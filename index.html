@@ -651,13 +651,20 @@ GAME QA MASTER
 
 <section id="dashboard" class="view active">
 <div class="grid">
-<div class="card"><div class="label">프로젝트</div><div class="metric blue" id="mProjects">0</div></div>
+<!-- 💡 선택된 프로젝트명이 카드 테두리 내부 하단에 깔끔하게 들어가도록 구조 수정 -->
+<div class="card">
+  <div class="label">프로젝트</div>
+  <div class="metric blue" id="mProjects">0</div>
+  <div id="mActiveProjectName" class="label" style="margin-top:10px;font-size:11px;color:#70a5ff;word-break:break-all;">선택된 프로젝트: 없음</div>
+</div>
 <div class="card"><div class="label">전체 테스트</div><div class="metric" id="mTests">0</div></div>
 <div class="card"><div class="label">PASS</div><div class="metric green" id="mPass">0</div></div>
 <div class="card"><div class="label">FAIL</div><div class="metric red" id="mFail">0</div></div>
 <div class="card"><div class="label">등록 결함</div><div class="metric orange" id="mBugs">0</div></div>
 <div class="card"><div class="label">결함 해결율</div><div class="metric green" id="mBugResolutionRate">0%</div></div>
 </div>
+
+
 <div class="card">
 <h2>테스트 진행 현황</h2>
 <div id="dashboardProgress"></div>
@@ -1299,6 +1306,7 @@ GAME QA MASTER
 <li style="color: #4bd69a;"><span style="color: #4bd69a; margin-right: 6px;"></span>전체 테스트 케이스 전체 선택/해제 기능 추가</li>
 <li style="color: #4bd69a;"><span style="color: #4bd69a; margin-right: 6px;"></span>테스트 케이스 및 결함 넘버링 추가</li>
 <li style="color: #4bd69a;"><span style="color: #4bd69a; margin-right: 6px;"></span>연결된 결함이 Closed 일때 색상 변경</li>
+<li style="color: #4bd69a;"><span style="color: #4bd69a; margin-right: 6px;"></span>대시보드 내 선택된 프로젝트 명 표기</li>
 </ul>
 </div>
 </div>
@@ -4927,7 +4935,7 @@ function renderSamples(){
  document.getElementById("sampleDevices").innerHTML=db.devices.filter(d=>d.isSample).map(d=>`<span class="badge">${esc(d.name)}</span>`).join("")||'<div class="empty">샘플 디바이스 없음</div>';
  document.getElementById("sampleMembers").innerHTML=db.members.filter(m=>m.isSample).map(m=>`<span class="badge">${esc(m.name)} - ${esc(m.role)}</span>`).join("")||'<div class="empty">샘플 담당자 없음</div>';
 }
-
+  
 function renderDashboard(){
  const targetTests=db.activeProject?db.tests.filter(t=>t.projectId===db.activeProject):[];
  const total=targetTests.length;
@@ -4935,7 +4943,16 @@ function renderDashboard(){
  const fail=targetTests.filter(t=>t.status==="Fail").length;
  const rate=total?Math.round((pass+fail)/total*100):0;
 
+ // 💡 1. 전체 프로젝트 개수 표시
  document.getElementById("mProjects").textContent=db.projects.length;
+
+ // 💡 2. 현재 선택된 프로젝트 명을 찾아 하단에 표시
+ const activeProj = db.projects.find(p => p.id === db.activeProject);
+ const activeProjEl = document.getElementById("mActiveProjectName");
+ if(activeProjEl) {
+  activeProjEl.textContent = activeProj ? `선택됨: ${activeProj.name}` : "선택된 프로젝트 없음";
+ }
+
  document.getElementById("mTests").textContent=total;
  document.getElementById("mPass").textContent=pass;
  document.getElementById("mFail").textContent=fail;
@@ -4973,6 +4990,8 @@ function renderDashboard(){
   ? openIssues.map(b=>`<p>${esc(b.title)} <span class="badge">${esc(b.severity)}</span> <span class="badge" style="background:#252d3a;color:#70a5ff">${esc(b.status)}</span></p>`).join("")
   : '<div class="empty">열려있는 이슈가 없습니다.</div>';
 }
+
+
 
 function renderDataHistory(){
  document.getElementById("dataHistory").innerHTML=db.dataRuns.map(r=>`
