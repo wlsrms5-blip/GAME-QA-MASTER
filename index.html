@@ -463,7 +463,7 @@ summary::-webkit-details-marker, summary::marker{
  display:flex;
  align-items:center;
  flex-wrap:wrap;
- gap:8px;
+ gap: 6px 8px;
  margin-bottom:10px;
 }
 
@@ -592,6 +592,7 @@ summary::-webkit-details-marker, summary::marker{
  .toolbar{position:relative;top:auto;z-index:10}
  .grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 }
+  
 </style>
 </head>
 
@@ -2184,26 +2185,38 @@ async function loadPersistentValidator(){
  }catch(e){ console.warn(e); }
 }
 
-function downloadBlob(name, blob){
- const url = URL.createObjectURL(blob);
- const a = document.createElement("a");
- a.href = url; 
- a.download = name;
- a.style.display = "none";
- document.body.appendChild(a);
- 
- // 브라우저 이벤트 루프 안정화를 위한 미세 지연 추가
- setTimeout(() => {
-   a.click();
-   setTimeout(() => {
-     document.body.removeChild(a);
-     URL.revokeObjectURL(url);
-   }, 1000);
- }, 100);
- 
- statusText("● 백업 다운로드 완료");
+function downloadBlob(name, blob) {
+  // 1. 기존에 남아있을 수 있는 임시 다운로드 링크가 있다면 강제 제거
+  const existingA = document.getElementById("dynamic-download-link");
+  if (existingA) {
+    document.body.removeChild(existingA);
+  }
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.id = "dynamic-download-link"; // 고유 ID 부여로 중복 방지
+  a.href = url; 
+  a.download = name;
+  a.style.display = "none";
+  document.body.appendChild(a);
+  
+  // 브라우저 이벤트 루프 및 렌더링 안정화 지연 처리
+  setTimeout(() => {
+    a.click();
+    
+    // 다운로드 트리거 직후 메모리 누수 방지 및 URL 해제
+    setTimeout(() => {
+      if (a.parentNode) {
+        document.body.removeChild(a);
+      }
+      URL.revokeObjectURL(url);
+    }, 1000);
+  }, 50);
+  
+  statusText("● 백업 다운로드 완료");
 }
 
+  
 function todayString(){
  const d=new Date();
  return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("");
