@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GAME QA MASTER v2.6.0</title>
+<title>GAME QA MASTER v2.6.3</title>
 <script>
 // 1. 우클릭 차단
 document.addEventListener('contextmenu', function(e) {
@@ -602,7 +602,7 @@ summary::-webkit-details-marker, summary::marker{
 <aside class="sidebar">
 <div class="logo">
 GAME QA MASTER
-<small>QUALITY ASSURANCE PLATFORM v2.6.0</small>
+<small>QUALITY ASSURANCE PLATFORM v2.6.1</small>
 </div>
 
 <button class="nav active" data-view="dashboard">📊 대시보드</button>
@@ -623,7 +623,7 @@ GAME QA MASTER
 
 <div class="header">
 <h1 id="pageTitle">QA Dashboard</h1>
-<span class="version">GAME QA MASTER v2.6.0</span>
+<span class="version">GAME QA MASTER v2.6.3</span>
 </div>
 
 <div class="toolbar">
@@ -1132,7 +1132,7 @@ GAME QA MASTER
  </div>
  <div>
   <label class="label">발견 빌드 버전</label>
-  <input id="bugBuildVersion" placeholder="예: v1.0.0-Alpha">
+  <select id="bugBuildVersion"><option value=""></option></select>
  </div>
  <div>
   <label class="label">연관 테스트 케이스 (추적성)</label>
@@ -1227,7 +1227,7 @@ GAME QA MASTER
 <div class="card">
 <div class="actions" style="justify-content:space-between">
  <h2>QA 통합 리포트 및 시각화</h2>
- <button class="primary" onclick="downloadReportHTML()">📥 독립 결과 리포트 HTML 다운로드</button>
+ <button class="primary" type="button" onclick="downloadReportHTML();return false;">📥 독립 결과 리포트 HTML 다운로드</button>
 </div>
 <div id="reportSummary"></div>
 </div>
@@ -1260,7 +1260,7 @@ GAME QA MASTER
 <div class="card">
 <h2>업데이트 내역</h2>
 <p class="update-intro">
- GAME QA MASTER의 v1.0.0부터 최신 v2.4.4까지 전체 버전별 변경사항 및 히스토리입니다.
+ GAME QA MASTER의 v1.0.0부터 최신 v2.6.3까지 전체 버전별 변경사항 및 히스토리입니다.
 </p>
 
 <div class="update-timeline">
@@ -1269,8 +1269,77 @@ GAME QA MASTER
 <div class="update-dot latest"></div>
 <details class="update-details" open>
 <summary class="update-head">
-<span class="update-version latest-ver">v2.6.0</span>
+<span class="update-version latest-ver">v2.6.3</span>
 <span class="update-pill latest-pill">LATEST</span>
+<span class="update-pill feature-pill">🛠️ 버그 수정</span>
+<span class="update-date">2026-11-09</span>
+</summary>
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel green-border">
+<strong class="green">버그 패치</strong>
+<ul>
+<li>결함 등록 시 현재 생성된 빌드 목록만 출력</li>
+<li>등록된 결함 편집 시 빌드 목록 정상 로드</li>
+</ul>
+</div>
+</div>
+</details>
+</div>
+  
+<div class="update-entry">
+<div class="update-dot original"></div>
+<details class="update-details">
+<summary class="update-head">
+<span class="update-version latest-ver">v2.6.2</span>
+<span class="update-pill latest-pill">STABLE</span>
+<span class="update-pill feature-pill">🛠️ 기능 개선 및 버그 수정</span>
+<span class="update-date">2026-11-09</span>
+</summary>
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel green-border">
+<strong class="green">핵심 버그 패치 및 UX 고도화</strong>
+<ul>
+<li>테스트 케이스 전체 삭제 실행 시 현재 프로젝트의 테스트가 정상 삭제되도록 필터링 로직 수정</li>
+<li>선택 일괄 담당자 지정 및 일괄 상태 변경 실행 시 개별 테스트 케이스 히스토리에 타임스탬프와 함께 정밀 기록</li>
+<li>데이터 검증기 이슈 필터링 테이블 목록을 실제 발생한 검증 이슈 테이블에 맞게 정제</li>
+<li>결함 등록 및 편집 시 등록된 빌드 목록(Alpha, Beta, RC, Live)을 선택할 수 있는 드롭다운 셀렉터 적용</li>
+<li>독립 결과 리포트 HTML 다운로드 버튼 반복 클릭 시에도 이벤트 차단 없이 정상 재다운로드 보장</li>
+</ul>
+</div>
+</div>
+</details>
+</div>
+
+
+<div class="update-entry">
+<div class="update-dot original"></div>
+<details class="update-details">
+<summary class="update-head">
+<span class="update-version latest-ver">v2.6.1</span>
+<span class="update-pill latest-pill">STABLE</span>
+<span class="update-pill feature-pill">📦 다운로드 제공 최적화 및 런타임 영속성 패치</span>
+<span class="update-date">2026-11-09</span>
+</summary>
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel green-border">
+<strong class="green">독립형 단일 파일 다운로드 패키징 반영</strong>
+<ul>
+<li>소속 텍스트 잘림 현상을 완전 방어하기 위해 다운로드 가능한 단일 HTML 파일 형태로 승격 패키징</li>
+<li>전체 플랫폼 탭 모듈, 스크립트 런타임 및 IndexedDB/LocalStorage 데이터 무결성 보장</li>
+<li>v2.6.0 간트 차트 캘린더 매니지먼트 엔진과 호환성 유지</li>
+</ul>
+</div>
+</div>
+</details>
+</div>
+
+
+<div class="update-entry">
+<div class="update-dot original"></div>
+<details class="update-details">
+<summary class="update-head">
+<span class="update-version latest-ver">v2.6.0</span>
+<span class="update-pill latest-pill">STABLE</span>
 <span class="update-pill feature-pill">📅 테스트 일정 및 마일스톤 (Milestone) 간트 차트 캘린더 매니지먼트 Engine 도입</span>
 <span class="update-date">2026-11-08</span>
 </summary>
@@ -1833,7 +1902,7 @@ QUALITY ASSURANCE MANAGEMENT PLATFORM
 </div>
 
 <script>
-const APP_VERSION="2.6.0";
+const APP_VERSION="2.6.2";
 const KEY="GAME_QA_MASTER_V1";
 const VALIDATOR_KEY="GAME_QA_MASTER_VALIDATOR_V153";
 
@@ -2731,7 +2800,7 @@ function updateTest(id,field,value){
 function deleteTest(id){ db.tests=db.tests.filter(t=>t.id!==id); save(); }
 function clearAllProjectTests(){
  if(!db.activeProject||!confirm("현재 선택된 프로젝트의 모든 테스트 케이스를 삭제하시겠습니까?"))return;
- db.tests=db.tests.filter(t=>t.projectId===db.activeProject);
+ db.tests=db.tests.filter(t=>t.projectId!==db.activeProject);
  save();
 }
 
@@ -2802,9 +2871,16 @@ function applyBatchAction(){
  const selected=db.tests.filter(t=>batchActionTestIds.includes(t.id));
  if(!selected.length)return alert("선택된 테스트 케이스가 없습니다.");
  let changedCount=0;
+ const now=new Date().toISOString();
  if(batchActionType==="tester"){
   selected.forEach(t=>{
-   if((t.tester||"")!==value){t.tester=value;changedCount++;}
+   const oldVal=t.tester||"";
+   if(oldVal!==value){
+    t.tester=value;
+    if(!Array.isArray(t.history))t.history=[];
+    t.history.push({date:now,action:"일괄 담당자 변경",detail:`확인자: '${oldVal||"미지정"}' ➔ '${value}'`,version:t.version||"1.0"});
+    changedCount++;
+   }
   });
   closeBatchActionModal();
   if(!changedCount)return alert("선택한 테스트가 이미 해당 담당자로 지정되어 있습니다.");
@@ -2814,10 +2890,14 @@ function applyBatchAction(){
  }
  if(batchActionType==="status"){
   selected.forEach(t=>{
-   if(t.status===value)return;
-   t.status=value;
-   db.testRuns.push({id:uid(),testId:t.id,projectId:t.projectId,status:value,date:new Date().toISOString(),isSample:!!t.isSample});
-   changedCount++;
+   const oldVal=t.status;
+   if(oldVal!==value){
+    t.status=value;
+    db.testRuns.push({id:uid(),testId:t.id,projectId:t.projectId,status:value,date:now,isSample:!!t.isSample});
+    if(!Array.isArray(t.history))t.history=[];
+    t.history.push({date:now,action:"일괄 상태 변경",detail:`${oldVal||"미지정"} ➔ ${value}`,version:t.version||"1.0"});
+    changedCount++;
+   }
   });
   closeBatchActionModal();
   if(!changedCount)return alert("선택한 테스트가 이미 해당 상태입니다.");
@@ -3070,10 +3150,12 @@ function updateTableFilterOptions(){
  if(!filterEl)return;
  const currentVal=filterEl.value;
  const tableNames=new Set();
- if(validatorConfig && validatorConfig.tables){
-  Object.keys(validatorConfig.tables).forEach(t=>tableNames.add(t));
+ if(lastResult&&Array.isArray(lastResult.issues)){
+  lastResult.issues.forEach(i=>{ if(i.table&&i.table!=="-")tableNames.add(i.table); });
  }
- Object.keys(store).forEach(f=>tableNames.add(f));
+ if(tableNames.size===0){
+  Object.keys(store).forEach(f=>tableNames.add(f));
+ }
 
  let html='<option value="all">전체 테이블</option>';
  tableNames.forEach(t=>{
@@ -4125,6 +4207,44 @@ function populateBugTestSelectOptions(){
  if(activeTests.some(t=>t.id===curVal)) sel.value=curVal;
 }
 
+
+function populateBugBuildSelectOptions(){
+ const activeBuilds = db.activeProject ? db.builds.filter(b=>b.projectId===db.activeProject) : db.builds;
+ const buildVersions = Array.from(new Set(activeBuilds.map(b=>b.versionName?.trim()).filter(Boolean)));
+
+ const sel = document.getElementById("bugBuildVersion");
+ if(sel){
+  const curVal = sel.value;
+  let html = '';
+  if(buildVersions.length === 0){
+   html = `<option value="v1.0.0-Alpha">v1.0.0-Alpha (등록된 빌드 없음)</option>`;
+  } else {
+   buildVersions.forEach(bv => {
+    html += `<option value="${esc(bv)}">${esc(bv)}</option>`;
+   });
+  }
+  sel.innerHTML = html;
+  if(buildVersions.includes(curVal)) sel.value = curVal;
+ }
+
+
+ db.bugs.forEach(b => {
+  const editSel = document.getElementById(`editBugBuildVersion_${b.id}`);
+  if(editSel){
+   const curVal = editSel.value || b.buildVersion || "";
+   let html = '';
+   if(buildVersions.length === 0){
+    html = `<option value="${esc(b.buildVersion||'v1.0.0-Alpha')}">${esc(b.buildVersion||'v1.0.0-Alpha')}</option>`;
+   } else {
+    buildVersions.forEach(bv => {
+     html += `<option value="${esc(bv)}" ${bv===(b.buildVersion||curVal)?'selected':''}>${esc(bv)}</option>`;
+    });
+   }
+   editSel.innerHTML = html;
+  }
+ });
+}
+
 function addBug(){
  if(!db.activeProject) return alert("프로젝트를 선택하세요.");
  const title=document.getElementById("bugTitle").value.trim();
@@ -4250,7 +4370,7 @@ function exportBugsCSV(){
 }
 
 function renderBugs(){
- populateBugTestSelectOptions();
+ populateBugTestSelectOptions(); 
  const activeBugs=db.activeProject?db.bugs.filter(b=>b.projectId===db.activeProject):[];
  
  const fStatus=document.getElementById("filterBugStatus").value;
@@ -4311,7 +4431,7 @@ function renderBugs(){
      </div>
      <div>
       <label class="label">발견 빌드</label>
-      <input id="editBugBuildVersion_${b.id}" value="${esc(b.buildVersion)}">
+      <select id="editBugBuildVersion_${b.id}"></select>
      </div>
     </div>
     <label class="label">상세 설명</label>
@@ -4360,7 +4480,11 @@ function renderBugs(){
  </div>
  `;
  }).join("")||'<div class="empty">조건에 일치하는 결함이 없습니다.</div>';
+
+ // 👉 HTML 엘리먼트들이 생성된 직후에 빌드 목록 셀렉터 데이터 바인딩 실행
+ populateBugBuildSelectOptions();
 }
+
 
 function initDefaultSampleData(silent=true){
  const now=new Date().toISOString();
@@ -4903,7 +5027,7 @@ function downloadReportHTML(){
 </head>
 <body>
   <h1>📈 ${esc(name)} QA 통합 리포트</h1>
-  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.6.0</p>
+  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.6.3</p>
 
   ${certHTML}
 
