@@ -2184,12 +2184,24 @@ async function loadPersistentValidator(){
  }catch(e){ console.warn(e); }
 }
 
-function downloadBlob(name,blob){
- const url=URL.createObjectURL(blob);
- const a=document.createElement("a");
- a.href=url; a.download=name;
- document.body.appendChild(a); a.click(); a.remove();
- setTimeout(()=>URL.revokeObjectURL(url),3000);
+function downloadBlob(name, blob){
+ const url = URL.createObjectURL(blob);
+ const a = document.createElement("a");
+ a.href = url; 
+ a.download = name;
+ a.style.display = "none";
+ document.body.appendChild(a);
+ 
+ // 브라우저 이벤트 루프 안정화를 위한 미세 지연 추가
+ setTimeout(() => {
+   a.click();
+   setTimeout(() => {
+     document.body.removeChild(a);
+     URL.revokeObjectURL(url);
+   }, 1000);
+ }, 100);
+ 
+ statusText("● 백업 다운로드 완료");
 }
 
 function todayString(){
