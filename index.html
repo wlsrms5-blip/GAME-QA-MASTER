@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GAME QA MASTER v2.6.4</title>
+<title>GAME QA MASTER v2.6.5</title>
 <script>
 // 1. 우클릭 차단
 document.addEventListener('contextmenu', function(e) {
@@ -631,7 +631,7 @@ GAME QA MASTER
 
   <!-- 2단: 버전 표기 (한 줄 아래로 이동) -->
   <div>
-    <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.6.4</span>
+    <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.6.5</span>
   </div>
 
   <!-- 3단: 샘플 데이터 탭 이동 버튼 -->
@@ -785,6 +785,8 @@ GAME QA MASTER
    <option value="N/T">N/T</option>
    <option value="N/A">N/A</option>
   </select>
+  <!-- 💡 현재 필터링된 항목 전체 선택/해제 토글 버튼 추가 -->
+  <button class="secondary" style="padding:6px 12px;font-size:11px" onclick="toggleSelectAllFilteredVisibleTests()">☑️ 현재 목록 전체 선택/해제</button>
 </div>
 <div class="actions" style="margin-bottom:12px">
   <button class="primary" style="padding:6px 12px;font-size:11px;background:#10b981" onclick="batchAssignTesterModal()">👥 선택 일괄 담당자 지정</button>
@@ -1275,7 +1277,7 @@ GAME QA MASTER
 <div class="card">
 <h2>업데이트 내역</h2>
 <p class="update-intro">
- GAME QA MASTER의 v1.0.0부터 최신 v2.6.4까지 전체 버전별 변경사항 및 히스토리입니다.
+ GAME QA MASTER의 v1.0.0부터 최신 v2.6.5까지 전체 버전별 변경사항 및 히스토리입니다.
 </p>
 
 <div class="update-timeline">
@@ -1284,8 +1286,40 @@ GAME QA MASTER
 <div class="update-dot latest"></div>
 <details class="update-details" open>
 <summary class="update-head">
-<span class="update-version latest-ver">v2.6.4</span>
+<span class="update-version latest-ver">v2.6.5</span>
 <span class="update-pill latest-pill">LATEST</span>
+<span class="update-pill feature-pill">💡🛠️ 사용성 개선 및 버그 수정</span>
+<span class="update-date">2026-11-10</span>
+</summary>
+<div class="update-grid" style="margin-top:12px">
+<!-- 💡 사용성 개선 텍스트 색상을 보더라인 초록색(#4bd69a)과 동일하게 맞춤 -->
+<div class="update-panel green-border">
+<strong class="green">사용성 개선</strong>
+<ul style="color: #4bd69a;">
+<li style="color: #4bd69a;"><span style="color: #4bd69a; margin-right: 6px;"></span>전체 테스트 케이스 전체 선택/해제 기능 추가</li>
+<li style="color: #4bd69a;"><span style="color: #4bd69a; margin-right: 6px;"></span>테스트 케이스 및 결함 넘버링 추가</li>
+<li style="color: #4bd69a;"><span style="color: #4bd69a; margin-right: 6px;"></span>연결된 결함이 Closed 일때 색상 변경</li>
+</ul>
+</div>
+</div>
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel blue-border">
+<strong class="blue">버그 패치</strong>
+<!-- 💡 파란색 점 크기를 6px에서 8px로 키우고 텍스트 색상을 보더라인 파란색(#70a5ff)으로 설정 -->
+<div style="margin-top: 6px; font-size: 13px; color: #70a5ff;">
+<span style="display: inline-block; width: 8px; height: 8px; background-color: #70a5ff; border-radius: 50%; margin-right: 16px; vertical-align: middle;"></span>테스트 관리 필터에 미지정 추가
+</div>
+</div>
+</div>
+</details>
+</div>
+
+<div class="update-entry">
+<div class="update-dot original"></div>
+<details class="update-details">
+<summary class="update-head">
+<span class="update-version latest-ver">v2.6.4</span>
+<span class="update-pill latest-pill">UX STABLE</span>
 <span class="update-pill feature-pill">💡 사용성 개선</span>
 <span class="update-date">2026-11-09</span>
 </summary>
@@ -2900,6 +2934,22 @@ function clearAllProjectTests(){
  save();
 }
 
+let isAllFilteredSelected = false;
+
+function toggleSelectAllFilteredVisibleTests() {
+  // 현재 화면(DOM)에 렌더링되어 있는 테스트 케이스들의 체크박스만 타겟팅
+  const checkboxes = document.querySelectorAll("#testList .test-chk");
+  if (!checkboxes.length) return alert("선택할 수 있는 테스트 케이스가 없습니다.");
+
+  // 토글 상태 반전 (모두 선택되어 있었다면 해제, 아니면 모두 선택)
+  isAllFilteredSelected = !isAllFilteredSelected;
+
+  checkboxes.forEach(chk => {
+    chk.checked = isAllFilteredSelected;
+  });
+}
+
+  
 function createBugFromTest(testId){
  const t=db.tests.find(x=>x.id===testId);
  if(!t)return;
@@ -3046,7 +3096,8 @@ function renderTests(){
  const testers=Array.from(new Set(activeTests.map(t=>t.tester?.trim()).filter(Boolean)));
  if(testerSel){
   const curTester=testerSel.value;
-  testerSel.innerHTML='<option value="all">전체 테스터</option>'+testers.map(tn=>`<option value="${esc(tn)}">${esc(tn)}</option>`).join("");
+  // ✅ 전체 테스터 옵션 뒤에 '<option value="미지정">미지정</option>' 추가
+  testerSel.innerHTML='<option value="all">전체 테스터</option><option value="미지정">미지정</option>'+testers.map(tn=>`<option value="${esc(tn)}">${esc(tn)}</option>`).join("");
   if(Array.from(testerSel.options).some(o=>o.value===curTester)) testerSel.value=curTester;
  }
 
@@ -3059,37 +3110,39 @@ function renderTests(){
   return true;
  });
 
- document.getElementById("testList").innerHTML=filtered.map(t=>{
-  if(editingTestId === t.id){
-   return `
-   <div class="card" style="border-left:4px solid #70a5ff;background:#171b23">
-    <h3 style="margin:0 0 12px;font-size:14px;color:#70a5ff">✏️ 테스트 케이스 정보 수정 (현재: v${t.version||"1.0"})</h3>
-    <label class="label">테스트 항목명</label>
-    <input id="editTestName_${t.id}" value="${esc(t.name)}">
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px">
-     <div>
-      <label class="label">유형</label>
-      <select id="editTestType_${t.id}">
-       ${["기능 테스트","UI 테스트","전투 테스트","데이터 테스트","성능 테스트","네트워크 테스트","회귀 테스트","보안 테스트"].map(type=>`<option ${t.type===type?"selected":""}>${type}</option>`).join("")}
-      </select>
-     </div>
-     <div>
-      <label class="label">담당 테스터</label>
-      <input id="editTestTester_${t.id}" value="${esc(t.tester||"")}">
-     </div>
-    </div>
-    <label class="label">테스트 절차</label>
-    <textarea id="editTestSteps_${t.id}" style="min-height:70px">${esc(t.steps)}</textarea>
-    <label class="label">예상 결과</label>
-    <textarea id="editTestExpected_${t.id}" style="min-height:70px">${esc(t.expected)}</textarea>
-    <div class="actions" style="margin-top:10px">
-     <button class="primary" onclick="saveEditTest('${t.id}')">💾 저장 및 버전 업그레이드</button>
-     <button class="secondary" onclick="cancelEditTest()">취소</button>
-    </div>
-   </div>
-   `;
-  }
+ document.getElementById("testList").innerHTML = filtered.map((t, idx) => {
+  const tcNumber = `TC-${idx + 1}`; // TC-1, TC-2 형태의 번호 문자열 생성
 
+  if (editingTestId === t.id) {
+    return `
+    <div class="card" style="border-left:4px solid #70a5ff;background:#171b23">
+     <h3 style="margin:0 0 12px;font-size:14px;color:#70a5ff">✏️ ${tcNumber} 테스트 케이스 정보 수정 (현재: v${t.version || "1.0"})</h3>
+     <label class="label">테스트 항목명</label>
+     <input id="editTestName_${t.id}" value="${esc(t.name)}">
+     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px">
+      <div>
+       <label class="label">유형</label>
+       <select id="editTestType_${t.id}">
+        ${["기능 테스트","UI 테스트","전투 테스트","데이터 테스트","성능 테스트","네트워크 테스트","회귀 테스트","보안 테스트"].map(type => `<option ${t.type === type ? "selected" : ""}>${type}</option>`).join("")}
+       </select>
+      </div>
+      <div>
+       <label class="label">담당 테스터</label>
+       <input id="editTestTester_${t.id}" value="${esc(t.tester || "")}">
+      </div>
+     </div>
+     <label class="label">테스트 절차</label>
+     <textarea id="editTestSteps_${t.id}" style="min-height:70px">${esc(t.steps)}</textarea>
+     <label class="label">예상 결과</label>
+     <textarea id="editTestExpected_${t.id}" style="min-height:70px">${esc(t.expected)}</textarea>
+     <div class="actions" style="margin-top:10px">
+      <button class="primary" onclick="saveEditTest('${t.id}')">💾 저장 및 버전 업그레이드</button>
+      <button class="secondary" onclick="cancelEditTest()">취소</button>
+     </div>
+    </div>
+    `;
+  }
+  
   const historyList = t.history || [];
  // [수정 코드] 카드 시작부에 고유 ID 추가 (id="test-card-${t.id}") 
    return `
@@ -3097,6 +3150,7 @@ function renderTests(){
  <div class="actions" style="justify-content:space-between">
  <div class="actions">
   <input type="checkbox" value="${t.id}" class="test-chk" style="width:16px;height:16px;margin:0">
+  <span class="badge" style="background:#303b4d;color:#70a5ff;font-weight:bold">${tcNumber}</span>
   <strong>${esc(t.name)}</strong>
   <span class="badge" style="background:#263b31;color:#4bd69a;font-weight:bold">v${t.version||"1.0"}</span>
  </div>
@@ -3138,14 +3192,31 @@ function renderTests(){
  }).join("")||'<div class="empty">조건에 일치하는 테스트 케이스가 없습니다.</div>';
 
 // [수정 코드] 결함 배지 클릭 시 해당 결함 카드로 부드럽게 이동하도록 변경
- activeTests.forEach(t=>{
-  const linkedBugs=db.bugs.filter(b=>b.testId===t.id || (b.desc&&b.desc.includes(t.name)));
-  const el=document.getElementById(`linkedBugs_${t.id}`);
-  if(el && linkedBugs.length>0){
-   el.innerHTML=`<div style="margin-top:8px;padding:6px 10px;background:#101319;border-radius:6px;font-size:11px"><span class="red" style="font-weight:bold">🔗 연결된 결함 (${linkedBugs.length}건):</span> ` + 
-   linkedBugs.map(b=>`<span class="badge" style="background:#512a32;color:#ff9292;cursor:pointer" onclick="scrollToTargetElement('bugs', 'bug-card-${b.id}')"># ${esc(b.title)} [${esc(b.status)}]</span>`).join(" ") + `</div>`;
+  
+  activeTests.forEach(t=>{
+  const linkedBugs = db.bugs.filter(b => b.testId === t.id || (b.desc && b.desc.includes(t.name)));
+  const el = document.getElementById(`linkedBugs_${t.id}`);
+  if(el && linkedBugs.length > 0){
+   const projectBugs = db.bugs.filter(b => b.projectId === t.projectId);
+
+   el.innerHTML = `<div style="margin-top:8px;padding:6px 10px;background:#101319;border-radius:6px;font-size:11px"><span class="red" style="font-weight:bold">🔗 연결된 결함 (${linkedBugs.length}건):</span> ` + 
+   linkedBugs.map(b => {
+     const bugIdx = projectBugs.findIndex(item => item.id === b.id);
+     const issueLabel = bugIdx !== -1 ? `ISSUE-${bugIdx + 1}` : 'ISSUE';
+
+     // 💡 결함 상태가 Closed인지 확인
+     const isClosed = b.status === "Closed";
+     
+     // 💡 Closed 상태일 때 테두리(border)를 제거하고 배경과 글자색만 연두색 계열로 적용
+     const badgeBg = isClosed ? "#183827" : "#512a32";
+     const badgeColor = isClosed ? "#4bd69a" : "#ff9292";
+
+     return `<span class="badge" style="background:${badgeBg};color:${badgeColor};cursor:pointer" onclick="scrollToTargetElement('bugs', 'bug-card-${b.id}')">[${issueLabel}] ${esc(b.title)} [${esc(b.status)}]</span>`;
+   }).join(" ") + `</div>`;
   }
  });
+
+
 
   
  renderTesterWorkload();
@@ -4492,12 +4563,13 @@ function renderBugs(){
   return new Date(b.created)-new Date(a.created);
  });
 
- document.getElementById("bugList").innerHTML=filtered.map(b=>{
+ document.getElementById("bugList").innerHTML = filtered.map((b, idx) => {  
+  const issueNumber = `ISSUE-${idx + 1}`; // 💡 ISSUE-1, ISSUE-2 넘버링 생성
+
   if(editingBugId === b.id){
-   // [수정 코드] 결함 카드 시작부에 고유 ID 추가 (id="bug-card-${b.id}")
-    return `
+   return `
    <div class="card" id="bug-card-${b.id}" style="border-left:4px solid #70a5ff;background:#171b23">
-    <h3 style="margin:0 0 12px;font-size:14px;color:#70a5ff">✏️ 결함 정보 수정</h3>
+    <h3 style="margin:0 0 12px;font-size:14px;color:#70a5ff">✏️ ${issueNumber} 결함 정보 수정</h3>
     <label class="label">결함 제목</label>
     <input id="editBugTitle_${b.id}" value="${esc(b.title)}">
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px">
@@ -4543,10 +4615,34 @@ function renderBugs(){
    </div>
    `;
   }
+
+  // 💡 연동된 테스트 케이스의 TC-N 번호 계산 로직
+  let tcBadgeHtml = "";
+  if (b.testId) {
+    const projectTests = db.tests.filter(t => t.projectId === b.projectId);
+    const targetTest = projectTests.find(t => t.id === b.testId);
+    const testIdx = targetTest ? projectTests.findIndex(t => t.id === targetTest.id) : -1;
+    const tcLabel = testIdx !== -1 ? `TC-${testIdx + 1}` : 'TC';
+
+    if (targetTest) {
+      tcBadgeHtml = `
+      <div style="margin-top:8px;padding:6px 10px;background:#101319;border-radius:6px;font-size:11px">
+       <span class="blue" style="font-weight:bold">🔗 추적 연관 테스트 케이스:</span> 
+       <span class="badge" style="background:#252d3a;color:#70a5ff;cursor:pointer" onclick="scrollToTargetElement('tests', 'test-card-${b.testId}')">
+         [${tcLabel}] ${esc(targetTest.name)}
+       </span>
+      </div>`;
+    }
+  }
+
   return `
  <div class="card" id="bug-card-${b.id}" style="border-left:4px solid ${b.severity==='Critical'?'#ff7373':b.severity==='Major'?'#ffbd69':'#3978e8'}">
  <div class="actions" style="justify-content:space-between;margin-bottom:6px">
-  <strong>${esc(b.title)}</strong>
+  <div class="actions">
+   <!-- 💡 ISSUE 번호 배지 -->
+   <span class="badge" style="background:#303b4d;color:#70a5ff;font-weight:bold">${issueNumber}</span>
+   <strong>${esc(b.title)}</strong>
+  </div>
   <div class="actions">
    <span class="badge" style="background:#252d3a;color:#70a5ff">${esc(b.category)}</span>
    <span class="badge" style="background:#263b31;color:#4bd69a">${esc(b.severity)}</span>
@@ -4555,15 +4651,9 @@ function renderBugs(){
  </div>
  <p class="label">담당자: <strong>${esc(b.assignee)}</strong> | 빌드: <strong>${esc(b.buildVersion)}</strong> | 등록일: ${new Date(b.created).toLocaleDateString("ko-KR")}</p>
  <p class="label" style="margin:8px 0">${esc(b.desc)}</p>
- // [수정 코드] 테스트 케이스 뱃지 클릭 시 해당 테스트 카드로 부드럽게 이동
- // [수정 코드] 따옴표 충돌을 해결한 연동 테스트 케이스 배지 렌더링부
- ${b.testId && db.tests.find(t=>t.id===b.testId)?`
- <div style="margin-top:8px;padding:6px 10px;background:#101319;border-radius:6px;font-size:11px">
-  <span class="blue" style="font-weight:bold">🔗 추적 연관 테스트 케이스:</span> 
-  <span class="badge" style="background:#252d3a;color:#70a5ff;cursor:pointer" onclick="scrollToTargetElement('tests', 'test-card-${b.testId}')">
-    ${esc(db.tests.find(t=>t.id===b.testId).name)}
-  </span>
-</div>`:""}
+ 
+ <!-- 💡 연동된 테스트 케이스 [TC-N] 뱃지 출력 -->
+ ${tcBadgeHtml}
 
  ${b.attachment?`<div style="margin:10px 0"><a href="${b.attachment}" target="_blank"><img src="${b.attachment}" style="max-width:120px;max-height:90px;border-radius:6px;border:1px solid #303644"></a></div>`:""}
 
@@ -5136,7 +5226,7 @@ function downloadReportHTML(){
 </head>
 <body>
   <h1>📈 ${esc(name)} QA 통합 리포트</h1>
-  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.6.4</p>
+  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.6.5</p>
 
   ${certHTML}
 
