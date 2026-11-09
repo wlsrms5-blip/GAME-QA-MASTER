@@ -1249,12 +1249,14 @@ GAME QA MASTER
 
 <section id="reports" class="view">
 <div class="card">
-<div class="actions" style="justify-content:space-between">
- <h2>QA 통합 리포트 및 시각화</h2>
- <button class="primary" type="button" onclick="downloadReportHTML();return false;">📥 독립 결과 리포트 HTML 다운로드</button>
+<!-- 💡 플렉스박스를 이용해 타이틀과 다운로드 버튼을 카드 상단 양옆으로 깔끔하게 배치 -->
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+ <h2 style="margin: 0;">QA 통합 리포트 및 시각화</h2>
+ <button class="primary" type="button" onclick="downloadReportHTML();return false;" style="margin: 0;">📥 결과 리포트 HTML 다운로드</button>
 </div>
 <div id="reportSummary"></div>
 </div>
+
 
 <div class="card">
 <h2>📈 테스트 분석 차트</h2>
@@ -1307,6 +1309,7 @@ GAME QA MASTER
 <li style="color: #4bd69a;"><span style="color: #4bd69a; margin-right: 6px;"></span>테스트 케이스 및 결함 넘버링 추가</li>
 <li style="color: #4bd69a;"><span style="color: #4bd69a; margin-right: 6px;"></span>연결된 결함이 Closed 일때 색상 변경</li>
 <li style="color: #4bd69a;"><span style="color: #4bd69a; margin-right: 6px;"></span>대시보드 내 선택된 프로젝트 명 표기</li>
+<li style="color: #4bd69a;"><span style="color: #4bd69a; margin-right: 6px;"></span>결과 리포트 다운로드 버튼명 변경</li>
 </ul>
 </div>
 </div>
@@ -1316,6 +1319,9 @@ GAME QA MASTER
 <!-- 💡 파란색 점 크기를 6px에서 8px로 키우고 텍스트 색상을 보더라인 파란색(#70a5ff)으로 설정 -->
 <div style="margin-top: 6px; font-size: 13px; color: #70a5ff;">
 <span style="display: inline-block; width: 8px; height: 8px; background-color: #70a5ff; border-radius: 50%; margin-right: 16px; vertical-align: middle;"></span>테스트 관리 필터에 미지정 추가
+</div>
+<div style="margin-top: 6px; font-size: 13px; color: #70a5ff;">
+<span style="display: inline-block; width: 8px; height: 8px; background-color: #70a5ff; border-radius: 50%; margin-right: 16px; vertical-align: middle;"></span>결과 리포트 HTML 다운로드 버튼 위치 조정
 </div>
 </div>
 </div>
