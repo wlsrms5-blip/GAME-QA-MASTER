@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GAME QA MASTER v2.6.3</title>
+<title>GAME QA MASTER v2.6.4</title>
 <script>
 // 1. 우클릭 차단
 document.addEventListener('contextmenu', function(e) {
@@ -621,9 +621,24 @@ GAME QA MASTER
 
 <main class="main">
 
-<div class="header">
-<h1 id="pageTitle">QA Dashboard</h1>
-<span class="version">GAME QA MASTER v2.6.3</span>
+<div class="header" style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start; margin-bottom: 16px;">
+  
+  <!-- 1단: 메인 타이틀 및 우측 버튼이 들어갈 공간 -->
+  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 8px;">
+    <h1 id="pageTitle" style="margin: 0; font-size: 1.5rem;">Project Management</h1>
+    <!-- 만약 우측에 다른 요소를 넣으려면 이 위치에 배치됩니다 -->
+  </div>
+
+  <!-- 2단: 버전 표기 (한 줄 아래로 이동) -->
+  <div>
+    <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.6.4</span>
+  </div>
+
+  <!-- 3단: 샘플 데이터 탭 이동 버튼 -->
+  <button type="button" onclick="switchView('samples')" class="sample-banner-btn" style="background: var(--primary-color, #3b82f6); color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); margin-top: 4px;">
+    <span>🧪 샘플 데이터 탭 이동</span> ➔
+  </button>
+  
 </div>
 
 <div class="toolbar">
@@ -1260,7 +1275,7 @@ GAME QA MASTER
 <div class="card">
 <h2>업데이트 내역</h2>
 <p class="update-intro">
- GAME QA MASTER의 v1.0.0부터 최신 v2.6.3까지 전체 버전별 변경사항 및 히스토리입니다.
+ GAME QA MASTER의 v1.0.0부터 최신 v2.6.4까지 전체 버전별 변경사항 및 히스토리입니다.
 </p>
 
 <div class="update-timeline">
@@ -1269,8 +1284,30 @@ GAME QA MASTER
 <div class="update-dot latest"></div>
 <details class="update-details" open>
 <summary class="update-head">
-<span class="update-version latest-ver">v2.6.3</span>
+<span class="update-version latest-ver">v2.6.4</span>
 <span class="update-pill latest-pill">LATEST</span>
+<span class="update-pill feature-pill">💡 사용성 개선</span>
+<span class="update-date">2026-11-09</span>
+</summary>
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel green-border">
+<strong class="green">사용성 개선 패치</strong>
+<ul>
+<li>상단 샘플 데이터 탭 이동 버튼 생성</li>
+<li>현재 선택된 프로젝트 버튼 눈에 잘 띄게 개선</li>
+<li>연동된 테스트 케이스<>결함 간 이동시 포커스 효과</li>
+</ul>
+</div>
+</div>
+</details>
+</div>
+  
+<div class="update-entry">
+<div class="update-dot original"></div>
+<details class="update-details">
+<summary class="update-head">
+<span class="update-version latest-ver">v2.6.3</span>
+<span class="update-pill latest-pill">STABLE</span>
 <span class="update-pill feature-pill">🛠️ 버그 수정</span>
 <span class="update-date">2026-11-09</span>
 </summary>
@@ -1948,6 +1985,61 @@ function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(
 function esc(v){ return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function statusText(text){ const el=document.getElementById("saveStatus"); if(el)el.textContent=text; }
 
+// [수정 코드] 특정 뷰로 전환 후 해당 요소 위치로 스크롤하고 하이라이트하는 유틸 함수
+// [수정 코드] 프로젝트 자동 전환 및 필터 자동 초기화 기능이 포함된 안전한 이동 함수
+// [완벽 개선된 scrollToTargetElement 함수]
+function scrollToTargetElement(viewName, targetId) {
+  if (viewName === 'tests') {
+    const testId = targetId.replace('test-card-', '');
+    const targetTest = db.tests.find(t => t.id === testId);
+    if (targetTest && db.activeProject !== targetTest.projectId) {
+      db.activeProject = targetTest.projectId;
+    }
+    const testerFilter = document.getElementById('filterTestTester');
+    const statusFilter = document.getElementById('filterTestStatus');
+    if (testerFilter) testerFilter.value = 'all';
+    if (statusFilter) statusFilter.value = 'all';
+  } else if (viewName === 'bugs') {
+    const bugId = targetId.replace('bug-card-', '');
+    const targetBug = db.bugs.find(b => b.id === bugId);
+    if (targetBug && db.activeProject !== targetBug.projectId) {
+      db.activeProject = targetBug.projectId;
+    }
+    // 💡 결함 탭의 모든 필터와 검색어를 초기화하여 대상 카드가 무조건 DOM에 렌더링되도록 보장
+    const statusFilter = document.getElementById('filterBugStatus');
+    const sevFilter = document.getElementById('filterBugSeverity');
+    const priFilter = document.getElementById('filterBugPriority');
+    const searchBugInput = document.getElementById('searchBugInput');
+    if (statusFilter) statusFilter.value = 'all';
+    if (sevFilter) sevFilter.value = 'all';
+    if (priFilter) priFilter.value = 'all';
+    if (searchBugInput) searchBugInput.value = '';
+  }
+
+  // 뷰 전환 및 렌더링 강제 실행
+  switchView(viewName);
+  if (viewName === 'tests') renderTests();
+  if (viewName === 'bugs') renderBugs();
+
+  // DOM 렌더링 완료 후 스크롤 및 하이라이트 실행 (지연 시간 250ms로 안정화)
+  setTimeout(() => {
+    const el = document.getElementById(targetId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.style.transition = 'background-color 0.4s';
+      const origBg = el.style.backgroundColor;
+      el.style.backgroundColor = 'rgba(112, 165, 255, 0.35)'; // 눈에 띄는 파란빛 강조
+      setTimeout(() => {
+        el.style.backgroundColor = origBg;
+      }, 2000);
+    } else {
+      console.warn('Target element not found in DOM:', targetId);
+    }
+  }, 250);
+}
+
+
+ 
 let validatorSaveTimer;
 function save(){
  try{
@@ -2189,18 +2281,22 @@ function selectProject(id){
 function projectName(id){ return db.projects.find(p=>p.id===id)?.name||"미지정"; }
 
 function renderProjects(){
- document.getElementById("projectList").innerHTML=db.projects.map(p=>`
+ document.getElementById("projectList").innerHTML=db.projects.map(p=>{
+   const isActive = db.activeProject === p.id;
+   return `
  <div class="card">
  <strong>${esc(p.name)}</strong>
  <p class="label">${esc(p.desc)}</p>
- <span class="badge">${db.activeProject===p.id?"선택된 프로젝트":"프로젝트"}</span>
+ <span class="badge">${isActive?"선택된 프로젝트":"프로젝트"}</span>
  <div class="actions" style="margin-top:12px">
- <button class="secondary" onclick="selectProject('${p.id}')">선택</button>
+ <button class="${isActive ? 'primary' : 'secondary'}" onclick="selectProject('${p.id}')" ${isActive ? 'style="background: #3b82f6; color: #fff; border: none;"' : ''}>${isActive ? '선택됨' : '선택'}</button>
  <button class="danger" onclick="deleteProject('${p.id}')">삭제</button>
  </div>
  </div>
- `).join("")||'<div class="empty">프로젝트가 없습니다.</div>';
+ `;
+ }).join("")||'<div class="empty">프로젝트가 없습니다.</div>';
 }
+
 
 function addBuildRecord(){
  if(!db.activeProject) return alert("프로젝트를 먼저 선택하세요.");
@@ -2995,8 +3091,9 @@ function renderTests(){
   }
 
   const historyList = t.history || [];
-  return `
- <div class="card">
+ // [수정 코드] 카드 시작부에 고유 ID 추가 (id="test-card-${t.id}") 
+   return `
+ <div class="card" id="test-card-${t.id}">
  <div class="actions" style="justify-content:space-between">
  <div class="actions">
   <input type="checkbox" value="${t.id}" class="test-chk" style="width:16px;height:16px;margin:0">
@@ -3040,15 +3137,17 @@ function renderTests(){
  `;
  }).join("")||'<div class="empty">조건에 일치하는 테스트 케이스가 없습니다.</div>';
 
- 
+// [수정 코드] 결함 배지 클릭 시 해당 결함 카드로 부드럽게 이동하도록 변경
  activeTests.forEach(t=>{
   const linkedBugs=db.bugs.filter(b=>b.testId===t.id || (b.desc&&b.desc.includes(t.name)));
   const el=document.getElementById(`linkedBugs_${t.id}`);
   if(el && linkedBugs.length>0){
    el.innerHTML=`<div style="margin-top:8px;padding:6px 10px;background:#101319;border-radius:6px;font-size:11px"><span class="red" style="font-weight:bold">🔗 연결된 결함 (${linkedBugs.length}건):</span> ` + 
-   linkedBugs.map(b=>`<span class="badge" style="background:#512a32;color:#ff9292;cursor:pointer" onclick="switchView('bugs')"># ${esc(b.title)} [${esc(b.status)}]</span>`).join(" ") + `</div>`;
+   linkedBugs.map(b=>`<span class="badge" style="background:#512a32;color:#ff9292;cursor:pointer" onclick="scrollToTargetElement('bugs', 'bug-card-${b.id}')"># ${esc(b.title)} [${esc(b.status)}]</span>`).join(" ") + `</div>`;
   }
  });
+
+  
  renderTesterWorkload();
 }
 
@@ -4395,8 +4494,9 @@ function renderBugs(){
 
  document.getElementById("bugList").innerHTML=filtered.map(b=>{
   if(editingBugId === b.id){
-   return `
-   <div class="card" style="border-left:4px solid #70a5ff;background:#171b23">
+   // [수정 코드] 결함 카드 시작부에 고유 ID 추가 (id="bug-card-${b.id}")
+    return `
+   <div class="card" id="bug-card-${b.id}" style="border-left:4px solid #70a5ff;background:#171b23">
     <h3 style="margin:0 0 12px;font-size:14px;color:#70a5ff">✏️ 결함 정보 수정</h3>
     <label class="label">결함 제목</label>
     <input id="editBugTitle_${b.id}" value="${esc(b.title)}">
@@ -4444,7 +4544,7 @@ function renderBugs(){
    `;
   }
   return `
- <div class="card" style="border-left:4px solid ${b.severity==='Critical'?'#ff7373':b.severity==='Major'?'#ffbd69':'#3978e8'}">
+ <div class="card" id="bug-card-${b.id}" style="border-left:4px solid ${b.severity==='Critical'?'#ff7373':b.severity==='Major'?'#ffbd69':'#3978e8'}">
  <div class="actions" style="justify-content:space-between;margin-bottom:6px">
   <strong>${esc(b.title)}</strong>
   <div class="actions">
@@ -4455,7 +4555,16 @@ function renderBugs(){
  </div>
  <p class="label">담당자: <strong>${esc(b.assignee)}</strong> | 빌드: <strong>${esc(b.buildVersion)}</strong> | 등록일: ${new Date(b.created).toLocaleDateString("ko-KR")}</p>
  <p class="label" style="margin:8px 0">${esc(b.desc)}</p>
- ${b.testId && db.tests.find(t=>t.id===b.testId)?`<div style="margin:8px 0;padding:6px 10px;background:#101319;border-radius:6px;font-size:11px"><span class="blue" style="font-weight:bold">🔗 추적 연관 테스트 케이스:</span> <span class="badge" style="background:#252d3a;color:#70a5ff;cursor:pointer" onclick="switchView('tests')">${esc(db.tests.find(t=>t.id===b.testId).name)}</span></div>`:""}
+ // [수정 코드] 테스트 케이스 뱃지 클릭 시 해당 테스트 카드로 부드럽게 이동
+ // [수정 코드] 따옴표 충돌을 해결한 연동 테스트 케이스 배지 렌더링부
+ ${b.testId && db.tests.find(t=>t.id===b.testId)?`
+ <div style="margin-top:8px;padding:6px 10px;background:#101319;border-radius:6px;font-size:11px">
+  <span class="blue" style="font-weight:bold">🔗 추적 연관 테스트 케이스:</span> 
+  <span class="badge" style="background:#252d3a;color:#70a5ff;cursor:pointer" onclick="scrollToTargetElement('tests', 'test-card-${b.testId}')">
+    ${esc(db.tests.find(t=>t.id===b.testId).name)}
+  </span>
+</div>`:""}
+
  ${b.attachment?`<div style="margin:10px 0"><a href="${b.attachment}" target="_blank"><img src="${b.attachment}" style="max-width:120px;max-height:90px;border-radius:6px;border:1px solid #303644"></a></div>`:""}
 
  <details style="margin:12px 0;background:#101319;padding:8px 12px;border-radius:6px;border:1px solid #303644">
@@ -5027,7 +5136,7 @@ function downloadReportHTML(){
 </head>
 <body>
   <h1>📈 ${esc(name)} QA 통합 리포트</h1>
-  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.6.3</p>
+  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.6.4</p>
 
   ${certHTML}
 
@@ -5233,6 +5342,7 @@ window.addEventListener("DOMContentLoaded", async () => {
  render();
  statusText("● 준비 완료");
 });
+  
 </script>
 </body>
 </html>
