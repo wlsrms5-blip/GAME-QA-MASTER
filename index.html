@@ -24,7 +24,6 @@ document.addEventListener('keydown', function(e) {
     }
 });
 </script>
-
 <!-- Chosen Palette: Dark Mode Neutral (Background #101319, Card #1a1f28, Sidebar #171b23, Accent #70a5ff, Green #4bd69a, Red #ff7373) -->
 <!-- Application Structure Plan: GAME QA MASTER v2.4.4 SPA platform with robust layout constraints, responsive grid wrapping, full update history integration, and complete data management functionality. -->
 <!-- Visualization & Content Choices: Pure HTML5 Canvas 2D engine for charts, responsive grid/flexbox with explicit box-sizing and min-width guards. -->
@@ -1279,6 +1278,7 @@ GAME QA MASTER
 <div class="update-panel green-border">
 <strong class="green">간트 차트 캘린더 뷰 & 일정 매니지먼트 신설</strong>
 <ul>
+<li>프로젝트 선택 후 빌드 등록 버튼 클릭 시 반응하지 않던 JS 런타임 구문 오류 수정</li>
 <li>프로젝트별 Alpha, Beta, RC, Live 마일스톤 및 회귀 테스트 타임라인 시각화</li>
 <li>테스터별 일정 가용성 연동, 담당자별 마감일(Due Date) 알림 및 D-Day 진척도 트래킹 엔진 탑재</li>
 <li>마일스톤 일정 신규 등록/수정/삭제 및 테스트 케이스 매니지먼트 레이어와 영속성 데이터 완벽 연동</li>
@@ -2139,43 +2139,6 @@ function addBuildRecord(){
  if(!versionName) return alert("빌드 버전명을 입력하세요.");
  const phase=document.getElementById("buildPhaseSelect").value;
  const note=document.getElementById("buildNote").value.trim();
-
- 
- db.schedules = (db.schedules||[]).filter(s => !s.isSample);
- const todayDate = new Date();
- const nextWeek = new Date(todayDate);
- nextWeek.setDate(todayDate.getDate() + 7);
- const prevWeek = new Date(todayDate);
- prevWeek.setDate(todayDate.getDate() - 7);
-
- db.schedules.push(
-  {
-   id: uid(),
-   projectId: sampleProject.id,
-   title: "Alpha 로그인 & 결제 회귀 검증 패키지",
-   phase: "Alpha",
-   assignee: "김테스터",
-   startDate: prevWeek.toISOString().split("T")[0],
-   dueDate: todayDate.toISOString().split("T")[0],
-   progress: 100,
-   status: "Completed",
-   created: now,
-   isSample: true
-  },
-  {
-   id: uid(),
-   projectId: sampleProject.id,
-   title: "v1.1.0-RC1 릴리즈 Sign-off 테스트",
-   phase: "RC",
-   assignee: "이QA",
-   startDate: todayDate.toISOString().split("T")[0],
-   dueDate: nextWeek.toISOString().split("T")[0],
-   progress: 50,
-   status: "In Progress",
-   created: now,
-   isSample: true
-  }
- );
 
  db.builds.push({
   id: uid(),
