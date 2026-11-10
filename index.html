@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GAME QA MASTER v2.6.5</title>
+<title>GAME QA MASTER v2.6.6</title>
 <script>
 // 1. 우클릭 차단
 document.addEventListener('contextmenu', function(e) {
@@ -632,7 +632,7 @@ GAME QA MASTER
 
   <!-- 2단: 버전 표기 (한 줄 아래로 이동) -->
   <div>
-    <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.6.5</span>
+    <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.6.6</span>
   </div>
 
   <!-- 3단: 샘플 데이터 탭 이동 버튼 -->
@@ -1287,7 +1287,7 @@ GAME QA MASTER
 <div class="card">
 <h2>업데이트 내역</h2>
 <p class="update-intro">
- GAME QA MASTER의 v1.0.0부터 최신 v2.6.5까지 전체 버전별 변경사항 및 히스토리입니다.
+ GAME QA MASTER의 v1.0.0부터 최신 v2.6.6까지 전체 버전별 변경사항 및 히스토리입니다.
 </p>
 
 <div class="update-timeline">
@@ -1295,6 +1295,26 @@ GAME QA MASTER
 <div class="update-entry">
 <div class="update-dot latest"></div>
 <details class="update-details" open>
+<summary class="update-head">
+<span class="update-version latest-ver">v2.6.6</span>
+<span class="update-pill latest-pill">LATEST</span>
+<span class="update-pill feature-pill">🛠️ 버그 수정</span>
+<span class="update-date">2026-11-10</span>
+</summary>
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel green-border">
+<strong class="green">버그 패치</strong>
+<ul style="color: #4bd69a;">
+<li>깃허브 사이트 보안으로 인한 다운로드 방식 변경</li>
+</uid>
+</div>
+</div>
+</details>
+</div>
+  
+<div class="update-entry">
+<div class="update-dot original"></div>
+<details class="update-details">
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.5</span>
 <span class="update-pill latest-pill">LATEST</span>
@@ -2186,40 +2206,53 @@ async function loadPersistentValidator(){
 }
 
 function downloadBlob(name, blob) {
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const dataUri = e.target.result;
-    
-    // 기존에 남아있는 임시 링크 제거
+  const url = URL.createObjectURL(blob);
+  
+  // 브라우저의 다중 자동 다운로드 차단을 우회하기 위해 
+  // 새 창(또는 팝업)을 띄워 사용자 직접 클릭을 유도하는 방식
+  const downloadWindow = window.open('', '_blank');
+  if (downloadWindow) {
+    downloadWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="ko">
+      <head>
+        <meta charset="UTF-8">
+        <title>파일 다운로드</title>
+        <style>
+          body { background: #101319; color: #e5e7eb; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+          .box { background: #1a1f28; border: 1px solid #303644; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+          a.btn { display: inline-block; margin-top: 20px; background: #3978e8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; }
+          a.btn:hover { opacity: 0.9; }
+          p { color: #9299aa; font-size: 13px; line-height: 1.6; }
+        </style>
+      </head>
+      <body>
+        <div class="box">
+          <h2>💾 ${esc(name)} 백업 준비 완료</h2>
+          <p>아래 버튼을 클릭하시면 파일이 안전하게 다운로드됩니다.</p>
+          <a class="btn" href="${url}" download="${esc(name)}">지금 다운로드 받기</a>
+        </div>
+      </body>
+      </html>
+    `);
+    downloadWindow.document.close();
+  } else {
+    // 팝업 차단이 걸려있는 경우 기존 DOM 방식 Fallback
     const existingA = document.getElementById("dynamic-download-link");
-    if (existingA) {
-      document.body.removeChild(existingA);
-    }
+    if (existingA) document.body.removeChild(existingA);
 
     const a = document.createElement("a");
     a.id = "dynamic-download-link";
-    a.href = dataUri; 
+    a.href = url; 
     a.download = name;
     a.style.display = "none";
     document.body.appendChild(a);
-    
-    // 강제 클릭 이벤트 발생
-    setTimeout(() => {
-      a.click();
-      setTimeout(() => {
-        if (a.parentNode) {
-          document.body.removeChild(a);
-        }
-      }, 500);
-    }, 50);
-  };
+    a.click();
+  }
   
-  reader.readAsDataURL(blob);
-  statusText("● 백업 다운로드 완료");
+  statusText("● 백업 다운로드 준비 완료");
 }
-
-
-  
+ 
 function todayString(){
  const d=new Date();
  return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("");
@@ -5279,7 +5312,7 @@ function downloadReportHTML(){
 </head>
 <body>
   <h1>📈 ${esc(name)} QA 통합 리포트</h1>
-  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.6.5</p>
+  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.6.6</p>
 
   ${certHTML}
 
