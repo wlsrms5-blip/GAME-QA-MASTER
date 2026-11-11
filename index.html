@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GAME QA MASTER v2.6.7</title>
+<title>GAME QA MASTER v2.6.8</title>
 <script>
 // 1. 우클릭 차단
 document.addEventListener('contextmenu', function(e) {
@@ -632,7 +632,7 @@ GAME QA MASTER
 
   <!-- 2단: 버전 표기 (한 줄 아래로 이동) -->
   <div>
-    <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.6.7</span>
+    <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.6.8</span>
   </div>
 
   <!-- 3단: 샘플 데이터 탭 이동 버튼 -->
@@ -1294,7 +1294,7 @@ GAME QA MASTER
 <div class="card">
 <h2>업데이트 내역</h2>
 <p class="update-intro">
- GAME QA MASTER의 v1.0.0부터 최신 v2.6.7까지 전체 버전별 변경사항 및 히스토리입니다.
+ GAME QA MASTER의 v1.0.0부터 최신 v2.6.8까지 전체 버전별 변경사항 및 히스토리입니다.
 </p>
 
 <div class="update-timeline">
@@ -1302,6 +1302,38 @@ GAME QA MASTER
 <div class="update-entry">
 <div class="update-dot latest"></div>
 <details class="update-details" open>
+<summary class="update-head">
+<span class="update-version latest-ver">v2.6.8</span>
+<span class="update-pill latest-pill">LATEST</span>
+<span class="update-pill feature-pill">🛡️ P0-001 무결성 검증 엔진 고도화 및 자동 연동 완성</span>
+<span class="update-date">2026-11-12</span>
+</summary>
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel green-border">
+<strong class="green">빌드 무결성 자동 재검증 및 복구 시스템 고도화</strong>
+<ul class="update-list-green">
+<li>결함 삭제(<code>deleteBug</code>) 및 수정(<code>saveEditBug</code>) 시 연관 프로젝트의 빌드 승인 상태가 실시간으로 재평가되도록 정합성 연동</li>
+<li>미해결 Critical/Major 결함이 모두 해소(Fixed/Closed)될 경우 반려(Rejected) 상태가 자동으로 풀리고 검토 대기(Pending) 상태로 정상 복구되는 역방향 무결성 엔진 탑재</li>
+<li>승인된 빌드에 여러 건의 결함이 추가 등록되더라도 중복된 'n건' 문구 대신 일관된 반려/취소 사유로 타임라인과 서명부 히스토리가 기록되도록 정제</li>
+</ul>
+</div>
+</div>
+
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel blue-border">
+<strong class="blue">체크리스트(테스트 케이스)와 결함 간 양방향 자동 연동 강화</strong>
+<ul class="update-list-blue">
+<li>결함 상태를 <code>Open</code> 또는 <code>In Progress</code>로 변경 시, 추적 연동된 체크리스트(테스트 케이스) 상태가 자동으로 <code>Fail</code>로 전환되도록 워크로드 구축</li>
+<li>테스트 케이스 PASS 처리 시 연동된 미해결 결함을 일괄 <code>Fixed</code>로 전환하고 빌드 승인 상태를 동시 재검증하는 로직 추가</li>
+</ul>
+</div>
+</div>
+</details>
+</div>
+  
+<div class="update-entry">
+<div class="update-dot original"></div>
+<details class="update-details">
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.7</span>
 <span class="update-pill latest-pill">LATEST</span>
@@ -2057,7 +2089,7 @@ QUALITY ASSURANCE MANAGEMENT PLATFORM
 </div>
 
 <script>
-const APP_VERSION="2.6.7";
+const APP_VERSION="2.6.8";
 const KEY="GAME_QA_MASTER_V1";
 const VALIDATOR_KEY="GAME_QA_MASTER_VALIDATOR_V153";
 
@@ -2084,6 +2116,7 @@ function normalizeDB(source){
  return result;
 }
 
+// 기존 db 로드 및 정규화 구간을 아래 코드로 교체해 주세요.
 let db;
 try{
  db=normalizeDB(JSON.parse(localStorage.getItem(KEY)||"null"));
@@ -2331,6 +2364,8 @@ async function saveAll(){
 
 function openRestore(){ document.getElementById("backupInput").click(); }
 
+// [P0-001-02] 백업 복원 직후 전체 프로젝트 승인 상태 자동 재검증 연동
+// [데이터 복원 및 즉시 화면 갱신 보완] restoreAll 함수
 async function restoreAll(event){
  const file=event.target.files[0];
  if(!file)return;
@@ -2340,20 +2375,49 @@ async function restoreAll(event){
   const restoredDB=parsed.application==="GAME_QA_MASTER"?parsed.database:parsed;
   if(!restoredDB||!Array.isArray(restoredDB.projects)) throw Error("올바르지 않은 백업 형식입니다.");
   if(!confirm("복원하시겠습니까? 현재 데이터는 복원 파일로 교체됩니다.")) return;
+  
   db=normalizeDB(restoredDB);
+  
+  // 복원 직후 모든 프로젝트의 빌드 승인/무효화 상태 정합성 자동 재검증 수행
+  // [P0-001-01 반영] 프로그램 최초 실행 시 로드된 기존 데이터의 빌드 승인/무효화 상태 자동 재검증
+if (db.projects && db.projects.length > 0) {
+ db.projects.forEach(p => {
+  if (typeof validateProjectBuildSignOffs === "function") {
+   validateProjectBuildSignOffs(p.id);
+  }
+ });
+ // 상태 일치 확인 후 자동 변경 사항 영속 저장
+ try {
+  localStorage.setItem(KEY, JSON.stringify(db));
+ } catch(e) {}
+}
+
   store=parsed.validator?.store||{};
   lastResult=parsed.validator?.lastResult||null;
   validatorConfig=parsed.validator?.config||null;
   if(parsed.validator?.configText) document.getElementById("cfg").value=parsed.validator.configText;
+  
   localStorage.setItem(KEY,JSON.stringify(db));
   await idbPut("validator",validatorState());
   editingBugId=null;
-  render(); renderChips(); renderValidationResult();
-  statusText("● 데이터 복원 완료");
-  alert("복원 완료!");
+  
+  // 1. 전체 데이터 렌더링 강제 실행
+  render(); 
+  renderChips(); 
+  renderValidationResult();
+
+  // 2. 현재 활성화되어 있는 뷰(탭)를 유지한 채 리렌더링 및 스크롤 고정
+  const activeViewEl = document.querySelector(".view.active");
+  if(activeViewEl){
+   switchView(activeViewEl.id);
+  }
+
+  statusText("● 데이터 복원 및 화면 갱신 완료");
+  alert("복원 및 빌드 승인 상태 재검증 완료!");
  }catch(e){ alert("복원 실패: "+e.message); }
  event.target.value="";
 }
+
 
 const titles={
  dashboard:"QA Dashboard",
@@ -2530,26 +2594,26 @@ function generateRegressionTestsForBuild(buildId){
 let currentSignOffBuildId = null;
 
 function openSignOffModal(buildId){
- const b=db.builds.find(x=>x.id===buildId);
- if(!b)return;
+ const b = db.builds.find(x => x.id === buildId);
+ if(!b) return;
  currentSignOffBuildId = buildId;
- const projectBugs=db.bugs.filter(bug=>bug.projectId===b.projectId);
- const openCriticalBugs=projectBugs.filter(bug=>
-  (bug.buildVersion===b.versionName || !bug.buildVersion) &&
-  (bug.severity==="Critical" || bug.severity==="Major") &&
-  (bug.status==="Open" || bug.status==="In Progress")
- );
-
+ 
  document.getElementById("signOffBuildVersionInfo").textContent = `대상 빌드: ${b.versionName} (${b.phase})`;
- document.getElementById("signOffTypeSelect").value = b.signOffStatus === "Approved" ? "Approved" : (b.signOffStatus === "Conditional" ? "Conditional" : "Approved");
- document.getElementById("signOffQaLeadInput").value = b.signOffDetails?.qaLead || "";
- document.getElementById("signOffPmInput").value = b.signOffDetails?.pm || "";
- document.getElementById("signOffCommentInput").value = b.signOffDetails?.comment || "";
+ 
+ // 2단계 결재창을 열 때 이전 무효화 사유나 코멘트가 남아있지 않도록 입력폼 초기화 (기존에 작성된 내용이 있다면 불러오되, 무효화 자동 코멘트는 배제)
+ const existingDetails = b.signOffDetails;
+ const isInvalidComment = existingDetails?.comment?.includes("[자동 승인 무효화]");
+ 
+ document.getElementById("signOffTypeSelect").value = "Approved";
+ document.getElementById("signOffQaLeadInput").value = isInvalidComment ? "" : (existingDetails?.qaLead || "");
+ document.getElementById("signOffPmInput").value = isInvalidComment ? "" : (existingDetails?.pm || "");
+ document.getElementById("signOffCommentInput").value = isInvalidComment ? "" : (existingDetails?.comment || "");
 
  const modal = document.getElementById("signOffModal");
  modal.style.display = "flex";
  document.body.style.overflow = "hidden";
 }
+
 
 function closeSignOffModal(){
  const modal = document.getElementById("signOffModal");
@@ -2559,61 +2623,18 @@ function closeSignOffModal(){
 }
 
 // [P0-001-C, D] 결재 제출 시 필수 입력 검증 강화
+// [P0-001-02, 03] 최종 결재 제출 및 이력 별도 보존
 function submitBuildSignOff(){
- if(!currentSignOffBuildId) return;
- const b=db.builds.find(x=>x.id===currentSignOffBuildId);
+ const buildId = currentSignOffBuildId || window.activeSignOffBuildId;
+ if(!buildId) return;
+ const b = db.builds.find(x => x.id === buildId);
  if(!b) return;
 
- const projectBugs=db.bugs.filter(bug=>bug.projectId===b.projectId);
- const openCriticalBugs=projectBugs.filter(bug=>
-  (bug.buildVersion===b.versionName || !bug.buildVersion) &&
-  (bug.severity==="Critical" || bug.severity==="Major") &&
-  (bug.status==="Open" || bug.status==="In Progress")
- );
-
- const type = document.getElementById("signOffTypeSelect").value;
- const qaLead = document.getElementById("signOffQaLeadInput").value.trim();
- const pm = document.getElementById("signOffPmInput").value.trim();
- const comment = document.getElementById("signOffCommentInput").value.trim();
-
- // QA Lead 및 PM 입력 필수화 검증
- if(!qaLead){
-  alert("⚠️ QA 리드(QA Lead) 이름을 반드시 입력해주세요.");
-  document.getElementById("signOffQaLeadInput").focus();
+ // [P0-001-01 보안 강화] 최종 결재 시 1단계 검증 통과 여부 강제 검증
+ if(b.verificationStatus !== "Verified"){
+  alert(`⚠️ 최종 결재 차단!\n\n해당 빌드[${b.versionName}]는 아직 '1단계 빌드 승인 검증'을 통과하지 않았습니다.\n\n반드시 1단계 검증을 완료한 후 최종 결재를 진행해 주세요.`);
   return;
  }
- if(!pm){
-  alert("⚠️ 프로젝트 매니저(PM) 이름을 반드시 입력해주세요.");
-  document.getElementById("signOffPmInput").focus();
-  return;
- }
-
- if(type === "Approved" && openCriticalBugs.length > 0){
-  alert(`⚠️ 빌드 완전 승인(Approved) 차단!\n\n해당 빌드[${b.versionName}]에 미해결된 Critical/Major 결함이 ${openCriticalBugs.length}건 존재합니다.\n\n[차단 결함 목록]\n` + openCriticalBugs.map(cg=>`- [${cg.severity}] ${cg.title} (${cg.status})`).join("\n") + `\n\n모든 Critical/Major 결함을 Fixed/Closed 처리해야 완전 승인(Approved)을 진행할 수 있습니다. (필요시 조건부 승인 선택 가능)`);
-  return;
- }
-
- b.signOffStatus = type;
- b.signedOffAt = new Date().toISOString();
- b.signOffDetails = {
-  type,
-  qaLead,
-  pm,
-  comment: comment || "결재 코멘트 없음",
-  updatedAt: new Date().toISOString()
- };
-
- save();
- closeSignOffModal();
- alert(`✅ 빌드 [${b.versionName}] Sign-off 결재 (${type === 'Approved' ? '완전 승인' : type === 'Conditional' ? '조건부 승인' : '반려'}) 완료!`);
- renderBuilds();
- renderGanttChart();
-}
-  
-function submitBuildSignOff(){
- if(!currentSignOffBuildId) return;
- const b = db.builds.find(x => x.id === currentSignOffBuildId);
- if(!b) return;
 
  const projectBugs = db.bugs.filter(bug => bug.projectId === b.projectId);
  const openCriticalBugs = projectBugs.filter(bug =>
@@ -2639,58 +2660,126 @@ function submitBuildSignOff(){
  }
 
  if(type === "Approved" && openCriticalBugs.length > 0){
-  // 팝업에서는 상세 목록을 제거하고 건수 위주로 간결하게 차단 안내
-  alert(`⚠️ 빌드 완전 승인(Approved) 차단!\n\n해당 빌드[${b.versionName}]에 미해결된 Critical/Major 결함이 ${openCriticalBugs.length}건 존재합니다.\n\n빌드 카드 내 아코디언에서 결함을 확인 후 처리해 주세요. (필요시 조건부 승인 선택 가능)`);
+  alert(`⚠️ 빌드 최종 승인(Approved) 차단!\n\n해당 빌드[${b.versionName}]에 미해결된 Critical/Major 결함이 ${openCriticalBugs.length}건 존재합니다.`);
   return;
  }
 
+ const now = new Date().toISOString();
  b.signOffStatus = type;
- b.signedOffAt = new Date().toISOString();
- b.signOffDetails = {
+ b.signedOffAt = now;
+
+ const detailObj = {
   type,
   qaLead,
   pm,
   comment: comment || "결재 코멘트 없음",
-  updatedAt: new Date().toISOString()
+  updatedAt: now
  };
+
+ b.signOffDetails = detailObj;
+
+ // 승인 이력 타임라인 누적 보존
+ if(!Array.isArray(b.signOffHistory)) b.signOffHistory = [];
+ b.signOffHistory.push({
+  actionType: "최종 결재 승인",
+  status: type,
+  qaLead,
+  pm,
+  comment: detailObj.comment,
+  timestamp: now
+ });
 
  save();
  closeSignOffModal();
- alert(`✅ 빌드 [${b.versionName}] Sign-off 결재가 완료되었습니다!`);
+ alert(`✅ 빌드 [${b.versionName}] 최종 결재가 완료되었습니다!`);
  renderBuilds();
  renderGanttChart();
 }
 
-
 // [P0-001-E, F, G] 공통 빌드 Sign-off 유효성 및 자동 무효화 검증 엔진
+// [P0-001-03] 승인 무효화 시 이력 누적 기록
+// [자동 승인 무효화 시 상단 박스와 하단 이력에 동시에 반영되도록 보완]
+// [1단계 검증 및 최종 승인 상태 모두 결함 발생 시 이력과 함께 자동 무효화되도록 보완된 함수]
+// [P0-001] 미해결 결함이 모두 해소(Fixed/Closed)될 경우 빌드 승인 상태를 자동으로 정상화하도록 보완된 무결성 검증 엔진
+// [요청 1 반영] 중복 'n건' 문구를 제거하고 깔끔한 반려/무효화 사유로 통일된 무결성 검증 함수
 function validateProjectBuildSignOffs(projectId) {
  if (!projectId) return;
  const projectBugs = db.bugs.filter(b => b.projectId === projectId);
  const projectBuilds = db.builds.filter(b => b.projectId === projectId);
+ const now = new Date().toISOString();
 
  projectBuilds.forEach(b => {
-  if (b.signOffStatus === "Approved" || b.signOffStatus === "Conditional") {
-   const openCrit = projectBugs.filter(bug =>
-    (bug.buildVersion === b.versionName || !bug.buildVersion) &&
-    (bug.severity === "Critical" || bug.severity === "Major") &&
-    (bug.status === "Open" || bug.status === "In Progress")
-   );
-   
-   if (openCrit.length > 0) {
+  const openCrit = projectBugs.filter(bug =>
+   (bug.buildVersion === b.versionName || !bug.buildVersion) &&
+   (bug.severity === "Critical" || bug.severity === "Major") &&
+   (bug.status === "Open" || bug.status === "In Progress")
+  );
+  
+  if (openCrit.length > 0) {
+   const isApprovedOrVerified = b.signOffStatus === "Approved" || b.signOffStatus === "Conditional" || b.verificationStatus === "Verified";
+   if (isApprovedOrVerified || b.signOffStatus !== "Rejected") {
     b.signOffStatus = "Rejected";
-    if (!b.signOffDetails) b.signOffDetails = {};
-    b.signOffDetails.type = "Rejected";
-    b.signOffDetails.comment = `🚨 [자동 승인 무효화] 승인 이후 미해결 Critical/Major 결함이 ${openCrit.length}건 발생(등록 또는 재오픈)하여 승인이 무효화되었습니다. (${new Date().toLocaleString("ko-KR")})`;
-    b.signOffDetails.updatedAt = new Date().toISOString();
+    b.verificationStatus = "None";
+    
+    // 💡 'n건' 문구를 제거하고 결함 발견으로 인한 자동 취소 메시지로 통일
+    const invalidReason = `🚨 [자동 승인 무효화] 미해결 Critical/Major 결함이 발견되어 빌드 승인이 취소되었습니다.`;
+    
+    b.signOffDetails = {
+     type: "Rejected",
+     qaLead: b.signOffDetails?.qaLead || "System",
+     pm: b.signOffDetails?.pm || "System",
+     comment: invalidReason,
+     updatedAt: now
+    };
+
+    if(!Array.isArray(b.signOffHistory)) b.signOffHistory = [];
+    const lastHistory = b.signOffHistory[b.signOffHistory.length - 1];
+    if (!lastHistory || lastHistory.comment !== invalidReason) {
+     b.signOffHistory.push({
+      actionType: "검증/승인 자동 무효화",
+      status: "Rejected",
+      qaLead: b.signOffDetails.qaLead,
+      pm: b.signOffDetails.pm,
+      comment: invalidReason,
+      timestamp: now
+     });
+    }
+   }
+  } else {
+   if (b.signOffStatus === "Rejected") {
+    b.signOffStatus = "Pending";
+    b.verificationStatus = "None";
+    
+    const recoveryReason = `✅ [자동 상태 복구] 미해결 Critical/Major 결함이 모두 해소(Fixed/Closed)되어 빌드 검토 대기 상태로 복구되었습니다.`;
+    
+    b.signOffDetails = {
+     type: "Pending",
+     qaLead: "System",
+     pm: "System",
+     comment: recoveryReason,
+     updatedAt: now
+    };
+
+    if(!Array.isArray(b.signOffHistory)) b.signOffHistory = [];
+    b.signOffHistory.push({
+     actionType: "결함 해소 자동 복구",
+     status: "Pending",
+     qaLead: "System",
+     pm: "System",
+     comment: recoveryReason,
+     timestamp: now
+    });
    }
   }
  });
 }
+
  
 // [P0-001-A, B] 우회 승인 방식 제거 및 결재 모달 강제 연동
 // [복원 및 보완] 1단계: 빌드 승인 검증 및 토글 절차
 // [1단계] 빌드 승인 검증 및 토글 절차
 // 1단계 승인 토글 및 검증 로직
+// [P0-001-01] 1단계 검증과 최종 승인 상태 분리
 function toggleBuildSignOff(buildId){
  const b = db.builds.find(x => x.id === buildId);
  if(!b) return;
@@ -2702,10 +2791,10 @@ function toggleBuildSignOff(buildId){
   (bug.status === "Open" || bug.status === "In Progress")
  );
 
- if(!b.signOffStatus || b.signOffStatus === "Pending" || b.signOffStatus === "Rejected" || b.signOffStatus === "Conditional"){
+ if(!b.verificationStatus || b.verificationStatus === "None" || b.signOffStatus === "Rejected" || b.signOffStatus === "Pending"){
   if(openCriticalBugs.length > 0){
-   // 팝업에서는 상세 목록을 제거하고 건수 위주로 간결하게 경고 안내
-   alert(`⚠️ 빌드 승인(Sign-off) 차단!\n\n해당 빌드[${b.versionName}]에 미해결된 Critical/Major 결함이 ${openCriticalBugs.length}건 존재합니다.\n\n빌드 카드 내의 '승인 반려/무효화' 아코디언을 펼쳐서 상세 결함 목록을 확인하고 Fixed/Closed 처리한 후 다시 승인해 주세요.`);
+   alert(`⚠️ 빌드 1단계 검증 차단!\n\n해당 빌드[${b.versionName}]에 미해결된 Critical/Major 결함이 ${openCriticalBugs.length}건 존재합니다.\n\n빌드 카드 내 아코디언에서 결함을 확인 후 처리해 주세요.`);
+   b.verificationStatus = "None";
    b.signOffStatus = "Rejected";
    save();
    renderBuilds();
@@ -2713,19 +2802,14 @@ function toggleBuildSignOff(buildId){
    return;
   }
   
-  b.signOffStatus = "Approved";
-  b.signedOffAt = new Date().toISOString();
-  if(!b.signOffDetails){
-   b.signOffDetails = {
-    type: "Approved",
-    qaLead: "QA Lead",
-    pm: "PM",
-    comment: "기본 승인 완료 (결재 작성에서 수정 가능)",
-    updatedAt: new Date().toISOString()
-   };
-  }
+  // 1단계 검증 통과 시: 최신 서명부(signOffDetails)만 초기화하여 카드 상단에서 숨김 (signOffHistory 아코디언 이력은 보존됨)
+  b.verificationStatus = "Verified";
+  b.signOffStatus = "Pending";
+  delete b.signOffDetails;
+  delete b.signedOffAt;
+  
   save();
-  alert(`✅ 빌드 [${b.versionName}] 1단계 승인이 완료되었습니다!`);
+  alert(`✅ 빌드 [${b.versionName}] 1단계 검증이 완료되었습니다!\n이제 'QA Release Sign-off 결재 작성' 버튼을 통해 새로운 결재를 진행할 수 있습니다.`);
  } else {
   cancelBuildSignOff(buildId);
   return;
@@ -2736,14 +2820,34 @@ function toggleBuildSignOff(buildId){
 }
 
 // 승인 취소 및 초기화 함수
+// 승인 수동 취소 시 이력 타임라인 기록 및 상태 초기화 함수
 function cancelBuildSignOff(buildId){
  const b = db.builds.find(x => x.id === buildId);
  if(!b) return;
- if(!confirm(`빌드 [${b.versionName}]의 승인을 취소하고 대기(Pending) 상태로 전환하시겠습니까?`)) return;
+ if(!confirm(`빌드 [${b.versionName}]의 승인을 취소하고 검증 대기 상태로 전환하시겠습니까?`)) return;
  
+ const now = new Date().toISOString();
+ const prevStatus = b.signOffStatus;
+ const lastQaLead = b.signOffDetails?.qaLead || "QA Lead";
+ const lastPm = b.signOffDetails?.pm || "PM";
+
+ // 상태 초기화
+ b.verificationStatus = "None";
  b.signOffStatus = "Pending";
+ 
+ // [추가] 승인 수동 취소 이력을 타임라인 배열에 누적 보존
+ if(!Array.isArray(b.signOffHistory)) b.signOffHistory = [];
+ b.signOffHistory.push({
+  actionType: "승인 수동 취소",
+  status: "Pending",
+  qaLead: lastQaLead,
+  pm: lastPm,
+  comment: `사용자에 의해 승인이 수동 취소되었습니다. (이전 판정: ${prevStatus})`,
+  timestamp: now
+ });
+
  delete b.signedOffAt;
- delete b.signOffDetails; // 서명부 초기화
+ delete b.signOffDetails; // 상단 최신 서명부 박스 제거 (하단 아코디언 타임라인 이력에는 수동 취소 기록이 안전하게 보존됨)
  
  save();
  renderBuilds();
@@ -2751,39 +2855,6 @@ function cancelBuildSignOff(buildId){
  alert(`빌드 [${b.versionName}] 승인이 취소되었습니다.`);
 }
 
-function addScheduleItem(){
- if(!db.activeProject) return alert("프로젝트를 선택하세요.");
- const title=document.getElementById("schedTitle").value.trim();
- if(!title) return alert("마일스톤 / 패키지명을 입력하세요.");
- const phase=document.getElementById("schedPhase").value;
- const assignee=document.getElementById("schedAssignee").value.trim()||"미지정";
- const startDate=document.getElementById("schedStartDate").value;
- const dueDate=document.getElementById("schedDueDate").value;
-
- if(!startDate || !dueDate) return alert("시작일과 마감일을 모두 선택하세요.");
- if(startDate > dueDate) return alert("시작일은 마감일보다 앞서야 합니다.");
-
- if(!Array.isArray(db.schedules)) db.schedules=[];
-
- db.schedules.push({
-  id: uid(),
-  projectId: db.activeProject,
-  title,
-  phase,
-  assignee,
-  startDate,
-  dueDate,
-  progress: 0,
-  status: "In Progress",
-  created: new Date().toISOString()
- });
-
- document.getElementById("schedTitle").value="";
- document.getElementById("schedAssignee").value="";
- save();
- alert(`마일스톤 [${title}] 일정이 성공적으로 등록되었습니다.`);
- renderGanttChart();
-}
 
 function deleteScheduleItem(id){
  if(!confirm("해당 일정을 삭제하시겠습니까?")) return;
@@ -2871,43 +2942,44 @@ function renderGanttChart(){
 // [빌드 목록 렌더링] 1단계 승인 버튼 및 2단계 결재 작성 버튼 완전 분리
 // 승인 상태에 따라 1단계/2단계 버튼이 전환되는 빌드 목록 렌더링
 // 승인 반려/무효화 아코디언 및 결함 포커스 연동 기능이 추가된 renderBuilds
+// 1단계 검증 및 최종 승인 상태에 따라 버튼이 동적으로 변경되는 renderBuilds
+// 등록된 빌드 목록 렌더링 함수 (선택된 프로젝트 정합성 및 안전장치 강화)
+// 승인 무효화 시 1단계 승인 버튼으로 정확히 복원되도록 개선된 renderBuilds
+// 1단계 검증 완료 또는 최종 승인 시 버튼이 2단계 결재 작성 모드로 정확히 전환되도록 보완된 renderBuilds
+// 1단계 상태로 돌아간 경우에도 이력 타임라인과 서명부를 확인할 수 있도록 개선된 renderBuilds
+// [반려/무효화 상태일 때 상단 박스에 무효화 사유가 선명하게 출력되도록 보완된 renderBuilds]
 function renderBuilds(){
  const activeBuilds = db.activeProject ? db.builds.filter(b => b.projectId === db.activeProject) : [];
- document.getElementById("buildList").innerHTML = activeBuilds.map(b => {
-  const projectBugs = db.bugs.filter(bug => bug.projectId === b.projectId);
-  
-  // 현재 빌드와 연관된 미해결 Critical/Major 결함 필터링
-  const openCritBugs = projectBugs.filter(bug => 
-   (bug.buildVersion === b.versionName || !bug.buildVersion) && 
-   (bug.severity === "Critical" || bug.severity === "Major") && 
-   (bug.status === "Open" || bug.status === "In Progress")
-  );
+ const container = document.getElementById("buildList");
+ if(!container) return;
 
+ if(!activeBuilds.length){
+  container.innerHTML = '<div class="empty">등록된 빌드가 없습니다. 상단 폼에서 새 빌드를 등록하거나 프로젝트를 선택해 주세요.</div>';
+  return;
+ }
+
+ container.innerHTML = activeBuilds.map(b => {
+  const projectBugs = db.bugs.filter(bug => bug.projectId === b.projectId);
+  const openCritCount = projectBugs.filter(bug => (bug.buildVersion === b.versionName || !bug.buildVersion) && (bug.severity === "Critical" || bug.severity === "Major") && (bug.status === "Open" || bug.status === "In Progress")).length;
+  
   const status = b.signOffStatus || "Pending";
+  const isVerified = b.verificationStatus === "Verified";
   const isApproved = status === "Approved";
   const isConditional = status === "Conditional";
-  const isRejected = status === "Rejected" || (openCritBugs.length > 0 && status === "Pending");
+  const isRejected = status === "Rejected" || (openCritCount > 0 && status === "Pending") || (openCritCount > 0 && (isApproved || isConditional));
 
-  // 승인 반려/무효화 상태일 때 아코디언 형태로 미해결 결함 목록 출력
   let signOffBadge = "";
-  if (isApproved) {
-   signOffBadge = '<span class="badge" style="background:#263b31;color:#4bd69a;font-weight:bold">🛡️ Sign-off 승인 완료</span>';
-  } else if (isConditional) {
-   signOffBadge = '<span class="badge" style="background:#473a25;color:#ffbd69;font-weight:bold">⚠️ 조건부 승인 (Conditional)</span>';
-  } else if (isRejected) {
-   // 아코디언 태그(<details>)를 사용하여 터치 시 열리고 접히도록 구성
+  if (isRejected) {
    signOffBadge = `
     <details style="display:inline-block;background:#512a32;border-radius:5px;padding:2px 6px;">
      <summary style="color:#ff7373;font-weight:bold;cursor:pointer;font-size:10px;">
-      🚨 승인 반려/무효화 (미해결 결함: ${openCritBugs.length}건) ▼
+      🚨 승인 반려/무효화 (미해결 결함: ${openCritCount}건) ▼
      </summary>
      <div style="margin-top:6px;padding:8px;background:#101319;border-radius:4px;border:1px solid #303644;font-size:11px;text-align:left;">
       <div style="color:#9299aa;margin-bottom:4px;font-weight:bold;">[미해결 Critical/Major 결함 목록]</div>
-      ${openCritBugs.length > 0 ? openCritBugs.map(bug => {
-       // 결함 넘버(ISSUE-N) 계산
+      ${openCritCount > 0 ? projectBugs.filter(bug => (bug.buildVersion === b.versionName || !bug.buildVersion) && (bug.severity === "Critical" || bug.severity === "Major") && (bug.status === "Open" || bug.status === "In Progress")).map(bug => {
        const bugIdx = projectBugs.findIndex(item => item.id === bug.id);
        const issueLabel = bugIdx !== -1 ? `ISSUE-${bugIdx + 1}` : 'ISSUE';
-       
        return `
         <div style="margin:4px 0;padding:4px;background:#1a1f28;border-radius:3px;cursor:pointer;" onclick="scrollToTargetElement('bugs', 'bug-card-${bug.id}')">
          <span class="badge" style="background:#303b4d;color:#70a5ff;font-weight:bold">[${issueLabel}]</span>
@@ -2920,14 +2992,22 @@ function renderBuilds(){
      </div>
     </details>
    `;
+  } else if (isApproved) {
+   signOffBadge = '<span class="badge" style="background:#263b31;color:#4bd69a;font-weight:bold">🛡️ 최종 승인 완료 (Approved)</span>';
+  } else if (isConditional) {
+   signOffBadge = '<span class="badge" style="background:#473a25;color:#ffbd69;font-weight:bold">⚠️ 조건부 승인 (Conditional)</span>';
+  } else if (isVerified) {
+   signOffBadge = '<span class="badge" style="background:#263b31;color:#70a5ff;font-weight:bold">🔍 1단계 검증 완료 (대기 중)</span>';
   } else {
    signOffBadge = '<span class="badge" style="background:#303746;color:#aab0bf;font-weight:bold">⏳ Sign-off 검토 대기</span>';
   }
 
   const details = b.signOffDetails;
+  const historyList = b.signOffHistory || [];
+  const showNextStepButtons = (isVerified || isApproved || isConditional) && !isRejected;
 
   return `
- <div class="card" style="border-left:4px solid ${isApproved ? '#4bd69a' : isConditional ? '#ffbd69' : isRejected ? '#ff7373' : '#70a5ff'}">
+ <div class="card" style="border-left:4px solid ${isApproved || isConditional && !isRejected ? '#4bd69a' : isRejected ? '#ff7373' : '#70a5ff'}">
   <div class="actions" style="justify-content:space-between;margin-bottom:6px">
    <div>
     <strong>${esc(b.versionName)}</strong>
@@ -2938,19 +3018,35 @@ function renderBuilds(){
   <p class="label">등록일: ${new Date(b.created).toLocaleDateString("ko-KR")} ${b.signedOffAt ? ` | 결재일: ${new Date(b.signedOffAt).toLocaleDateString("ko-KR")}` : ''}</p>
   <p class="label" style="margin:8px 0">${esc(b.note || "노트 없음")}</p>
 
+  <!-- 💡 [보완] 결재 서명부 또는 무효화 사유가 존재할 경우 상단 박스에 일관되게 출력 -->
   ${details ? `
-  <div style="margin:10px 0;padding:10px 12px;background:#101319;border-radius:6px;border:1px solid #303644;font-size:12px">
+  <div style="margin:10px 0;padding:10px 12px;background:#101319;border-radius:6px;border:1px solid ${isRejected ? '#512a32' : '#303644'};font-size:12px">
    <div class="actions" style="justify-content:space-between;margin-bottom:4px">
-    <span class="blue" style="font-weight:bold">✍️ Release Sign-off 결재 서명부</span>
+    <span class="${isRejected ? 'red' : 'blue'}" style="font-weight:bold">${isRejected ? '🚨 승인 반려 및 무효화 사유' : '✍️ Release Sign-off 결재 서명부'}</span>
     <span class="label" style="font-size:11px">${new Date(details.updatedAt).toLocaleString("ko-KR")}</span>
    </div>
-   <p class="label" style="margin:4px 0"><strong>QA Lead:</strong> ${esc(details.qaLead)} | <strong>PM:</strong> ${esc(details.pm)}</p>
-   <p class="label" style="margin:4px 0"><strong>결재 의견/사유:</strong> ${esc(details.comment)}</p>
+   ${details.qaLead && !isRejected ? `<p class="label" style="margin:4px 0"><strong>QA Lead:</strong> ${esc(details.qaLead)} | <strong>PM:</strong> ${esc(details.pm)}</p>` : ''}
+   <p class="label" style="margin:4px 0"><strong>의견/사유:</strong> ${esc(details.comment)}</p>
   </div>
   ` : ''}
 
+  <!-- 전체 이력 타임라인 아코디언 -->
+  ${historyList.length > 0 ? `
+  <details style="margin:10px 0;background:#101319;padding:8px 12px;border-radius:6px;border:1px solid #303644">
+   <summary class="label" style="cursor:pointer;font-weight:bold;color:#70a5ff">📜 전체 승인/무효화 이력 타임라인 (${historyList.length}건)</summary>
+   <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+    ${historyList.map(h => `
+     <div style="font-size:11px;border-left:2px solid ${h.status === 'Rejected' ? '#ff7373' : '#4bd69a'};padding-left:8px">
+      <span style="color:#9299aa">${new Date(h.timestamp).toLocaleString("ko-KR")}</span> - <strong style="color:${h.status === 'Rejected' ? '#ff7373' : '#4bd69a'}">[${h.actionType}]</strong> QA Lead: ${esc(h.qaLead || '-')} / PM: ${esc(h.pm || '-')}<br>
+      <span style="color:#cbd5e1">의견: ${esc(h.comment)}</span>
+     </div>
+    `).join("")}
+   </div>
+  </details>
+  ` : ''}
+
   <div class="actions" style="margin-top:12px">
-   ${!isApproved && !isConditional ? `
+   ${!showNextStepButtons ? `
     <button class="primary" style="padding:6px 12px;font-size:11px" onclick="toggleBuildSignOff('${b.id}')">🛡️ 1단계 빌드 승인 검증</button>
    ` : `
     <button class="primary" style="padding:6px 12px;font-size:11px;background:#3978e8" onclick="openSignOffModal('${b.id}')">🛡️ QA Release Sign-off 결재 작성</button>
@@ -2962,9 +3058,11 @@ function renderBuilds(){
   </div>
  </div>
  `;
- }).join("") || '<div class="empty">등록된 빌드가 없습니다. 새 빌드를 등록하세요.</div>';
+ }).join("");
 }
 
+
+ 
 
 const CHECKLIST_SAMPLE={
  name:"웹/모바일 로그인 시스템",
@@ -3174,6 +3272,7 @@ function saveEditTest(id){
  save();
 }
 
+// [수정 3] 테스트 케이스 PASS 처리 시 연동된 미해결 결함 자동 Fixed 전환 및 빌드 승인 재검증
 function updateTest(id,field,value){
  const t=db.tests.find(x=>x.id===id); if(!t)return;
  const oldVal = t[field];
@@ -3191,6 +3290,25 @@ function updateTest(id,field,value){
    detail: `${oldVal||"미지정"} ➔ ${value}`,
    version: t.version || "1.0"
   });
+
+  // 💡 테스트 케이스가 PASS로 변경된 경우, 연동된 미해결 결함 자동 Fixed 처리 제안
+  if(value === "Pass"){
+   const linkedBugs = db.bugs.filter(b => b.testId === t.id && (b.status === "Open" || b.status === "In Progress"));
+   if(linkedBugs.length > 0){
+    if(confirm(`해당 테스트 케이스[${t.name}]가 PASS 처리되었습니다.\n이 테스트에 연동된 미해결 결함 ${linkedBugs.length}건을 일괄 'Fixed(해결)' 상태로 변경하고 빌드 승인 상태를 재검증하시겠습니까?`)){
+     linkedBugs.forEach(b => {
+      b.status = "Fixed";
+      if(!Array.isArray(b.history)) b.history = [];
+      b.history.push({
+       date: now,
+       action: "상태 자동 변경",
+       detail: `연관 테스트(TC) PASS 처리로 인해 자동 Fixed 전환`
+      });
+     });
+     validateProjectBuildSignOffs(t.projectId);
+    }
+   }
+  }
  } else if(field==="tester" || field==="comment"){
   t.history.push({
    date: now,
@@ -3201,6 +3319,7 @@ function updateTest(id,field,value){
  }
  save();
 }
+
 
 function deleteTest(id){ db.tests=db.tests.filter(t=>t.id!==id); save(); }
 function clearAllProjectTests(){
@@ -4739,6 +4858,7 @@ function cancelEditBug(){
 }
 
 // [P0-001-E, F 반영] 결함 수정 함수 수정 (수정 직후 빌드 승인 상태 무효화 검증 포함)
+// [수정 2] 결함 정보 수정 시 빌드 승인 상태 재검증 연동
 function saveEditBug(id){
  const b=db.bugs.find(x=>x.id===id); if(!b) return;
  const newTitle=document.getElementById(`editBugTitle_${id}`).value.trim();
@@ -4775,6 +4895,7 @@ function saveEditBug(id){
 }
 
 // [P0-001-E, F 반영] 결함 상태 변경 함수 수정 (상태 변경 시 무효화 검증 포함)
+// [요청 2 반영] 결함 상태가 Open 또는 In Progress로 변경될 때 연동된 테스트 케이스 상태를 Fail로 자동 변경
 function updateBug(id,status){
  const b=db.bugs.find(x=>x.id===id); if(!b) return;
  const oldStatus = b.status;
@@ -4787,13 +4908,43 @@ function updateBug(id,status){
    detail: `${oldStatus} ➔ ${status}`
   });
   
-  // 결함 상태 변경(재오픈 등) 시 승인 상태 재검증
+  // 💡 결함 상태가 Open 또는 In Progress로 변경되었고, 연동된 테스트 케이스(testId)가 존재할 경우 테스트 상태를 Fail로 자동 연동
+  if((status === "Open" || status === "In Progress") && b.testId){
+   const linkedTest = db.tests.find(t => t.id === b.testId);
+   if(linkedTest && linkedTest.status !== "Fail"){
+    linkedTest.status = "Fail";
+    const nowStr = new Date().toISOString();
+    db.testRuns.push({id:uid(), testId:linkedTest.id, projectId:linkedTest.projectId, status:"Fail", date:nowStr, isSample:!!linkedTest.isSample});
+    if(!Array.isArray(linkedTest.history)) linkedTest.history = [];
+    linkedTest.history.push({
+     date: nowStr,
+     action: "결함 연동 상태 자동 변경",
+     detail: `연관된 결함(${b.title})이 ${status} 상태로 전환되어 Fail로 자동 변경됨`,
+     version: linkedTest.version || "1.0"
+    });
+   }
+  }
+
   validateProjectBuildSignOffs(b.projectId);
   save();
+  render();
  }
 }
 
-function deleteBug(id){ db.bugs=db.bugs.filter(b=>b.id!==id); save(); }
+
+// [수정 1] 결함 삭제 시 미해결 결함 해소 여부를 빌드 승인 상태에 즉시 반영
+function deleteBug(id){ 
+ const b = db.bugs.find(x => x.id === id);
+ const projectId = b ? b.projectId : null;
+ 
+ db.bugs = db.bugs.filter(b => b.id !== id); 
+ 
+ if(projectId){
+  validateProjectBuildSignOffs(projectId);
+ }
+ save(); 
+}
+
 
 const severityWeight={"Critical":4,"Major":3,"Minor":2,"Trivial":1};
 const priorityWeight={"P1 (Urgent)":4,"P2 (High)":3,"P3 (Normal)":2,"P4 (Low)":1};
@@ -5274,37 +5425,83 @@ function renderDataHistory(){
 
 let reportResizeBound=false;
 
+// [P0-001-02] QA 리포트에 최종 결재 완료 여부 정확히 반영
+// [P0-001-02 보완] 가장 최신 빌드의 상태를 우선 판별하여 과거 빌드 인증서 오노출 방지
+// [P0-001-01] 등록 일시 및 버전 기준 엄격한 최신 빌드 판별
+// [P0-001-01, 03] 엄격한 최신 빌드 판별 및 리포트 인증서 동기화
 function getSignOffCertHTML(activeProjectBuilds){
  if(!activeProjectBuilds || !activeProjectBuilds.length) return "";
- const latestSigned = activeProjectBuilds.filter(b => b.signOffDetails || b.signOffStatus).pop();
- if(!latestSigned) return "";
+ 
+ // 등록 일시(created) 기준 내림차순 정렬 (동일 시간일 경우 버전명 내림차순 보조 정렬)
+ const sortedBuilds = [...activeProjectBuilds].sort((a, b) => {
+  const timeDiff = new Date(b.created) - new Date(a.created);
+  if(timeDiff !== 0) return timeDiff;
+  return String(b.versionName).localeCompare(String(a.versionName));
+ });
+ 
+ const latestBuild = sortedBuilds[0];
+ if(!latestBuild) return "";
 
- const details = latestSigned.signOffDetails || {};
- const status = latestSigned.signOffStatus || "Pending";
- const isApproved = status === "Approved";
- const isConditional = status === "Conditional";
- const statusTitle = isApproved ? "RELEASE APPROVED (최종 릴리즈 승인 완료)" : isConditional ? "CONDITIONAL APPROVAL (조건부 승인)" : "RELEASE REJECTED (릴리즈 반려)";
- const statusColor = isApproved ? "#4bd69a" : isConditional ? "#ffbd69" : "#ff7373";
+ const projectBugs = db.bugs.filter(bug => bug.projectId === latestBuild.projectId);
+ const openCritCount = projectBugs.filter(bug => (bug.buildVersion === latestBuild.versionName || !bug.buildVersion) && (bug.severity === "Critical" || bug.severity === "Major") && (bug.status === "Open" || bug.status === "In Progress")).length;
+ 
+ const isLatestRejected = latestBuild.signOffStatus === "Rejected" || openCritCount > 0 || latestBuild.signOffStatus === "Pending" || !latestBuild.signOffStatus;
+ 
+ if(isLatestRejected){
+  return `
+  <div class="card" style="border:2px solid #ff7373;background:#171b23;margin-bottom:20px">
+   <div class="actions" style="justify-content:space-between;margin-bottom:6px">
+    <h2 style="margin:0;color:#ff7373">🚨 RELEASE SIGN-OFF CERTIFICATE (BLOCKED)</h2>
+    <span class="badge" style="background:#ff7373;color:#101319;font-weight:bold;font-size:12px">CURRENT BUILD REJECTED / PENDING</span>
+   </div>
+   <p class="label" style="color:#cbd5e1;margin:0">가장 최신 빌드인 <strong>[${esc(latestBuild.versionName)}]</strong>이(가) 미해결 결함 존재 또는 검증 미완료 상태이므로, 릴리즈 승인 인증서가 발급되지 않습니다.</p>
+  </div>
+  `;
+ }
 
- return `
- <div class="card" style="border:2px solid ${statusColor};background:#171b23;margin-bottom:20px">
-  <div class="actions" style="justify-content:space-between;margin-bottom:10px">
-   <h2 style="margin:0;color:${statusColor}">🛡️ OFFICIAL RELEASE SIGN-OFF CERTIFICATE</h2>
-   <span class="badge" style="background:${statusColor};color:#101319;font-weight:bold;font-size:12px">${esc(statusTitle)}</span>
+ if((latestBuild.signOffStatus === "Approved" || latestBuild.signOffStatus === "Conditional") && latestBuild.signOffDetails){
+  const details = latestBuild.signOffDetails;
+  const status = latestBuild.signOffStatus;
+  const isApproved = status === "Approved";
+  const statusTitle = isApproved ? "RELEASE APPROVED (최종 릴리즈 승인 완료)" : "CONDITIONAL APPROVAL (조건부 승인)";
+  const statusColor = isApproved ? "#4bd69a" : "#ffbd69";
+  const historyList = latestBuild.signOffHistory || [];
+
+  return `
+  <div class="card" style="border:2px solid ${statusColor};background:#171b23;margin-bottom:20px">
+   <div class="actions" style="justify-content:space-between;margin-bottom:10px">
+    <h2 style="margin:0;color:${statusColor}">🛡️ OFFICIAL RELEASE SIGN-OFF CERTIFICATE</h2>
+    <span class="badge" style="background:${statusColor};color:#101319;font-weight:bold;font-size:12px">${esc(statusTitle)}</span>
+   </div>
+   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;background:#101319;padding:12px;border-radius:8px;border:1px solid #303644;font-size:12px;margin-bottom:10px">
+    <div><span class="label">대상 빌드 버전:</span><br><strong style="font-size:14px">${esc(latestBuild.versionName)} (${esc(latestBuild.phase)})</strong></div>
+    <div><span class="label">QA Lead 승인자:</span><br><strong>${esc(details.qaLead || "미지정")}</strong></div>
+    <div><span class="label">PM 결재자:</span><br><strong>${esc(details.pm || "미지정")}</strong></div>
+    <div><span class="label">최종 결재 일시:</span><br><span class="label">${latestBuild.signedOffAt ? new Date(latestBuild.signedOffAt).toLocaleString("ko-KR") : "대기 중"}</span></div>
+   </div>
+   <div style="margin-bottom:12px">
+    <span class="label" style="font-weight:bold;color:#70a5ff">✍️ 최신 결재 의견 및 사유:</span>
+    <pre style="margin-top:6px;background:#101319;padding:10px;border-radius:6px;border:1px solid #303644;color:#e5e7eb;font-family:inherit">${esc(details.comment || "공식 결재 코멘트 없음")}</pre>
+   </div>
+   
+   <details style="background:#101319;padding:8px 12px;border-radius:6px;border:1px solid #303644">
+    <summary class="label" style="cursor:pointer;font-weight:bold;color:#70a5ff">📜 전체 승인 및 무효화 이력 타임라인 (${historyList.length}건)</summary>
+    <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+     ${historyList.length > 0 ? historyList.map(h => `
+      <div style="font-size:11px;border-left:2px solid ${h.status==='Rejected'?'#ff7373':'#4bd69a'};padding-left:8px">
+       <span style="color:#9299aa">${new Date(h.timestamp).toLocaleString("ko-KR")}</span> - <strong style="color:${h.status==='Rejected'?'#ff7373':'#4bd69a'}">[${h.actionType}]</strong> QA Lead: ${esc(h.qaLead)} / PM: ${esc(h.pm)}<br>
+       <span style="color:#cbd5e1">의견: ${esc(h.comment)}</span>
+      </div>
+     `).join("") : `<div style="font-size:11px;color:#777f90">기록된 이력이 없습니다.</div>`}
+    </div>
+   </details>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;background:#101319;padding:12px;border-radius:8px;border:1px solid #303644;font-size:12px;margin-bottom:10px">
-   <div><span class="label">대상 빌드 버전:</span><br><strong style="font-size:14px">${esc(latestSigned.versionName)} (${esc(latestSigned.phase)})</strong></div>
-   <div><span class="label">QA Lead 승인자:</span><br><strong>${esc(details.qaLead || "미지정")}</strong></div>
-   <div><span class="label">PM 결재자:</span><br><strong>${esc(details.pm || "미지정")}</strong></div>
-   <div><span class="label">최종 결재 일시:</span><br><span class="label">${latestSigned.signedOffAt ? new Date(latestSigned.signedOffAt).toLocaleString("ko-KR") : "대기 중"}</span></div>
-  </div>
-  <div>
-   <span class="label" style="font-weight:bold;color:#70a5ff">✍️ 결재선 검토 종합 의견 및 사유:</span>
-   <pre style="margin-top:6px;background:#101319;padding:10px;border-radius:6px;border:1px solid #303644;color:#e5e7eb;font-family:inherit">${esc(details.comment || latestSigned.note || "공식 결재 코멘트 없음")}</pre>
-  </div>
- </div>
- `;
+  `;
+ }
+
+ return "";
 }
+
 
 function renderReports(){
  const activeTests=db.activeProject?db.tests.filter(t=>t.projectId===db.activeProject):[];
@@ -5472,6 +5669,7 @@ function renderReportCharts(){
  }
 }
 
+// [P0-001-03] 독립 HTML 보고서 생성 시 공유된 getSignOffCertHTML 호출
 function downloadReportHTML(){
  const name = projectName(db.activeProject);
  const activeTests = db.activeProject ? db.tests.filter(t => t.projectId === db.activeProject) : [];
@@ -5482,6 +5680,8 @@ function downloadReportHTML(){
  const na = activeTests.filter(t => t.status === "N/A").length;
  const nt = activeTests.filter(t => t.status === "N/T").length;
  const errRate = (pass + fail) > 0 ? Math.round((fail / (pass + fail)) * 100) : 0;
+ 
+ // 공통 인증서 빌더 함수 재사용으로 내부 리포트와 100% 일치 보장
  const certHTML = getSignOffCertHTML(activeBuilds);
 
  const html = `<!DOCTYPE html>
@@ -5515,7 +5715,7 @@ function downloadReportHTML(){
 </head>
 <body>
   <h1>📈 ${esc(name)} QA 통합 리포트</h1>
-  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.6.7</p>
+  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.6.8</p>
 
   ${certHTML}
 
@@ -5694,6 +5894,11 @@ function downloadReportHTML(){
  downloadBlob(safeFilename(name)+"_QA_Report.html", new Blob([html],{type:"text/html;charset=utf-8"}));
 }
 
+
+   
+
+
+
 function exportCSV(){
  const activeTests=db.activeProject?db.tests.filter(t=>t.projectId===db.activeProject):[];
  if(!activeTests.length)return alert("내보낼 테스트케이스가 없습니다.");
@@ -5718,10 +5923,22 @@ function render(){
 
 window.addEventListener("DOMContentLoaded", async () => {
  await loadPersistentValidator();
+ 
+ // [P0-001-01 보완] DOM 로드 완료 시점에도 전체 프로젝트 무결성 재검증 강제 수행
+ if (db && db.projects && db.projects.length > 0) {
+  db.projects.forEach(p => {
+   if (typeof validateProjectBuildSignOffs === "function") {
+    validateProjectBuildSignOffs(p.id);
+   }
+  });
+  save();
+ }
+
  render();
  switchView('dashboard');
  statusText("● 준비 완료");
 });
+
   
 </script>
 </body>
