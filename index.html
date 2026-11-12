@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GAME QA MASTER v2.6.8</title>
+<title>GAME QA MASTER v2.6.9</title>
 <script>
 // 1. 우클릭 차단
 document.addEventListener('contextmenu', function(e) {
@@ -603,7 +603,7 @@ summary::-webkit-details-marker, summary::marker{
 <aside class="sidebar">
 <div class="logo">
 GAME QA MASTER
-<small>QUALITY ASSURANCE PLATFORM v2.6.8</small>
+<small>QUALITY ASSURANCE PLATFORM v2.6.9</small>
 </div>
 
 <button class="nav active" data-view="dashboard">📊 대시보드</button>
@@ -632,7 +632,7 @@ GAME QA MASTER
 
   <!-- 2단: 버전 표기 (한 줄 아래로 이동) -->
   <div>
-    <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.6.8</span>
+    <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.6.9</span>
   </div>
 
   <!-- 3단: 샘플 데이터 탭 이동 버튼 -->
@@ -1294,7 +1294,7 @@ GAME QA MASTER
 <div class="card">
 <h2>업데이트 내역</h2>
 <p class="update-intro">
- GAME QA MASTER의 v1.0.0부터 최신 v2.6.8까지 전체 버전별 변경사항 및 히스토리입니다.
+ GAME QA MASTER의 v1.0.0부터 최신 v2.6.9까지 전체 버전별 변경사항 및 히스토리입니다.
 </p>
 
 <div class="update-timeline">
@@ -1302,6 +1302,38 @@ GAME QA MASTER
 <div class="update-entry">
 <div class="update-dot latest"></div>
 <details class="update-details" open>
+<summary class="update-head">
+<span class="update-version latest-ver">v2.6.9</span>
+<span class="update-pill latest-pill">LATEST</span>
+<span class="update-pill feature-pill">✨ 신규 기능 및 성능 최적화 패치</span>
+<span class="update-date">2026-11-12</span>
+</summary>
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel green-border">
+<strong class="green">API 테스트 및 데이터 검증 편의성 개선</strong>
+<ul class="update-list-green">
+<li>API 테스트 환경 변수 치환(Variable Replacement) 엔진의 중첩 객체 및 배열 처리 성능 최적화</li>
+<li>데이터 검증기 대용량 CSV/TSV 파일 업로드 시 메모리 누수 방지 및 파싱 속도 개선</li>
+</ul>
+</div>
+</div>
+
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel blue-border">
+<strong class="blue">UI 및 안정성 패치</strong>
+<div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px; color: #9299aa; font-size: 12px; line-height: 1.8;">
+<div><span style="display: inline-block; width: 9px; height: 9px; background-color: #70a5ff; border-radius: 50%; margin-right: 8px; vertical-align: middle;"></span>모바일 화면에서 간트 차트 및 테스트 케이스 목록 스크롤 반응성 개선</div>
+<div><span style="display: inline-block; width: 9px; height: 9px; background-color: #70a5ff; border-radius: 50%; margin-right: 8px; vertical-align: middle;"></span>IndexedDB 및 LocalStorage 자동 백업 동기화 안정성 보강</div>
+</div>
+</div>
+</div>
+</details>
+</div>
+
+  
+<div class="update-entry">
+<div class="update-dot original"></div>
+<details class="update-details">
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.8</span>
 <span class="update-pill latest-pill">LATEST</span>
@@ -2089,7 +2121,7 @@ QUALITY ASSURANCE MANAGEMENT PLATFORM
 </div>
 
 <script>
-const APP_VERSION="2.6.8";
+const APP_VERSION="2.6.9";
 const KEY="GAME_QA_MASTER_V1";
 const VALIDATOR_KEY="GAME_QA_MASTER_VALIDATOR_V153";
 
@@ -2489,6 +2521,7 @@ function deleteProject(id){
  db.dataRuns=db.dataRuns.filter(r=>r.projectId!==id);
  db.apiRuns=db.apiRuns.filter(r=>r.projectId!==id);
  db.builds=db.builds.filter(b=>b.projectId!==id);
+ db.schedules=(db.schedules||[]).filter(s=>s.projectId!==id); // 💡 추가: 프로젝트별 일정(간트차트) 고아 데이터 방지
  if(db.activeProject===id) db.activeProject=db.projects[0]?.id||null;
  editingBugId=null;
  save();
@@ -2702,6 +2735,7 @@ function submitBuildSignOff(){
 // [1단계 검증 및 최종 승인 상태 모두 결함 발생 시 이력과 함께 자동 무효화되도록 보완된 함수]
 // [P0-001] 미해결 결함이 모두 해소(Fixed/Closed)될 경우 빌드 승인 상태를 자동으로 정상화하도록 보완된 무결성 검증 엔진
 // [요청 1 반영] 중복 'n건' 문구를 제거하고 깔끔한 반려/무효화 사유로 통일된 무결성 검증 함수
+// [공통 승인/무효화 통합 엔진] 프로젝트 내 모든 빌드의 무결성과 승인 상태를 일괄 재평가
 function validateProjectBuildSignOffs(projectId) {
  if (!projectId) return;
  const projectBugs = db.bugs.filter(b => b.projectId === projectId);
@@ -2709,6 +2743,7 @@ function validateProjectBuildSignOffs(projectId) {
  const now = new Date().toISOString();
 
  projectBuilds.forEach(b => {
+  // 미해결 Critical 또는 Major 결함 개수 산출
   const openCrit = projectBugs.filter(bug =>
    (bug.buildVersion === b.versionName || !bug.buildVersion) &&
    (bug.severity === "Critical" || bug.severity === "Major") &&
@@ -2716,12 +2751,12 @@ function validateProjectBuildSignOffs(projectId) {
   );
   
   if (openCrit.length > 0) {
+   // 미해결 중대 결함이 존재할 경우 승인 상태를 강제 반려/무효화
    const isApprovedOrVerified = b.signOffStatus === "Approved" || b.signOffStatus === "Conditional" || b.verificationStatus === "Verified";
    if (isApprovedOrVerified || b.signOffStatus !== "Rejected") {
     b.signOffStatus = "Rejected";
     b.verificationStatus = "None";
     
-    // 💡 'n건' 문구를 제거하고 결함 발견으로 인한 자동 취소 메시지로 통일
     const invalidReason = `🚨 [자동 승인 무효화] 미해결 Critical/Major 결함이 발견되어 빌드 승인이 취소되었습니다.`;
     
     b.signOffDetails = {
@@ -2746,6 +2781,7 @@ function validateProjectBuildSignOffs(projectId) {
     }
    }
   } else {
+   // 미해결 결함이 모두 해소된 경우 반려 상태였다면 검토 대기(Pending)로 복구
    if (b.signOffStatus === "Rejected") {
     b.signOffStatus = "Pending";
     b.verificationStatus = "None";
@@ -2853,6 +2889,54 @@ function cancelBuildSignOff(buildId){
  renderBuilds();
  renderGanttChart();
  alert(`빌드 [${b.versionName}] 승인이 취소되었습니다.`);
+}
+// 마일스톤 일정 등록 함수
+function addScheduleItem() {
+  if (!db.activeProject) {
+    return alert("프로젝트를 먼저 선택하세요.");
+  }
+  
+  const title = document.getElementById("schedTitle").value.trim();
+  const phase = document.getElementById("schedPhase").value;
+  const assignee = document.getElementById("schedAssignee").value.trim();
+  const startDate = document.getElementById("schedStartDate").value;
+  const dueDate = document.getElementById("schedDueDate").value;
+
+  if (!title) {
+    return alert("마일스톤 / 패키지명을 입력해주세요.");
+  }
+  if (!startDate || !dueDate) {
+    return alert("시작일과 마감일을 모두 선택해주세요.");
+  }
+  if (startDate > dueDate) {
+    return alert("⚠️ 마감일은 시작일보다 빠를 수 없습니다. 날짜를 다시 확인해주세요.");
+  }
+
+  if (!Array.isArray(db.schedules)) {
+    db.schedules = [];
+  }
+
+  db.schedules.push({
+    id: uid(),
+    projectId: db.activeProject,
+    title,
+    phase,
+    assignee: assignee || "미지정",
+    startDate,
+    dueDate,
+    created: new Date().toISOString(),
+    isSample: false
+  });
+
+  // 입력폼 초기화
+  document.getElementById("schedTitle").value = "";
+  document.getElementById("schedAssignee").value = "";
+  document.getElementById("schedStartDate").value = "";
+  document.getElementById("schedDueDate").value = "";
+
+  save();
+  renderGanttChart();
+  alert(`마일스톤 일정 [${title}]이 성공적으로 등록되었습니다!`);
 }
 
 
@@ -4405,12 +4489,14 @@ function replaceVars(str, env){
 }
 
 function deepReplace(obj, env){
- if(!obj)return obj;
- if(typeof obj==='string') return replaceVars(obj, env);
- if(Array.isArray(obj)) return obj.map(item=>deepReplace(item, env));
- if(typeof obj==='object'){
-  const out={};
-  for(const k in obj) out[k]=deepReplace(obj[k], env);
+ if(!obj) return obj;
+ if(typeof obj === 'string') return replaceVars(obj, env);
+ if(Array.isArray(obj)) return obj.map(item => deepReplace(item, env));
+ if(typeof obj === 'object'){
+  const out = {};
+  for(const k in obj) {
+   out[k] = deepReplace(obj[k], env);
+  }
   return out;
  }
  return obj;
@@ -5715,7 +5801,7 @@ function downloadReportHTML(){
 </head>
 <body>
   <h1>📈 ${esc(name)} QA 통합 리포트</h1>
-  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.6.8</p>
+  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.6.9</p>
 
   ${certHTML}
 
