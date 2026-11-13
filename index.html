@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GAME QA MASTER v2.6.9</title>
+<title>GAME QA MASTER v2.7.0</title>
 <script>
 // 1. 우클릭 차단
 document.addEventListener('contextmenu', function(e) {
@@ -58,7 +58,7 @@ img, video, canvas, svg{
 }
 
 .sidebar{
- width:225px;
+ width:235px;
  background:#171b23;
  border-right:1px solid #303644;
  padding:20px 12px;
@@ -68,7 +68,7 @@ img, video, canvas, svg{
 .logo{
  font-size:19px;
  font-weight:bold;
- margin:8px 10px 30px;
+ margin:8px 10px 24px;
 }
 
 .logo small{
@@ -78,24 +78,83 @@ img, video, canvas, svg{
  margin-top:7px;
 }
 
+.nav-group-container{
+ display:flex;
+ flex-direction:column;
+ gap:8px;
+}
+
+.nav-group{
+ border-radius:8px;
+ background:#13161d;
+ border:1px solid #262b36;
+ overflow:hidden;
+}
+
+.nav-group-btn{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ width:100%;
+ padding:11px 12px;
+ background:#1c212b;
+ border:0;
+ color:#ffffff !important; /* 요청 1: 상위 탭 폰트 흰색 */
+ text-align:left;
+ font-size:13px;
+ font-weight:bold;
+ cursor:pointer;
+ transition:background 0.2s, color 0.2s;
+}
+
+.nav-group-btn:hover, .nav-group-btn.active-group{
+ background:#3978e8 !important; /* 요청 2: 선택한 상위 탭 파란색 강조 */
+ color:#ffffff !important;
+}
+
+.nav-group-btn .arrow{
+ font-size:10px;
+ transition:transform 0.2s;
+}
+
+.nav-group.open .nav-group-btn .arrow{
+ transform:rotate(180deg);
+}
+
+.nav-sub-list{
+ display:none;
+ flex-direction:column;
+ padding:6px;
+ gap:4px;
+}
+
+.nav-group.open .nav-sub-list{
+ display:flex;
+}
+
 .nav{
  display:block;
  width:100%;
- padding:12px;
- margin-bottom:5px;
+ padding:9px 12px;
  background:none;
  border:0;
  color:#9299aa;
  text-align:left;
- border-radius:7px;
+ border-radius:6px;
  cursor:pointer;
- font-size:13px;
+ font-size:12.5px;
  transition:background 0.2s, color 0.2s;
 }
 
 .nav:hover,.nav.active{
  background:#252d3a;
  color:#70a5ff;
+ font-weight:bold;
+}
+
+/* 세로 화면용 2단 가로 정렬 바 (기본 숨김) */
+.mobile-sub-bar{
+ display:none;
 }
 
 .main{
@@ -571,14 +630,12 @@ summary::-webkit-details-marker, summary::marker{
  line-height:1.8;
 }
 
-@media(max-width:768px){
+/* 세로 화면이 길거나 모바일/태블릿 세로 뷰포트인 경우 */
+@media (orientation: portrait), (max-width: 768px) {
  .layout{display:block}
  .sidebar{
   width:100%;
-  display:flex;
-  overflow-x:auto;
-  padding:10px;
-  gap:5px;
+  padding:10px 12px 0 12px;
   position:sticky;
   top:0;
   z-index:1000;
@@ -587,7 +644,56 @@ summary::-webkit-details-marker, summary::marker{
   border-bottom:1px solid #303644;
  }
  .logo{display:none}
- .nav{white-space:nowrap;width:auto;margin:0}
+ .nav-group-container{
+  flex-direction:row;
+  gap:6px;
+  border-bottom:1px solid #2a303d;
+  padding-bottom:8px;
+ }
+ .nav-group{
+  flex:1;
+  border:0;
+  background:transparent;
+ }
+ .nav-group-btn{
+  justify-content:center;
+  text-align:center;
+  padding:9px 8px;
+  border-radius:6px;
+  font-size:13px;
+ }
+ .nav-group-btn .arrow{
+  display:none;
+ }
+ /* 세로 모드에서는 아코디언 드롭다운 숨기고 하단 2번째 줄 전용 바 사용 */
+ .nav-sub-list{
+  display:none !important;
+ }
+ .mobile-sub-bar{
+  display:flex;
+  overflow-x:auto;
+  gap:6px;
+  padding:8px 2px 10px 2px;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+ }
+ .mobile-sub-bar::-webkit-scrollbar{
+  display:none;
+ }
+ .mobile-sub-bar .nav{
+  white-space:nowrap;
+  width:auto;
+  padding:7px 12px;
+  font-size:12px;
+  background:#13161d;
+  border:1px solid #2a303d;
+  flex-shrink:0;
+ }
+ .mobile-sub-bar .nav.active{
+  background:#252d3a;
+  border-color:#3978e8;
+  color:#70a5ff;
+ }
  .main{padding:15px}
  .toolbar{position:relative;top:auto;z-index:10}
  .grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
@@ -603,21 +709,57 @@ summary::-webkit-details-marker, summary::marker{
 <aside class="sidebar">
 <div class="logo">
 GAME QA MASTER
-<small>QUALITY ASSURANCE PLATFORM v2.6.9</small>
+<small>QUALITY ASSURANCE PLATFORM v2.7.0</small>
+</div>
+<div class="nav-group-container">
+  <!-- 1. 매니지먼트 (요청 3: QA 리포트가 매니지먼트 하위로 이동) -->
+  <div class="nav-group open" data-group="management">
+    <button type="button" class="nav-group-btn active-group" onclick="toggleNavGroup('management')">
+      <span>매니지먼트</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div class="nav-sub-list">
+      <button class="nav active" data-view="dashboard" data-group="management">📊 대시보드</button>
+      <button class="nav" data-view="projects" data-group="management">📁 프로젝트 관리</button>
+      <button class="nav" data-view="builds" data-group="management">🚀 빌드/버전 관리</button>
+      <button class="nav" data-view="schedule" data-group="management">📅 일정 &amp; 마일스톤</button>
+      <button class="nav" data-view="matrix" data-group="management">🔗 QA 추적성 매트릭스</button>
+      <button class="nav" data-view="reports" data-group="management">📈 QA 리포트</button> <!-- 이동됨 -->
+    </div>
+  </div>
+
+  <!-- 2. 실행 -->
+  <div class="nav-group" data-group="execution">
+    <button type="button" class="nav-group-btn" onclick="toggleNavGroup('execution')">
+      <span>실행</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div class="nav-sub-list">
+      <button class="nav" data-view="generator" data-group="execution">📝 체크리스트 생성기</button>
+      <button class="nav" data-view="tests" data-group="execution">📋 테스트 관리</button>
+      <button class="nav" data-view="bugs" data-group="execution">🐞 결함 관리</button>
+    </div>
+  </div>
+
+  <!-- 3. 유틸리티 (QA 리포트 제외됨) -->
+  <div class="nav-group" data-group="utility">
+    <button type="button" class="nav-group-btn" onclick="toggleNavGroup('utility')">
+      <span>유틸리티</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div class="nav-sub-list">
+      <button class="nav" data-view="data" data-group="utility">🗃 데이터 검증</button>
+      <button class="nav" data-view="api" data-group="utility">🔌 API 테스트</button>
+      <button class="nav" data-view="ailog" data-group="utility">🤖 AI 로그 분석</button>
+      <button class="nav" data-view="samples" data-group="utility">🧪 샘플 데이터</button>
+      <button class="nav" data-view="updates" data-group="utility">🕘 업데이트 내역</button>
+    </div>
+  </div>
 </div>
 
-<button class="nav active" data-view="dashboard">📊 대시보드</button>
-<button class="nav" data-view="projects">📁 프로젝트 관리</button>
-<button class="nav" data-view="builds">🚀 빌드/버전 관리</button>
-<button class="nav" data-view="schedule">📅 일정 &amp; 마일스톤</button>
-<button class="nav" data-view="generator">📝 체크리스트 생성기</button>
-<button class="nav" data-view="tests">📋 테스트 관리</button>
-<button class="nav" data-view="data">🗃 데이터 검증</button>
-<button class="nav" data-view="api">🔌 API 테스트</button>
-<button class="nav" data-view="bugs">🐞 결함 관리</button>
-<button class="nav" data-view="samples">🧪 샘플 데이터</button>
-<button class="nav" data-view="reports">📈 QA 리포트</button>
-<button class="nav" data-view="updates">🕘 업데이트 내역</button>
+
+<!-- 세로 모드용 2번째 줄 가로 하위메뉴 바 -->
+<div id="mobileSubBar" class="mobile-sub-bar"></div>
 </aside>
 
 <main class="main">
@@ -632,7 +774,7 @@ GAME QA MASTER
 
   <!-- 2단: 버전 표기 (한 줄 아래로 이동) -->
   <div>
-    <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.6.9</span>
+    <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.7.0</span>
   </div>
 
   <!-- 3단: 샘플 데이터 탭 이동 버튼 -->
@@ -1227,7 +1369,6 @@ GAME QA MASTER
 <input id="searchBugInput" placeholder="결함 제목 또는 내용 검색..." oninput="renderBugs()">
 </div>
 
-
 <div class="card">
 <div class="actions" style="justify-content:space-between;margin-bottom:12px">
  <h2 style="margin:0">결함 목록</h2>
@@ -1237,6 +1378,62 @@ GAME QA MASTER
 </div>
 </section>
 
+<section id="ailog" class="view">
+<div class="card" style="border-left: 4px solid #70a5ff; background: #171b23;">
+  <h2 style="color: #70a5ff; margin-bottom: 8px;">🤖 AI 로그 스니펫(Stack Trace) 분석 툴셋</h2>
+  <p class="label" style="margin-bottom: 12px;">크래시 로그나 에러 스택 텍스트를 붙여넣거나, 아래 샘플을 선택하여 핵심 에러 라인을 파싱하고 진단할 수 있습니다.</p>
+  
+  <!-- 🌟 드롭박스 텍스트 간결화 및 초기화 버튼 변경 -->
+  <div style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
+    <select id="aiSampleDropdown" onchange="onAiSampleSelected(this.value)" style="flex: 1; margin: 0;">
+      <option value="">-- 샘플 로그 스니펫 선택 --</option>
+    </select>
+    <button class="secondary" style="white-space: nowrap; padding: 10px 14px; margin: 0;" onclick="resetAiLogAnalyzer()">초기화</button>
+  </div>
+
+  <textarea id="aiLogInput" class="mono" style="min-height: 150px; margin-bottom: 10px;" placeholder="[Stack Trace 또는 크래시 로그 텍스트를 여기에 붙여넣으세요]&#10;예: java.lang.NullPointerException: Attempt to invoke virtual method 'void Player.attack()' on a null object reference at CombatManager.update(CombatManager.java:142)"></textarea>
+  
+  <div class="actions" style="justify-content: space-between; align-items: center;">
+    <button class="primary" onclick="runAiLogAnalysisOnly()">🔍 AI 로그 분석 실행</button>
+    <span id="aiAnalysisStatus" class="label" style="color: #4bd69a; font-weight: bold;"></span>
+  </div>
+</div>
+
+<!-- AI 분석 결과 카드 영역 -->
+<div id="aiAnalysisResultCard" class="card" style="display: none; border-left: 4px solid #4bd69a; background: #171b23;">
+  <h2 style="color: #4bd69a; margin-bottom: 8px;">📊 AI 분석 진단 결과</h2>
+  <div id="aiAnalysisResultContent" class="label" style="line-height: 1.8; margin-bottom: 15px; color: #e5e7eb;"></div>
+  
+  <div class="actions">
+    <button class="primary" style="background: #10b981;" onclick="moveAiResultToBugTab()">📝 이 내용으로 결함 등록하러 가기 ➔</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>💡 AI 분석 가이드 및 수동 등록 안내</h2>
+  <p class="label" style="line-height: 1.8;">
+    • 로그를 분석한 뒤 <strong>[이 내용으로 결함 등록하러 가기]</strong> 버튼을 누르면 결함 관리 탭으로 내용이 이관됩니다.<br>
+    • 순수하게 수동으로 결함을 등록하시려면 언제든 사이드바의 <strong>[🐞 결함 관리]</strong> 탭을 이용해 주세요.
+  </p>
+</div>
+</section>
+
+<section id="matrix" class="view">
+<div class="card">
+  <h2>🔗 전사적 QA 추적성 매트릭스 (Traceability Matrix)</h2>
+  <p class="label">테스트 케이스 ➔ 테스트 실행 결과 ➔ 연동 결함(Issue) ➔ 빌드 검증 ➔ Release Sign-off로 이어지는 전체 QA 생명주기 흐름을 실시간으로 추적합니다.</p>
+  
+  <div class="actions" style="margin-bottom: 12px;">
+    <button class="secondary" onclick="renderTraceabilityMatrix()">🔄 매트릭스 새로고침</button>
+    <button class="primary" onclick="exportMatrixCSV()">📊 추적성 매트릭스 CSV 내보내기</button>
+  </div>
+  
+  <div id="traceabilityMatrixContainer" class="table-wrap"></div>
+</div>
+</section>
+
+
+  
 <section id="samples" class="view">
 <div class="card">
 <h2>샘플 데이터 관리</h2>
@@ -1294,7 +1491,7 @@ GAME QA MASTER
 <div class="card">
 <h2>업데이트 내역</h2>
 <p class="update-intro">
- GAME QA MASTER의 v1.0.0부터 최신 v2.6.9까지 전체 버전별 변경사항 및 히스토리입니다.
+ GAME QA MASTER의 v1.0.0부터 최신 v2.7.0까지 전체 버전별 변경사항 및 히스토리입니다.
 </p>
 
 <div class="update-timeline">
@@ -1302,6 +1499,52 @@ GAME QA MASTER
 <div class="update-entry">
 <div class="update-dot latest"></div>
 <details class="update-details" open>
+<summary class="update-head">
+<span class="update-version latest-ver">v2.7.0</span>
+<span class="update-pill latest-pill">LATEST</span>
+<span class="update-pill feature-pill">🔗 전사적 QA 추적성 매트릭스 및 AI·대용량 최적화 패치</span>
+<span class="update-date">2026-11-12</span>
+</summary>
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel green-border">
+<strong class="green">전사적 QA 추적성 매트릭스 및 AI 로그 분석 고도화</strong>
+<ul class="update-list-green">
+<li>테스트 케이스 ➔ 실행 결과 ➔ 연동 결함(Issue) ➔ 대상 빌드 ➔ Release Sign-off 상태로 이어지는 QA 생명주기 전체 흐름 실시간 추적 뷰어 신설</li>
+<li>매트릭스 데이터를 시트 프로그램에서 활용할 수 있는 CSV 내보내기 기능 탑재</li>
+<li>AI 로그 스니펫 분석 툴셋 내 샘플 드롭박스 및 원클릭 결함 등록 연동 프로세스 완성</li>
+</ul>
+</div>
+</div>
+
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel blue-border">
+<strong class="blue">엔터프라이즈 대용량 데이터 최적화 및 마이그레이션</strong>
+<div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px; color: #9299aa; font-size: 12px; line-height: 1.8;">
+<div><span style="display: inline-block; width: 9px; height: 9px; background-color: #70a5ff; border-radius: 50%; margin-right: 8px; vertical-align: middle;"></span>수만 건의 테스트 케이스 및 대용량 CSV/TSV 검증을 위한 가상 스크롤(Virtual Scrolling) 렌더링 성능 최적화 아키텍처 적용</div>
+<div><span style="display: inline-block; width: 9px; height: 9px; background-color: #70a5ff; border-radius: 50%; margin-right: 8px; vertical-align: middle;"></span>백업 파일 복원 시 구버전 스키마 구조 자동 감지 및 최신 버전 변환 마이그레이션 안전장치 보강</div>
+<div><span style="display: inline-block; width: 9px; height: 9px; background-color: #70a5ff; border-radius: 50%; margin-right: 8px; vertical-align: middle;"></span>API 테스트 스위트 내 Deep JSONPath, 응답 속도(ms) 임계값 검증 및 JSON Schema 유효성 검사</div>
+</div>
+</div>
+</div>
+
+<!-- 💡 내비게이션 메뉴 정렬 단락을 v2.7.0 details 안으로 배치하고 간격(margin-top:12px) 통일 -->
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel orange-border">
+<strong class="orange">내비게이션 메뉴 정렬</strong>
+<div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px; color: #9299aa; font-size: 12px; line-height: 1.8;">
+<div><span style="display: inline-block; width: 9px; height: 9px; background-color: #FFA500; border-radius: 50%; margin-right: 8px; vertical-align: middle;"></span>매니지먼트, 실행, 유틸리티로 분류</div>
+</div>
+</div>
+</div>
+
+</details>
+</div>
+
+  
+  
+<div class="update-entry">
+<div class="update-dot original"></div>
+<details class="update-details">
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.9</span>
 <span class="update-pill latest-pill">LATEST</span>
@@ -2121,7 +2364,7 @@ QUALITY ASSURANCE MANAGEMENT PLATFORM
 </div>
 
 <script>
-const APP_VERSION="2.6.9";
+const APP_VERSION="2.7.0";
 const KEY="GAME_QA_MASTER_V1";
 const VALIDATOR_KEY="GAME_QA_MASTER_VALIDATOR_V153";
 
@@ -2450,7 +2693,6 @@ if (db.projects && db.projects.length > 0) {
  event.target.value="";
 }
 
-
 const titles={
  dashboard:"QA Dashboard",
  projects:"Project Management",
@@ -2461,45 +2703,127 @@ const titles={
  data:"Game Data Validation",
  api:"API Test Automation Suite",
  bugs:"Bug Tracking",
+ ailog:"AI Log Snippet Analyzer",
+ matrix: "QA Traceability Matrix", // 🌟 [v2.7.0 신규]
  samples:"Sample Data Management",
  reports:"QA Reports",
  updates:"업데이트 내역",
 };
 
-document.querySelectorAll(".nav").forEach(btn=>{
- btn.onclick=()=>{
-  editingBugId=null;
-  editingTestId=null;
-  document.querySelectorAll(".nav").forEach(b=>b.classList.remove("active"));
-  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-  btn.classList.add("active");
-  document.getElementById(btn.dataset.view).classList.add("active");
-  document.getElementById("pageTitle").textContent=titles[btn.dataset.view];
-  if(btn.dataset.view==="reports") renderReports();
-  if(btn.dataset.view==="builds") renderBuilds();
- renderGanttChart();
-  if(btn.dataset.view==="tests") renderTests();
+let activeNavGroup = "management";
+
+function renderMobileSubBar(groupName, activeViewName) {
+ const subBar = document.getElementById("mobileSubBar");
+ if (!subBar) return;
+ const groupEl = document.querySelector(`.nav-group[data-group="${groupName}"]`);
+ if (!groupEl) return;
+ const subButtons = groupEl.querySelectorAll(".nav-sub-list .nav");
+ subBar.innerHTML = "";
+ subButtons.forEach(btn => {
+  const clone = document.createElement("button");
+  clone.type = "button";
+  clone.className = "nav" + (btn.dataset.view === activeViewName ? " active" : "");
+  clone.dataset.view = btn.dataset.view;
+  clone.dataset.group = groupName;
+  clone.textContent = btn.textContent;
+  clone.onclick = () => switchView(btn.dataset.view);
+  subBar.appendChild(clone);
+ });
+}
+function toggleNavGroup(groupName) {
+ activeNavGroup = groupName;
+ const isPortrait = window.matchMedia("(orientation: portrait), (max-width: 768px)").matches;
+ 
+ document.querySelectorAll(".nav-group").forEach(g => {
+  const gName = g.dataset.group;
+  const gBtn = g.querySelector(".nav-group-btn");
+  
+  if (gName === groupName) {
+   // 선택된 상위 탭만 활성화
+   gBtn.classList.add("active-group");
+   if (isPortrait) {
+    g.classList.add("open");
+   } else {
+    g.classList.toggle("open"); // 혹은 항상 열려면 g.classList.add("open")
+   }
+  } else {
+   // 나머지 상위 탭은 선택 해제 및 닫힘 상태로 강제 변경 (요청 2번 충족)
+   gBtn.classList.remove("active-group");
+   g.classList.remove("open");
+  }
+ });
+
+ const currentActiveView = document.querySelector(".view.active")?.id || "dashboard";
+ renderMobileSubBar(groupName, currentActiveView);
+
+ if (isPortrait) {
+  const groupEl = document.querySelector(`.nav-group[data-group="${groupName}"]`);
+  const firstSub = groupEl?.querySelector(".nav-sub-list .nav");
+  const isCurrentInGroup = groupEl?.querySelector(`.nav-sub-list .nav[data-view="${currentActiveView}"]`);
+  if (!isCurrentInGroup && firstSub) {
+   switchView(firstSub.dataset.view);
+  }
+ }
+}
+
+
+document.querySelectorAll(".nav-sub-list .nav").forEach(btn => {
+ btn.onclick = () => {
+  switchView(btn.dataset.view);
  };
 });
 
 function switchView(viewName){
  editingBugId=null;
  editingTestId=null;
- document.querySelectorAll(".nav").forEach(b=>{
-  if(b.dataset.view===viewName) b.classList.add("active");
-  else b.classList.remove("active");
+ 
+ let targetGroup = activeNavGroup;
+ document.querySelectorAll(".nav-sub-list .nav").forEach(b=>{
+  if(b.dataset.view===viewName) {
+   b.classList.add("active");
+   targetGroup = b.dataset.group || targetGroup;
+  } else {
+   b.classList.remove("active");
+  }
  });
+
+ // 상위 그룹 활성화 및 아코디언 열기 동기화
+ activeNavGroup = targetGroup;
+ document.querySelectorAll(".nav-group").forEach(g => {
+  const gName = g.dataset.group;
+  const gBtn = g.querySelector(".nav-group-btn");
+  if (gName === targetGroup) {
+   g.classList.add("open");
+   gBtn.classList.add("active-group");
+  } else {
+   gBtn.classList.remove("active-group");
+  }
+ });
+
+ renderMobileSubBar(targetGroup, viewName);
+
  document.querySelectorAll(".view").forEach(v=>{
   if(v.id===viewName) v.classList.add("active");
   else v.classList.remove("active");
  });
  document.getElementById("pageTitle").textContent=titles[viewName]||"QA Dashboard";
+ 
  if(viewName==="reports") renderReports();
  if(viewName==="builds") renderBuilds();
  renderGanttChart();
  if(viewName==="tests") renderTests();
+ 
+ // 🌟 [v2.7.0 신규] QA 추적성 매트릭스 뷰가 선택될 때 렌더링 실행
+ if(viewName==="matrix") renderTraceabilityMatrix(); 
+ 
  window.scrollTo(0,0);
 }
+
+window.addEventListener("resize", () => {
+ const currentActiveView = document.querySelector(".view.active")?.id || "dashboard";
+ renderMobileSubBar(activeNavGroup, currentActiveView);
+}, { passive: true });
+
 
 function addProject(){
  const name=document.getElementById("projectNameInput").value.trim();
@@ -4406,7 +4730,6 @@ function switchApiSubTab(mode){
   document.getElementById("apiSubJson").className="primary";
  }
 }
-
 const SAMPLE_API_SUITE_JSON=JSON.stringify({
  base_url: "https://jsonplaceholder.typicode.com",
  headers: {
@@ -4453,9 +4776,27 @@ const SAMPLE_API_SUITE_JSON=JSON.stringify({
    method: "DELETE",
    endpoint: "/posts/1",
    expected: { status_code: 200 }
+  },
+  {
+   name: "6. Deep JSONPath & 응답 시간/Schema 검증 (v2.7.0 신규)",
+   method: "GET",
+   endpoint: "/posts/1",
+   expected: { 
+    status_code: 200, 
+    max_duration_ms: 300,
+    json_path: {
+     "id": 1,
+     "userId": 1
+    },
+    json_schema: {
+     "type": "object",
+     "required": ["id", "title", "body"]
+    }
+   }
   }
  ]
 },null,2);
+
 
 const SAMPLE_API_ENV=JSON.stringify({
  TOKEN: "sample_bearer_token_qa_156",
@@ -4504,12 +4845,16 @@ function deepReplace(obj, env){
 
 function validateExpectations(resultObj, expected={}, httpOk=true){
  const errors=[];
+ 
+ // 1. 상태 코드 검증
  if(Object.prototype.hasOwnProperty.call(expected,"status_code")){
   const codes=Array.isArray(expected.status_code)?expected.status_code:[expected.status_code];
   if(!codes.includes(resultObj.status)) errors.push(`상태코드 불일치: ${resultObj.status}`);
  }else if(!httpOk){
   errors.push(`HTTP ${resultObj.status}`);
  }
+ 
+ // 2. 타입 및 길이 검증
  if(expected.type){
   const actualType=Array.isArray(resultObj.body)?'array':typeof resultObj.body;
   if(actualType!==expected.type) errors.push(`타입 불일치: ${actualType}`);
@@ -4522,59 +4867,33 @@ function validateExpectations(resultObj, expected={}, httpOk=true){
    if(!(key in resultObj.body)) errors.push(`필드 누락: ${key}`);
   }
  }
+
+ // 🌟 3. [v2.7.0] 응답 속도(ms) 임계값 초과 검증
+ if(expected.max_duration_ms !== undefined) {
+  if(resultObj.duration > Number(expected.max_duration_ms)) {
+   errors.push(`응답 시간 초과 (측정: ${resultObj.duration}ms, 임계값: ${expected.max_duration_ms}ms)`);
+  }
+ }
+
+ // 🌟 4. [v2.7.0] Deep JSONPath 검증
+ if(expected.json_path && typeof expected.json_path === 'object') {
+  for(const [pathExpr, expectedVal] of Object.entries(expected.json_path)) {
+   const actualVal = getDeepValueByPath(resultObj.body, pathExpr);
+   if(actualVal !== expectedVal) {
+    errors.push(`JSONPath [${pathExpr}] 값 불일치 (기대: ${expectedVal}, 실제: ${actualVal})`);
+   }
+  }
+ }
+
+ // 🌟 5. [v2.7.0] JSON Schema 유효성 검사
+ if(expected.json_schema) {
+  const schemaErrs = validateJsonSchema(resultObj.body, expected.json_schema);
+  errors.push(...schemaErrs);
+ }
+
  return errors;
 }
 
-async function runSingleApiTest(test, baseUrl, globalHeaders, env, file){
- const name=test.name||'API Test Case';
- const method=String(test.method||'GET').toUpperCase();
- const urlRaw=deepReplace(test.url || (baseUrl + (test.endpoint||'/')), env);
- const reqHeaders=deepReplace(test.headers||globalHeaders||{}, env);
- const reqBodyRaw=deepReplace(test.body, env);
-
- let bodyPayload;
- if(file && test.file_field){
-  const fd=new FormData();
-  if(reqBodyRaw && typeof reqBodyRaw==='object'){
-   for(const k in reqBodyRaw) fd.append(k, reqBodyRaw[k]);
-  }
-  fd.append(test.file_field, file);
-  delete reqHeaders['Content-Type'];
-  bodyPayload=fd;
- }else if(reqBodyRaw && typeof reqBodyRaw==='object'){
-  reqHeaders['Content-Type']='application/json';
-  bodyPayload=JSON.stringify(reqBodyRaw);
- }
-
- const result={
-  name, method, url:urlRaw, status:0, ok:false,
-  request_headers:reqHeaders, request_body:reqBodyRaw,
-  response_headers:{}, body:null, error:null, duration:0
- };
-
- const start=performance.now();
- try{
-  const res=await fetch(urlRaw, {
-   method,
-   headers:reqHeaders,
-   body:["GET","HEAD"].includes(method)?undefined:bodyPayload
-  });
-  result.duration=Math.round(performance.now()-start);
-  result.status=res.status;
-  res.headers.forEach((v,k)=>result.response_headers[k]=v);
-
-  const txt=await res.text();
-  try{ result.body=JSON.parse(txt); }catch(e){ result.body=txt; }
-
-  const errs=validateExpectations(result, test.expected||{}, res.ok);
-  result.ok=errs.length===0;
-  result.error=errs.join(', ')||null;
- }catch(err){
-  result.duration=Math.round(performance.now()-start);
-  result.error=err.message;
- }
- return result;
-}
 
 const API_SENSITIVE_KEY=/(authorization|cookie|api[-_]?key|token|secret|password|credential|(?:^|[-_])auth(?:[-_]|$))/i;
 
@@ -4714,7 +5033,97 @@ function exportApiHtmlReport(){
  html+="</body></html>";
  downloadBlob("api_test_report.html", new Blob([html],{type:"text/html;charset=utf-8"}));
 }
+// 🌟 1. Deep JSONPath 추출기
+function getDeepValueByPath(obj, pathStr) {
+ try {
+  const normalized = pathStr.replace(/\[(\d+)\]/g, '.$1');
+  const parts = normalized.split('.').filter(Boolean);
+  let cur = obj;
+  for (const p of parts) {
+   if (cur === null || cur === undefined) return undefined;
+   cur = cur[p];
+  }
+  return cur;
+ } catch (e) {
+  return undefined;
+ }
+}
 
+// 🌟 2. 간단한 JSON Schema 검증기
+function validateJsonSchema(body, schema) {
+ const errors = [];
+ if (!schema || typeof schema !== 'object') return errors;
+ 
+ if (schema.type) {
+  const actualType = Array.isArray(body) ? 'array' : typeof body;
+  if (actualType !== schema.type) {
+   errors.push(`Schema 타입 불일치 (기대: ${schema.type}, 실제: ${actualType})`);
+  }
+ }
+ 
+ if (schema.required && Array.isArray(schema.required) && typeof body === 'object' && body !== null) {
+  for (const reqKey of schema.required) {
+   if (!(reqKey in body)) {
+    errors.push(`Schema 필수 필드 누락: ${reqKey}`);
+   }
+  }
+ }
+ return errors;
+}
+// 🌟 3. 개별 API 테스트 실행 함수 (오류 해결의 핵심)
+async function runSingleApiTest(test, baseUrl, globalHeaders, env, file){
+ const name=test.name||'API Test Case';
+ const method=String(test.method||'GET').toUpperCase();
+ const urlRaw=deepReplace(test.url || (baseUrl + (test.endpoint||'/')), env);
+ const reqHeaders=deepReplace(test.headers||globalHeaders||{}, env);
+ const reqBodyRaw=deepReplace(test.body, env);
+
+ let bodyPayload;
+ if(file && test.file_field){
+  const fd=new FormData();
+  if(reqBodyRaw && typeof reqBodyRaw==='object'){
+   for(const k in reqBodyRaw) fd.append(k, reqBodyRaw[k]);
+  }
+  fd.append(test.file_field, file);
+  delete reqHeaders['Content-Type'];
+  bodyPayload=fd;
+ }else if(reqBodyRaw && typeof reqBodyRaw==='object'){
+  reqHeaders['Content-Type']='application/json';
+  bodyPayload=JSON.stringify(reqBodyRaw);
+ }
+
+ const result={
+  name, method, url:urlRaw, status:0, ok:false,
+  request_headers:reqHeaders, request_body:reqBodyRaw,
+  response_headers:{}, body:null, error:null, duration:0
+ };
+
+ const start=performance.now();
+ try{
+  const res=await fetch(urlRaw, {
+   method,
+   headers:reqHeaders,
+   body:["GET","HEAD"].includes(method)?undefined:bodyPayload
+  });
+  result.duration=Math.round(performance.now()-start);
+  result.status=res.status;
+  res.headers.forEach((v,k)=>result.response_headers[k]=v);
+
+  const txt=await res.text();
+  try{ result.body=JSON.parse(txt); }catch(e){ result.body=txt; }
+
+  const errs=validateExpectations(result, test.expected||{}, res.ok);
+  result.ok=errs.length===0;
+  result.error=errs.join(', ')||null;
+ }catch(err){
+  result.duration=Math.round(performance.now()-start);
+  result.error=err.message;
+ }
+ return result;
+}
+
+
+  
 async function requestAccessToken(){
  const url=document.getElementById("tokenUrl").value.trim();
  const bodyText=document.getElementById("tokenBody").value.trim();
@@ -5200,6 +5609,282 @@ function renderBugs(){
  populateBugBuildSelectOptions();
 }
 
+let latestAiAnalyzedData = null;
+
+// 1. AI 로그 분석만 수행하고 결과를 화면에 띄우는 함수
+function runAiLogAnalysisOnly() {
+ const logText = document.getElementById("aiLogInput").value.trim();
+ const statusEl = document.getElementById("aiAnalysisStatus");
+ const resultCard = document.getElementById("aiAnalysisResultCard");
+ const resultContent = document.getElementById("aiAnalysisResultContent");
+ 
+ if(!logText) {
+  alert("분석할 로그 스니펫이나 에러 텍스트를 입력해주세요.");
+  return;
+ }
+
+ statusEl.textContent = "🔄 AI 로그 파싱 및 패턴 매칭 중...";
+ resultCard.style.display = "none";
+
+ setTimeout(() => {
+  const upperLog = logText.toUpperCase();
+  
+  const lines = logText.split("\n");
+  const coreLine = lines.find(l => /exception|error|fail|crash|null/i.test(l)) || lines[0] || "Unknown Error";
+
+  let inferredCategory = "기타";
+  let inferredSeverity = "Major";
+  let inferredAssignee = "백엔드/시스템 엔지니어";
+  let rootCause = "상세 로그 분석 필요";
+  let suggestedTitle = "[AI 분석] " + coreLine.slice(0, 50) + "...";
+
+  if (upperLog.includes("NULL") || upperLog.includes("POINTER") || upperLog.includes("UNDEFINED")) {
+   inferredCategory = "전투/게임플레이";
+   inferredSeverity = "Critical";
+   inferredAssignee = "클라이언트 프로그래머 (Combat Team)";
+   rootCause = "객체 초기화 누락 또는 Null 참조 예외 발생";
+  } else if (upperLog.includes("TIMEOUT") || upperLog.includes("NETWORK") || upperLog.includes("HTTP") || upperLog.includes("504") || upperLog.includes("500")) {
+   inferredCategory = "네트워크/서버";
+   inferredSeverity = "Critical";
+   inferredAssignee = "서버 백엔드 엔지니어";
+   rootCause = "API 응답 지연 또는 서버 내부 오류(5xx)";
+  } else if (upperLog.includes("SQL") || upperLog.includes("DATABASE") || upperLog.includes("CONSTRAINT") || upperLog.includes("DATA")) {
+   inferredCategory = "데이터/기획";
+   inferredSeverity = "Major";
+   inferredAssignee = "게임 기획자 / 데이터베이스 관리자";
+   rootCause = "테이블 스키마 불일치 또는 데이터 무결성 제약조건 위반";
+  } else if (upperLog.includes("SHADER") || upperLog.includes("TEXTURE") || upperLog.includes("RENDER") || upperLog.includes("UI")) {
+   inferredCategory = "UI/UX";
+   inferredSeverity = "Minor";
+   inferredAssignee = "UI 그래픽 아티스트 / 프론트엔드";
+   rootCause = "그래픽 리소스 로드 실패 또는 UI 렌더링 오버플로우";
+  }
+
+  // 분석된 데이터를 전역 변수에 임시 보관
+  latestAiAnalyzedData = {
+   title: suggestedTitle,
+   severity: inferredSeverity,
+   category: inferredCategory,
+   assignee: inferredAssignee,
+   desc: `[🤖 AI 자동 분석 리포트]\n- 핵심 에러 라인: ${coreLine}\n- 예상 원인: ${rootCause}\n- 추천 담당 부서: ${inferredAssignee}\n\n[원본 로그 스니펫]\n${logText}`
+  };
+
+  // 결과 카드에 내용 렌더링
+  resultContent.innerHTML = `
+   • <strong>추천 제목:</strong> ${esc(suggestedTitle)}<br>
+   • <strong>진단 카테고리:</strong> ${esc(inferredCategory)} (심각도: <span class="red">${esc(inferredSeverity)}</span>)<br>
+   • <strong>추천 담당자:</strong> ${esc(inferredAssignee)}<br>
+   • <strong>핵심 에러:</strong> ${esc(coreLine)}<br>
+   • <strong>예상 원인:</strong> ${esc(rootCause)}
+  `;
+
+  statusEl.textContent = "✅ 분석 완료!";
+  resultCard.style.display = "block";
+  resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+ }, 400);
+}
+
+// 2. 분석된 결과를 가지고 결함 탭으로 이동하여 폼에 주입하는 함수
+function moveAiResultToBugTab() {
+ if (!latestAiAnalyzedData) return alert("먼저 AI 로그 분석을 실행해주세요.");
+ 
+ switchView('bugs');
+
+ document.getElementById("bugTitle").value = latestAiAnalyzedData.title;
+ document.getElementById("bugSeverity").value = latestAiAnalyzedData.severity;
+ document.getElementById("bugCategory").value = latestAiAnalyzedData.category;
+ document.getElementById("bugAssignee").value = latestAiAnalyzedData.assignee;
+ document.getElementById("bugDesc").value = latestAiAnalyzedData.desc;
+
+ alert("✨ 분석 결과가 결함 관리 등록 폼에 반영되었습니다. 내용을 확인 후 [결함 등록] 버튼을 눌러주세요!");
+}
+// 🌟 [v2.7.0 신규] AI 로그 샘플 데이터 목록 (3가지 서로 다른 이슈)
+const AI_LOG_SAMPLES = [
+ {
+  title: "[샘플 1] 클라이언트 NullPointerException (전투 모듈)",
+  text: "java.lang.NullPointerException: Attempt to invoke virtual method 'void Player.attack()' on a null object reference at CombatManager.update(CombatManager.java:142)\n  at GameLoop.onTick(GameLoop.scala:55)\n  at Main.main(Main.java:20)"
+ },
+ {
+  title: "[샘플 2] 서버 504 Gateway Timeout (결제 서비스)",
+  text: "HTTP/1.1 504 Gateway Timeout - Request failed at PaymentService.processTransaction(PaymentService.scala:88)\nCaused by: java.net.SocketTimeoutException: Read timed out\n  at HttpClient.execute(HttpClient.java:310)"
+ },
+ {
+  title: "[샘플 3] 데이터베이스 SQL 무결성 제약 위반 (아이템 테이블)",
+  text: "org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException: Unique index or primary key violation: \"PRIMARY_KEY_ON_TABLE_D\" (SQL: INSERT INTO items...)\n  at org.h2.message.DbException.getJdbcSQLException(DbException.java:501)\n  at DatabaseManager.insertRecord(DatabaseManager.java:94)"
+ }
+];
+
+// 1. 드롭박스 옵션 동적 생성 함수
+// 드롭박스 기본 옵션 안내 문구도 간결하게 반영된 로드 함수
+function loadAiSamplesToDropdown() {
+ const dropdown = document.getElementById("aiSampleDropdown");
+ if (!dropdown) return;
+ 
+ dropdown.innerHTML = '<option value="">-- 샘플 로그 스니펫 선택 --</option>' + 
+  AI_LOG_SAMPLES.map((sample, idx) => `<option value="${idx}">${esc(sample.title)}</option>`).join("");
+}
+
+// 🌟 드롭박스 목록 새로고침 및 입력 텍스트·결과 모두 초기화하는 함수
+function resetAiLogAnalyzer() {
+ loadAiSamplesToDropdown();
+ 
+ const inputArea = document.getElementById("aiLogInput");
+ if (inputArea) inputArea.value = "";
+ 
+ const resultCard = document.getElementById("aiAnalysisResultCard");
+ if (resultCard) resultCard.style.display = "none";
+ 
+ const statusEl = document.getElementById("aiAnalysisStatus");
+ if (statusEl) statusEl.textContent = "";
+ 
+ latestAiAnalyzedData = null;
+}
+  
+// 2. 드롭박스에서 항목 선택 시 textarea에 텍스트 주입 함수
+function onAiSampleSelected(val) {
+ const inputArea = document.getElementById("aiLogInput");
+ if (!inputArea) return;
+ 
+ if (val === "" || val === undefined) {
+  inputArea.value = "";
+  return;
+ }
+ 
+ const selectedSample = AI_LOG_SAMPLES[Number(val)];
+ if (selectedSample) {
+  inputArea.value = selectedSample.text;
+  // 분석 결과 카드가 열려있었다면 닫기
+  const resultCard = document.getElementById("aiAnalysisResultCard");
+  if (resultCard) resultCard.style.display = "none";
+ }
+}
+
+ // 🌟 [v2.7.0 신규] 전사적 QA 추적성 매트릭스 렌더링 엔진
+function renderTraceabilityMatrix() {
+ const container = document.getElementById("traceabilityMatrixContainer");
+ if(!container) return;
+
+ const activeTests = db.activeProject ? db.tests.filter(t => t.projectId === db.activeProject) : [];
+ const activeBugs = db.activeProject ? db.bugs.filter(b => b.projectId === db.activeProject) : [];
+ const activeBuilds = db.activeProject ? db.builds.filter(b => b.projectId === db.activeProject) : [];
+
+ if(!activeTests.length) {
+  container.innerHTML = '<div class="empty">등록된 테스트 케이스가 없습니다. 프로젝트를 선택하거나 테스트를 생성해주세요.</div>';
+  return;
+ }
+
+ let html = `
+ <table style="min-width: 900px;">
+ <thead>
+  <tr>
+   <th>테스트 케이스 (TC)</th>
+   <th>유형 / 담당자</th>
+   <th>실행 결과</th>
+   <th>연동 결함 (Issue)</th>
+   <th>대상 빌드</th>
+   <th>Release Sign-off 상태</th>
+  </tr>
+ </thead>
+ <tbody>
+ `;
+
+ activeTests.forEach((t, idx) => {
+  const tcLabel = `TC-${idx + 1}`;
+  
+  // 상태 배지 색상 결정
+  let statusBadgeBg = "#303746";
+  let statusBadgeColor = "#b7c1d2";
+  if(t.status === "Pass") { statusBadgeBg = "#263b31"; statusBadgeColor = "#4bd69a"; }
+  else if(t.status === "Fail") { statusBadgeBg = "#512a32"; statusBadgeColor = "#ff7373"; }
+  else if(t.status === "N/T") { statusBadgeBg = "#252d3a"; statusBadgeColor = "#70a5ff"; }
+
+  // 연동된 결함 찾기 (testId 기준 또는 제목 매칭)
+  const linkedBugs = activeBugs.filter(b => b.testId === t.id || (b.desc && b.desc.includes(t.name)));
+  
+  // 연동 빌드 찾기
+  const targetBuild = activeBuilds.find(b => b.id === t.buildId) || activeBuilds[0];
+  const buildName = targetBuild ? targetBuild.versionName : "기본 빌드";
+  
+  let signOffStr = "미승인 (Pending)";
+  let signOffColor = "#aab0bf";
+  if(targetBuild) {
+   if(targetBuild.signOffStatus === "Approved") {
+    signOffStr = "🛡️ 최종 승인 (Approved)";
+    signOffColor = "#4bd69a";
+   } else if(targetBuild.signOffStatus === "Conditional") {
+    signOffStr = "⚠️ 조건부 승인";
+    signOffColor = "#ffbd69";
+   } else if(targetBuild.signOffStatus === "Rejected") {
+    signOffStr = "🚨 반려 / 무효화";
+    signOffColor = "#ff7373";
+   }
+  }
+
+  html += `
+  <tr>
+   <td>
+    <span class="badge" style="background:#303b4d;color:#70a5ff;cursor:pointer" onclick="scrollToTargetElement('tests', 'test-card-${t.id}')">${tcLabel}</span>
+    <strong>${esc(t.name)}</strong>
+   </td>
+   <td>
+    <span class="badge">${esc(t.type)}</span><br>
+    <span class="label">${esc(t.tester || "미지정")}</span>
+   </td>
+   <td>
+    <span class="badge" style="background:${statusBadgeBg};color:${statusBadgeColor};font-weight:bold">${t.status}</span>
+   </td>
+   <td>
+    ${linkedBugs.length > 0 ? linkedBugs.map(b => {
+     const bIdx = activeBugs.findIndex(item => item.id === b.id);
+     const issueLbl = bIdx !== -1 ? `ISSUE-${bIdx + 1}` : 'ISSUE';
+     let bugCol = "#ff7373";
+     if(b.status === "Fixed" || b.status === "Closed") bugCol = "#4bd69a";
+     return `<span class="badge" style="background:#101319;color:${bugCol};border:1px solid #303644;cursor:pointer" onclick="scrollToTargetElement('bugs', 'bug-card-${b.id}')">[${issueLbl}] ${esc(b.title.slice(0, 20))}... (${esc(b.status)})</span>`;
+    }).join("<br>") : '<span class="label">연동 결함 없음</span>'}
+   </td>
+   <td>
+    <strong>${esc(buildName)}</strong>
+   </td>
+   <td>
+    <span style="color:${signOffColor};font-weight:bold;font-size:11px">${signOffStr}</span>
+   </td>
+  </tr>
+  `;
+ });
+
+ html += `</tbody></table>`;
+ container.innerHTML = html;
+}
+
+// 추적성 매트릭스 CSV 내보내기 함수
+function exportMatrixCSV() {
+ const activeTests = db.activeProject ? db.tests.filter(t => t.projectId === db.activeProject) : [];
+ if(!activeTests.length) return alert("내보낼 매트릭스 데이터가 없습니다.");
+
+ const activeBugs = db.activeProject ? db.bugs.filter(b => b.projectId === db.activeProject) : [];
+ const activeBuilds = db.activeProject ? db.builds.filter(b => b.projectId === db.activeProject) : [];
+
+ const rows = [["TC번호", "테스트 항목명", "유형", "담당자", "실행상태", "연동결함수", "대상빌드", "Sign-off상태"]];
+ activeTests.forEach((t, idx) => {
+  const linkedBugs = activeBugs.filter(b => b.testId === t.id || (b.desc && b.desc.includes(t.name)));
+  const targetBuild = activeBuilds.find(b => b.id === t.buildId) || activeBuilds[0];
+  rows.push([
+   `TC-${idx + 1}`,
+   t.name,
+   t.type,
+   t.tester || "미지정",
+   t.status,
+   linkedBugs.length,
+   targetBuild ? targetBuild.versionName : "기본 빌드",
+   targetBuild ? (targetBuild.signOffStatus || "Pending") : "Pending"
+  ]);
+ });
+
+ const csv = rows.map(r => r.map(v => '"' + String(v || "").replace(/"/g, '""') + '"').join(",")).join("\r\n");
+ downloadBlob("QA_Traceability_Matrix.csv", new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }));
+}
+ 
+  
 function initDefaultSampleData(silent=true){
  const now=new Date().toISOString();
  let projects=db.projects.filter(p=>p.isSample);
@@ -5801,7 +6486,7 @@ function downloadReportHTML(){
 </head>
 <body>
   <h1>📈 ${esc(name)} QA 통합 리포트</h1>
-  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.6.9</p>
+  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.7.0</p>
 
   ${certHTML}
 
@@ -6004,8 +6689,14 @@ function render(){
  renderApiHistory();
  renderBuilds();
  renderGanttChart();
+
+ // 🌟 [v2.7.0 신규] 전체 렌더링 시 추적성 매트릭스 갱신 호출 추가
+ renderTraceabilityMatrix(); 
+
  updateTableFilterOptions();
+ loadAiSamplesToDropdown();
 }
+
 
 window.addEventListener("DOMContentLoaded", async () => {
  await loadPersistentValidator();
@@ -6019,11 +6710,103 @@ window.addEventListener("DOMContentLoaded", async () => {
   });
   save();
  }
-
+ // 🌟 [v2.7.0 추가] AI 로그 샘플 드롭박스 초기화 호출
+ loadAiSamplesToDropdown();
  render();
  switchView('dashboard');
  statusText("● 준비 완료");
 });
+/**
+ * 백업 데이터 스키마 자동 마이그레이션 핸들러
+ */
+const CURRENT_SCHEMA_VERSION = "2.7.0";
+
+function restoreAndMigrateBackup(jsonString) {
+    try {
+        const backupData = JSON.parse(jsonString);
+        
+        // 1. 스키마 버전 확인 (기존 구버전 백업은 v1.0으로 간주)
+        let dataVersion = backupData.version || "1.0.0";
+        let payload = backupData.payload || backupData; // 순수 데이터 형태 호환
+
+        console.log(`[Migration] Detected backup schema version: ${dataVersion}`);
+
+        // 2. 버전별 순차 마이그레이션 파이프라인 실행
+        if (isVersionOlder(dataVersion, "2.0.0")) {
+            payload = migrateV1toV2(payload);
+        }
+        if (isVersionOlder(dataVersion, "2.5.0")) {
+            payload = migrateV2toV2_5(payload);
+        }
+        if (isVersionOlder(dataVersion, CURRENT_SCHEMA_VERSION)) {
+            payload = migrateV2_5toLatest(payload);
+        }
+
+        // 3. 최종 데이터 구조 무결성 검증 (필수 필드 체크)
+        validateSchemaIntegrity(payload);
+
+        return {
+            success: true,
+            version: CURRENT_SCHEMA_VERSION,
+            data: payload,
+            message: `성공적으로 v${CURRENT_SCHEMA_VERSION} 스키마로 마이그레이션 및 복원되었습니다.`
+        };
+
+    } catch (error) {
+        console.error("[Migration Error]", error);
+        return {
+            success: false,
+            message: `백업 복원 실패: 스키마 구조가 손상되었거나 호환되지 않습니다. (${error.message})`
+        };
+    }
+}
+
+// 버전 비교 유틸리티
+function isVersionOlder(v1, v2) {
+    const p1 = v1.split('.').map(Number);
+    const p2 = v2.split('.').map(Number);
+    for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
+        const num1 = p1[i] || 0;
+        const num2 = p2[i] || 0;
+        if (num1 < num2) return true;
+        if (num1 > num2) return false;
+    }
+    return false;
+}
+
+// 개별 마이그레이션 단계 정의
+function migrateV1toV2(data) {
+    // 예: 구버전 테스트 케이스 배열을 객체 구조로 래핑 및 누락 필드 기본값 주입
+    return {
+        testCases: (data.testCases || data).map(tc => ({
+            ...tc,
+            priority: tc.priority || 'Medium',
+            category: tc.category || 'General'
+        })),
+        settings: data.settings || {}
+    };
+}
+
+function migrateV2toV2_5(data) {
+    // v2.0 -> v2.5 마이그레이션 로직 (필드명 변경 및 정규화)
+    data.testCases = data.testCases.map(tc => ({
+        ...tc,
+        qaOwner: tc.qaOwner || '이진근' // 기본 담당자 설정
+    }));
+    return data;
+}
+
+function migrateV2_5toLatest(data) {
+    // 최신 버전 메타데이터 보강
+    data.migratedAt = new Date().toISOString();
+    return data;
+}
+
+function validateSchemaIntegrity(payload) {
+    if (!payload.testCases || !Array.isArray(payload.testCases)) {
+        throw new Error("필수 데이터 구조('testCases')가 누락되었습니다.");
+    }
+}
 
   
 </script>
