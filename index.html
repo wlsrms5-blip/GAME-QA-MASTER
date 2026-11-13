@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GAME QA MASTER v2.7.0</title>
+<title>GAME QA MASTER v2.7.1</title>
 <script>
 // 1. 우클릭 차단
 document.addEventListener('contextmenu', function(e) {
@@ -198,6 +198,28 @@ img, video, canvas, svg{
  gap:10px;
  margin-bottom:22px;
  box-shadow:0 4px 12px rgba(0,0,0,0.25);
+}
+
+.toolbar-label{
+ color:#9299aa;
+ font-size:12px;
+ font-weight:bold;
+ margin-right:auto;
+}
+
+/* 3번 이슈 수정: 버튼 크기가 늘어나지 않도록 고정하고, 공간이 부족하면 전체저장부터 아래로 떨어지도록 설정 */
+.toolbar button {
+ flex: 0 0 auto;
+ width: auto;
+ min-width: 110px;
+}
+
+/* 두 버튼을 묶은 그룹: 줄바꿈이 일어나도 항상 같은 라인에 유지되도록 설정 */
+.toolbar-btns {
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ flex-wrap: nowrap;
 }
 
 .toolbar-label{
@@ -519,49 +541,79 @@ summary::-webkit-details-marker, summary::marker{
 .update-dot.original{background:#70a5ff}
 
 .update-head{
- display:flex;
- align-items:center;
- flex-wrap:wrap;
+ display: flex;
+ align-items: center;
+ flex-wrap: wrap; /* 공간이 부족할 경우 자식 요소 중 브레이크되는 항목만 다음 줄로 이동 */
  gap: 6px 8px;
- margin-bottom:10px;
+ margin-bottom: 10px;
+ width: 100%;
 }
 
 .update-version{
- font-size:15px;
- font-weight:bold;
- color:#ffffff;
+ font-size: 15px;
+ font-weight: bold;
+ color: #ffffff;
+ white-space: nowrap;
+ flex-shrink: 0;
 }
 
 .update-version.latest-ver{
- color:#4bd69a;
-}
-
-.update-date{
- font-size:11px;
- color:#9299aa;
- margin-left:auto;
+ color: #4bd69a;
 }
 
 .update-pill{
- padding:3px 8px;
- border-radius:999px;
- font-size:10px;
- font-weight:bold;
+ padding: 3px 8px;
+ border-radius: 999px;
+ font-size: 10px;
+ font-weight: bold;
+ white-space: nowrap;
+ flex-shrink: 0;
 }
 
 .latest-pill{
- background:rgba(75,214,154,.18);
- color:#4bd69a;
+ background: rgba(75,214,154,.18);
+ color: #4bd69a;
 }
 
-.feature-pill{
- background:rgba(82,136,240,.18);
- color:#70a5ff;
+/* 🌟 핵심: feature-pill 클래스에 너비 100%를 주어 제목만 무조건 다음 줄로 떨어지게 강제 */
+/* 업데이트 제목/테마명은 공간이 부족할 경우 무조건 다음 줄로 떨어지도록 강제 */
+/* 🌟 수정 포인트: 배경이 글자 수에 맞고, 길면 줄바꿈되도록 변경 */
+/* 🌟 배경 가로 너비가 글자 수에 딱 맞게 줄어들도록 수정된 스타일 */
+/* 🌟 제목(feature-pill): order를 2로 주어 항상 날짜보다 뒤(오른쪽)에 오려고 하되,
+   가로 폭이 좁아지면 flex-wrap에 의해 자연스럽게 두 번째 줄로 내려갑니다. */
+/* 🌟 핵심 수정: 배경이 글자 수에 딱 맞게 줄어들고, 공간이 부족할 때만 줄바꿈되도록 설정 */
+.feature-pill {
+  background: rgba(82, 136, 240, .18);
+  color: #70a5ff;
+  display: inline-block;  /* 블록 대신 인라인 성격으로 변경하여 글자 수에 맞춤 */
+  width: auto;            /* 고정 너비 해제 */
+  max-width: 100%;        /* 화면을 넘지 않음 */
+  flex-basis: auto;       /* 강제 늘어남 방지 */
+  white-space: normal;    /* 길면 줄바꿈 허용 */
+  word-break: keep-all;   /* 단어 단위 줄바꿈 */
+  line-height: 1.4;
+  margin-top: 2px;
 }
-
+  
 .original-pill{
- background:#303746;
- color:#aab0bf;
+ background: #303746;
+ color: #aab0bf;
+ white-space: nowrap;
+ flex-shrink: 0;
+}
+
+/* 업데이트 날짜를 오른쪽 끝으로 고정 */
+/* 🌟 날짜를 첫 번째 줄의 무조건 오른쪽 끝으로 고정하는 핵심 설정 */
+/* 🌟 핵심 포인트: 날짜에 margin-left: auto를 주되, 
+   공간이 넉넉하면 자연스럽게 바로 앞 요소(배지 등) 오른쪽에 붙고,
+   공간이 부족해져서 제목이 아래로 밀려날 때만 첫 줄의 맨 우측 끝으로 밀려납니다. */
+.update-date {
+  font-size: 11px;
+  color: #9299aa;
+  margin-left: auto; 
+  white-space: nowrap;
+  flex-shrink: 0;
+  order: 1; /* flex 아이템 순서 제어 */
 }
 
 .update-grid{
@@ -698,7 +750,35 @@ summary::-webkit-details-marker, summary::marker{
  .toolbar{position:relative;top:auto;z-index:10}
  .grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 }
+
+/* 7번 이슈: 테스트 관리 탭 및 결함 목록 내 액션 버튼들의 세로 길이 및 규격 통일 */
+#testList .card .actions button,
+#bugList .card .actions button {
+  height: 28px !important;
+  padding: 0px 10px !important;
+  font-size: 11px !important;
+  line-height: normal !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+}
+/* 결함 목록 및 테스트 관리 내 상태 변경 드롭다운(select) 박스 높이 및 규격 통일 */
+#testList .card .actions select,
+#bugList .card .actions select {
+  height: 28px !important;
+  padding: 0 8px !important;
+  font-size: 11px !important;
+  line-height: normal !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+  margin: 0 !important;
+}
   
+
 </style>
 </head>
 
@@ -709,7 +789,7 @@ summary::-webkit-details-marker, summary::marker{
 <aside class="sidebar">
 <div class="logo">
 GAME QA MASTER
-<small>QUALITY ASSURANCE PLATFORM v2.7.0</small>
+<small>QUALITY ASSURANCE PLATFORM v2.7.1</small>
 </div>
 <div class="nav-group-container">
   <!-- 1. 매니지먼트 (요청 3: QA 리포트가 매니지먼트 하위로 이동) -->
@@ -764,32 +844,41 @@ GAME QA MASTER
 
 <main class="main">
 
-<div class="header" style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start; margin-bottom: 16px;">
+<!-- 상단 헤더 영역 (1단: 타이틀 / 2단: 버전 표기 좌측 고정 & 샘플 버튼 우측 고정) -->
+<div class="header" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
   
-  <!-- 1단: 메인 타이틀 및 우측 버튼이 들어갈 공간 -->
-  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 8px;">
-    <h1 id="pageTitle" style="margin: 0; font-size: 1.5rem;">Project Management</h1>
-    <!-- 만약 우측에 다른 요소를 넣으려면 이 위치에 배치됩니다 -->
+  <!-- 1단: 좌측 메인 타이틀 (줄바꿈 가능) -->
+  <div style="display: flex; width: 100%;">
+    <h1 id="pageTitle" style="margin: 0; font-size: 1.4rem; word-break: keep-all; line-height: 1.3; flex: 1; min-width: 0;">Build &amp; Version Management</h1>
   </div>
 
-  <!-- 2단: 버전 표기 (한 줄 아래로 이동) -->
-  <div>
-    <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.7.0</span>
+  <!-- 2단: 좌측 버전 표기 & 우측 '샘플 데이터 탭 이동' 버튼 양 끝 고정 -->
+  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 12px;">
+    <!-- 좌측 버전 표기 -->
+    <div>
+      <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.7.1</span>
+    </div>
+    
+    <!-- 우측 샘플 데이터 탭 이동 버튼 (2단 우측 고정) -->
+    <button type="button" onclick="switchView('samples')" class="sample-banner-btn" style="background: var(--primary-color, #3b82f6); color: #fff; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); white-space: nowrap; flex-shrink: 0;">
+      <span>🧪 샘플 데이터 탭 이동</span> ➔
+    </button>
   </div>
-
-  <!-- 3단: 샘플 데이터 탭 이동 버튼 -->
-  <button type="button" onclick="switchView('samples')" class="sample-banner-btn" style="background: var(--primary-color, #3b82f6); color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); margin-top: 4px;">
-    <span>🧪 샘플 데이터 탭 이동</span> ➔
-  </button>
   
 </div>
 
+
 <div class="toolbar">
-<span class="toolbar-label">전체 플랫폼 데이터 관리</span>
-<button class="primary" onclick="saveAll()">💾 전체 저장</button>
-<button class="secondary" onclick="openRestore()">📂 전체 불러오기</button>
-<span id="saveStatus" class="save-status">자동 저장 준비</span>
-<input type="file" id="backupInput" accept=".json,application/json" hidden onchange="restoreAll(event)">
+  <span class="toolbar-label">전체 플랫폼 데이터 관리</span>
+  
+  <!-- 두 버튼을 묶어주는 버튼 그룹 영역 -->
+  <div class="toolbar-btns">
+    <button class="primary" onclick="saveAll()">💾 전체 저장</button>
+    <button class="secondary" onclick="openRestore()">📂 전체 불러오기</button>
+  </div>
+
+  <span id="saveStatus" class="save-status">자동 저장 준비</span>
+  <input type="file" id="backupInput" accept=".json,application/json" hidden onchange="restoreAll(event)">
 </div>
 
 <section id="dashboard" class="view active">
@@ -798,8 +887,10 @@ GAME QA MASTER
 <div class="card">
   <div class="label">프로젝트</div>
   <div class="metric blue" id="mProjects">0</div>
-  <div id="mActiveProjectName" class="label" style="margin-top:10px;font-size:11px;color:#70a5ff;word-break:break-all;">선택된 프로젝트: 없음</div>
+  <div class="label" style="margin-top:10px;font-size:11px;color:#70a5ff;">선택된 프로젝트</div>
+  <div id="mActiveProjectName" style="font-size:14px;font-weight:bold;color:#e5e7eb;word-break:break-all;margin-top:2px;">없음</div>
 </div>
+
 <div class="card"><div class="label">전체 테스트</div><div class="metric" id="mTests">0</div></div>
 <div class="card"><div class="label">PASS</div><div class="metric green" id="mPass">0</div></div>
 <div class="card"><div class="label">FAIL</div><div class="metric red" id="mFail">0</div></div>
@@ -1478,20 +1569,25 @@ GAME QA MASTER
 </div>
 
 <div class="card">
-<h2>전체 테스트케이스 상세 내역</h2>
-<div id="reportDetailTable" class="table-wrap"></div>
-<div class="actions" style="margin-top:15px">
-<button class="primary" onclick="saveAll()">전체 데이터 백업</button>
-<button class="secondary" onclick="exportCSV()">테스트 CSV 다운로드</button>
+  <!-- 상단 라인: 타이틀과 CSV 다운로드 버튼을 같은 줄(우측 끝)에 배치 -->
+  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+    <h2 style="margin: 0; font-size: 1.25rem;">전체 테스트케이스 상세 내역</h2>
+    
+    <!-- 테스트 CSV 다운로드 버튼 (상단 우측 배치 및 기존 함수 exportCSV() 유지) -->
+    <button class="secondary" onclick="exportCSV()" style="padding: 6px 12px; font-size: 0.85rem; white-space: nowrap;">CSV 다운로드</button>
+  </div>
+
+  <!-- 테이블 영역 -->
+  <div id="reportDetailTable" class="table-wrap"></div>
 </div>
-</div>
+
 </section>
 
 <section id="updates" class="view">
 <div class="card">
 <h2>업데이트 내역</h2>
 <p class="update-intro">
- GAME QA MASTER의 v1.0.0부터 최신 v2.7.0까지 전체 버전별 변경사항 및 히스토리입니다.
+ GAME QA MASTER의 v1.0.0부터 최신 v2.7.1까지 전체 버전별 변경사항 및 히스토리입니다.
 </p>
 
 <div class="update-timeline">
@@ -1500,10 +1596,53 @@ GAME QA MASTER
 <div class="update-dot latest"></div>
 <details class="update-details" open>
 <summary class="update-head">
+<span class="update-version latest-ver">v2.7.1</span>
+<span class="update-pill latest-pill">LATEST</span>
+<span class="update-date">2026-11-14</span>
+<span class="update-pill feature-pill">✨ 버그 수정 및 UI/UX 무결성 패치</span>
+</summary>
+
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel green-border">
+<strong class="green"> 버그 수정 및 UI/UX 정합성 패치 (1~10번)</strong>
+<ul class="update-list-green">
+<li><strong>1.</strong> 프로젝트 카드 내 '선택됨' 상태 배지 적용 및 중복 선택 버튼 인터페이스 정제</li>
+<li><strong>2.</strong> 대시보드 프로젝트 위젯에서 '선택된 프로젝트' 텍스트 한 줄 밑에 실제 프로젝트명이 깔끔하게 출력되도록 레이아웃 구조 개편</li>
+<li><strong>3.</strong> 전체 플랫폼 데이터 관리 툴바 내 '전체 저장'과 '전체 불러오기' 버튼이 항상 동일 라인에 유지되도록 하고, 가로 폭 부족 시 '전체 저장'부터 줄바꿈되도록 Flex 래핑 제어</li>
+<li><strong>4.</strong> 상단 헤더 영역 2단 구조 정립: 좌측 버전 표기(v2.7.1)와 우측 '🧪 샘플 데이터 탭 이동' 버튼 양 끝 고정 배치</li>
+<li><strong>5.</strong> 내비게이션 그룹 상위 탭 선택 시 파란색 강조(#3978e8) 및 폰트 가독성 최적화</li>
+<li><strong>6.</strong> 모바일 및 세로 뷰포트 환경에서 하단 2번째 줄 전용 가로 서브 내비게이션 바(mobileSubBar) 스크롤 터치 반응성 강화</li>
+<li><strong>7.</strong> 테스트 관리 및 결함 목록 내 액션 버튼들의 세로 길이 및 규격 통일 (28px 고정)</li>
+<li><strong>8.</strong> 결함 목록 및 테스트 관리 내 상태 변경 드롭다운(select) 박스 높이 및 패딩 규격 통일</li>
+<li><strong>9.</strong> 배치 액션 및 QA Sign-off 결재 모달 영역 최상위 분리 및 이벤트 차단 원인 원천 차단 (z-index: 9999)</li>
+<li><strong>10.</strong> 플랫폼 버전 v2.7.1 공식 승격 및 전체 모듈 데이터 영속성·무결성 동기화 완료</li>
+</ul>
+</div>
+</div>
+
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel blue-border">
+<strong class="blue">엔터프라이즈 QA 매니지먼트 안정성 보강</strong>
+<div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px; color: #9299aa; font-size: 12px; line-height: 1.8;">
+<div><span style="display: inline-block; width: 9px; height: 9px; background-color: #70a5ff; border-radius: 50%; margin-right: 8px; vertical-align: middle;"></span>프로젝트 전환 및 데이터 복원 시 UI 렌더링 딜레이 최적화 및 포커스 무결성 보장</div>
+<div><span style="display: inline-block; width: 9px; height: 9px; background-color: #70a5ff; border-radius: 50%; margin-right: 8px; vertical-align: middle;"></span>다크 모드 뉴트럴 디자인 시스템과의 색상 대비 및 여백 규칙 완벽 준수</div>
+</div>
+</div>
+</div>
+
+</details>
+</div>
+
+  
+<div class="update-entry">
+<div class="update-dot original"></div>
+<details class="update-details">
+<summary class="update-head">
 <span class="update-version latest-ver">v2.7.0</span>
 <span class="update-pill latest-pill">LATEST</span>
-<span class="update-pill feature-pill">🔗 전사적 QA 추적성 매트릭스 및 AI·대용량 최적화 패치</span>
 <span class="update-date">2026-11-12</span>
+<span class="update-pill feature-pill">🔗 전사적 QA 추적성 매트릭스 및 AI·대용량 최적화 패치</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1548,8 +1687,8 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.9</span>
 <span class="update-pill latest-pill">LATEST</span>
-<span class="update-pill feature-pill">✨ 신규 기능 및 성능 최적화 패치</span>
 <span class="update-date">2026-11-12</span>
+<span class="update-pill feature-pill">✨ 신규 기능 및 성능 최적화 패치</span>
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1580,8 +1719,8 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.8</span>
 <span class="update-pill latest-pill">LATEST</span>
-<span class="update-pill feature-pill">🛡️ P0-001 무결성 검증 엔진 고도화 및 자동 연동 완성</span>
 <span class="update-date">2026-11-12</span>
+<span class="update-pill feature-pill">🛡️ P0-001 무결성 검증 엔진 고도화 및 자동 연동 완성</span>
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1612,8 +1751,8 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.7</span>
 <span class="update-pill latest-pill">LATEST</span>
-<span class="update-pill feature-pill">🛡️ Release Sign-off 무결성 및 UX 고도화</span>
 <span class="update-date">2026-11-12</span>
+<span class="update-pill feature-pill">🛡️ Release Sign-off 무결성 및 UX 고도화</span>
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1654,8 +1793,8 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.6</span>
 <span class="update-pill latest-pill">LATEST</span>
-<span class="update-pill feature-pill">🛠️ 버그 수정</span>
 <span class="update-date">2026-11-10</span>
+<span class="update-pill feature-pill">🛠️ 버그 수정</span>
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1674,8 +1813,8 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.5</span>
 <span class="update-pill latest-pill">LATEST</span>
-<span class="update-pill feature-pill">💡🛠️ 사용성 개선 및 버그 수정</span>
 <span class="update-date">2026-11-10</span>
+<span class="update-pill feature-pill">💡🛠️ 사용성 개선 및 버그 수정</span>
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <!-- 💡 사용성 개선 텍스트 색상을 보더라인 초록색(#4bd69a)과 동일하게 맞춤 -->
@@ -1711,8 +1850,8 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.4</span>
 <span class="update-pill latest-pill">UX STABLE</span>
-<span class="update-pill feature-pill">💡 사용성 개선</span>
 <span class="update-date">2026-11-09</span>
+<span class="update-pill feature-pill">💡 사용성 개선</span>
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1733,8 +1872,8 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.3</span>
 <span class="update-pill latest-pill">STABLE</span>
-<span class="update-pill feature-pill">🛠️ 버그 수정</span>
 <span class="update-date">2026-11-09</span>
+<span class="update-pill feature-pill">🛠️ 버그 수정</span>
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1754,8 +1893,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.2</span>
 <span class="update-pill latest-pill">STABLE</span>
-<span class="update-pill feature-pill">🛠️ 기능 개선 및 버그 수정</span>
 <span class="update-date">2026-11-09</span>
+<span class="update-pill feature-pill">🛠️ 기능 개선 및 버그 수정</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1779,8 +1919,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.1</span>
 <span class="update-pill latest-pill">STABLE</span>
-<span class="update-pill feature-pill">📦 다운로드 제공 최적화 및 런타임 영속성 패치</span>
 <span class="update-date">2026-11-09</span>
+<span class="update-pill feature-pill">📦 다운로드 제공 최적화 및 런타임 영속성 패치</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1802,8 +1943,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version latest-ver">v2.6.0</span>
 <span class="update-pill latest-pill">STABLE</span>
-<span class="update-pill feature-pill">📅 테스트 일정 및 마일스톤 (Milestone) 간트 차트 캘린더 매니지먼트 Engine 도입</span>
 <span class="update-date">2026-11-08</span>
+<span class="update-pill feature-pill">📅 테스트 일정 및 마일스톤 (Milestone) 간트 차트 캘린더 매니지먼트 Engine 도입</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1826,8 +1968,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.5.0</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">테스트 케이스 버전 관리(Versioning) 및 상세 변경 히스토리 트래킹 Engine 도입</span>
 <span class="update-date">2026-11-08</span>
+<span class="update-pill feature-pill">테스트 케이스 버전 관리(Versioning) 및 상세 변경 히스토리 트래킹 Engine 도입</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1849,8 +1992,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.4.4</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">초기 상태 디폴트화, 첨부파일명 기준 테이블 분리 및 대시보드 미결 이슈 출력 고도화</span>
 <span class="update-date">2026-11-08</span>
+<span class="update-pill feature-pill">초기 상태 디폴트화, 첨부파일명 기준 테이블 분리 및 대시보드 미결 이슈 출력 고도화</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1872,8 +2016,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.4.3</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">샘플 데이터 결함 9번 상태 Fixed 교정 및 버전 고도화</span>
 <span class="update-date">2026-11-08</span>
+<span class="update-pill feature-pill">샘플 데이터 결함 9번 상태 Fixed 교정 및 버전 고도화</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1894,8 +2039,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.4.2</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">체크리스트 및 결함-테스트케이스 연동 샘플 시뮬레이션 대폭 고도화</span>
 <span class="update-date">2026-11-08</span>
+<span class="update-pill feature-pill">체크리스트 및 결함-테스트케이스 연동 샘플 시뮬레이션 대폭 고도화</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1916,8 +2062,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.4.1</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">릴리즈 매니지먼트 QA Sign-off 서명부 및 통합 리포트 결재선 수립</span>
 <span class="update-date">2026-11-08</span>
+<span class="update-pill feature-pill">릴리즈 매니지먼트 QA Sign-off 서명부 및 통합 리포트 결재선 수립</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1945,8 +2092,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.4.0</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">결함-TC 양방향 추적성 및 빌드 Sign-off 승인 통제 Engine</span>
 <span class="update-date">2026-11-08</span>
+<span class="update-pill feature-pill">결함-TC 양방향 추적성 및 빌드 Sign-off 승인 통제 Engine</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1974,8 +2122,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.3.1</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">테스트 관리 일괄 작업 UX 개선</span>
 <span class="update-date">2026-11-08</span>
+<span class="update-pill feature-pill">테스트 관리 일괄 작업 UX 개선</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -1995,8 +2144,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.3.0</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">테스트 실행 및 테스터별 워크로드(Workload) 리소스 할당 매니지먼트 고도화</span>
 <span class="update-date">2026-11-08</span>
+<span class="update-pill feature-pill">테스트 실행 및 테스터별 워크로드(Workload) 리소스 할당 매니지먼트 고도화</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -2018,8 +2168,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.2.2</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">샘플 데이터 릴리즈 빌드 패키지 동기화 및 2.2.1 기능 정합성 보완</span>
 <span class="update-date">2026-11-08</span>
+<span class="update-pill feature-pill">샘플 데이터 릴리즈 빌드 패키지 동기화 및 2.2.1 기능 정합성 보완</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2042,8 +2193,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.2.1</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">회귀 테스트 패키지 생성 중복 버그 패치 및 안정성 고도화</span>
 <span class="update-date">2026-11-07</span>
+<span class="update-pill feature-pill">회귀 테스트 패키지 생성 중복 버그 패치 및 안정성 고도화</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2063,8 +2215,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.2.0</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">릴리즈 빌드 관리 및 회귀 테스트 패키지 매니지먼트 도입</span>
 <span class="update-date">2026-11-07</span>
+<span class="update-pill feature-pill">릴리즈 빌드 관리 및 회귀 테스트 패키지 매니지먼트 도입</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2084,8 +2237,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.1.3</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">UI/UX 정제 및 아코디언 상태 제어 패치</span>
 <span class="update-date">2026-11-07</span>
+<span class="update-pill feature-pill">UI/UX 정제 및 아코디언 상태 제어 패치</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2105,8 +2259,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.1.2</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">버전 관리 및 UI 메타데이터 동기화 패치</span>
 <span class="update-date">2026-11-07</span>
+<span class="update-pill feature-pill">버전 관리 및 UI 메타데이터 동기화 패치</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2126,8 +2281,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.1.1</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">데이터 영속성 및 저장소 안정성 고도화</span>
 <span class="update-date">2026-11-07</span>
+<span class="update-pill feature-pill">데이터 영속성 및 저장소 안정성 고도화</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2147,8 +2303,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.1.0</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">안정성 및 영속성 고도화 패치</span>
 <span class="update-date">2026-11-07</span>
+<span class="update-pill feature-pill">안정성 및 영속성 고도화 패치</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2168,8 +2325,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.0.3</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">API 테스트 스위트 병렬 실행 및 마스킹 보안 강화</span>
 <span class="update-date">2026-11-07</span>
+<span class="update-pill feature-pill">API 테스트 스위트 병렬 실행 및 마스킹 보안 강화</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2189,8 +2347,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.0.2</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">체크리스트 HTML 내보내기/불러오기 데이터 연동 보완</span>
 <span class="update-date">2026-11-07</span>
+<span class="update-pill feature-pill">체크리스트 HTML 내보내기/불러오기 데이터 연동 보완</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2210,8 +2369,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.0.1</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">다중 인코딩 감지 및 데이터 자동 교정 CSV 내보내기</span>
 <span class="update-date">2026-11-07</span>
+<span class="update-pill feature-pill">다중 인코딩 감지 및 데이터 자동 교정 CSV 내보내기</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2231,8 +2391,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v2.0.0</span>
 <span class="update-pill original-pill">MAJOR</span>
-<span class="update-pill feature-pill">메이저 플랫폼 리뉴얼 & 체크리스트 생성기</span>
 <span class="update-date">2026-10-31</span>
+<span class="update-pill feature-pill">메이저 플랫폼 리뉴얼 & 체크리스트 생성기</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2252,8 +2413,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v1.5.3</span>
 <span class="update-pill original-pill">STABLE</span>
-<span class="update-pill feature-pill">IndexedDB 대용량 데이터 검증 성능 최적화</span>
 <span class="update-date">2026-10-30</span>
+<span class="update-pill feature-pill">IndexedDB 대용량 데이터 검증 성능 최적화</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2273,8 +2435,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v1.5.0</span>
 <span class="update-pill original-pill">FEATURE</span>
-<span class="update-pill feature-pill">API 테스트 자동화 스위트 (JWT 토큰 & JSON 검증기) 통합</span>
 <span class="update-date">2026-10-29</span>
+<span class="update-pill feature-pill">API 테스트 자동화 스위트 (JWT 토큰 & JSON 검증기) 통합</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2294,8 +2457,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v1.2.0</span>
 <span class="update-pill original-pill">FEATURE</span>
-<span class="update-pill feature-pill">데이터 검증 엔진 (CSV/TSV 스키마 추론 & 외래키 검사)</span>
 <span class="update-date">2026-10-28</span>
+<span class="update-pill feature-pill">데이터 검증 엔진 (CSV/TSV 스키마 추론 & 외래키 검사)</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2315,8 +2479,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v1.1.0</span>
 <span class="update-pill original-pill">FEATURE</span>
-<span class="update-pill feature-pill">결함 관리 (Bug Tracker) 및 첨부파일/히스토리 트래킹</span>
 <span class="update-date">2026-10-28</span>
+<span class="update-pill feature-pill">결함 관리 (Bug Tracker) 및 첨부파일/히스토리 트래킹</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2336,8 +2501,9 @@ GAME QA MASTER
 <summary class="update-head">
 <span class="update-version">v1.0.0</span>
 <span class="update-pill original-pill">INITIAL</span>
-<span class="update-pill feature-pill">GAME QA MASTER 최초 릴리즈</span>
 <span class="update-date">2026-10-27</span>
+<span class="update-pill feature-pill">GAME QA MASTER 최초 릴리즈</span>
+
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel gray-panel">
@@ -2364,7 +2530,7 @@ QUALITY ASSURANCE MANAGEMENT PLATFORM
 </div>
 
 <script>
-const APP_VERSION="2.7.0";
+const APP_VERSION="2.7.1";
 const KEY="GAME_QA_MASTER_V1";
 const VALIDATOR_KEY="GAME_QA_MASTER_VALIDATOR_V153";
 
@@ -2705,7 +2871,7 @@ const titles={
  bugs:"Bug Tracking",
  ailog:"AI Log Snippet Analyzer",
  matrix: "QA Traceability Matrix", // 🌟 [v2.7.0 신규]
- samples:"Sample Data Management",
+ samples:"Sample Data",
  reports:"QA Reports",
  updates:"업데이트 내역",
 };
@@ -2866,7 +3032,6 @@ function renderProjects(){
  <div class="card">
  <strong>${esc(p.name)}</strong>
  <p class="label">${esc(p.desc)}</p>
- <span class="badge">${isActive?"선택된 프로젝트":"프로젝트"}</span>
  <div class="actions" style="margin-top:12px">
  <button class="${isActive ? 'primary' : 'secondary'}" onclick="selectProject('${p.id}')" ${isActive ? 'style="background: #3b82f6; color: #fff; border: none;"' : ''}>${isActive ? '선택됨' : '선택'}</button>
  <button class="danger" onclick="deleteProject('${p.id}')">삭제</button>
@@ -2875,6 +3040,7 @@ function renderProjects(){
  `;
  }).join("")||'<div class="empty">프로젝트가 없습니다.</div>';
 }
+
 
 
 function addBuildRecord(){
@@ -3461,7 +3627,7 @@ function renderBuilds(){
     <button class="secondary" style="padding:6px 12px;font-size:11px" onclick="cancelBuildSignOff('${b.id}')">🔓 승인 취소</button>
    `}
 
-   <button class="primary" style="padding:6px 12px;font-size:11px;background:#10b981" onclick="generateRegressionTestsForBuild('${b.id}')">🔄 회귀 테스트 패키지 자동 생성</button>
+   <button class="primary" style="padding:6px 12px;font-size:11px;background:#10b981" onclick="generateRegressionTestsForBuild('${b.id}')">🔄 회귀 테스트 생성</button>
    <button class="danger" style="padding:6px 12px;font-size:11px" onclick="deleteBuildRecord('${b.id}')">삭제</button>
   </div>
  </div>
@@ -3985,10 +4151,12 @@ function renderTests(){
 
  <div id="linkedBugs_${t.id}"></div>
  <div class="actions" style="margin-top:10px;justify-content:flex-end">
- <button class="secondary" style="padding:6px 12px;font-size:11px" onclick="editTest('${t.id}')">✏️ 편집</button>
- <button class="primary" style="padding:6px 12px;font-size:11px;background:#e11d48" onclick="createBugFromTest('${t.id}')">🐞 결함 등록</button>
+ <button class="secondary" onclick="editTest('${t.id}')">✏️ 편집</button>
+ <button class="primary" style="background:#e11d48" onclick="createBugFromTest('${t.id}')">🐞 결함 등록</button>
  <button class="danger" onclick="deleteTest('${t.id}')">삭제</button>
  </div>
+
+
  </div>
  `;
  }).join("")||'<div class="empty">조건에 일치하는 테스트 케이스가 없습니다.</div>';
@@ -5474,26 +5642,50 @@ function renderBugs(){
  const fSeverity = document.getElementById("filterBugSeverity").value;
  const fPriority = document.getElementById("filterBugPriority").value;
  const fBuildVersion = document.getElementById("filterBugBuildVersion")?.value || "all";
- const fQuery = (document.getElementById("searchBugInput").value || "").toLowerCase();
+ const fQuery = (document.getElementById("searchBugInput").value || "").toLowerCase().trim();
  const fOrder = document.getElementById("sortBugOrder").value;
 
- let filtered = activeBugs.filter(b => {
+  let filtered = activeBugs.filter(b => {
   if(fStatus !== "all" && b.status !== fStatus) return false;
   if(fSeverity !== "all" && b.severity !== fSeverity) return false;
   if(fPriority !== "all" && b.priority !== fPriority) return false;
   if(fBuildVersion !== "all" && (b.buildVersion || "").trim() !== fBuildVersion) return false;
-  if(fQuery && !b.title.toLowerCase().includes(fQuery) && !b.desc.toLowerCase().includes(fQuery) && !b.assignee.toLowerCase().includes(fQuery)) return false;
+  
+  if(fQuery) {
+   const globalIdx = activeBugs.findIndex(item => item.id === b.id);
+   const issueNumLower = `issue-${globalIdx + 1}`; // 예: issue-1
+   const rawNum = String(globalIdx + 1);          // 예: 1
+   const cleanQuery = fQuery.replace(/[^0-9]/g, '');
+   
+   const matchTitle = b.title.toLowerCase().includes(fQuery);
+   const matchDesc = b.desc.toLowerCase().includes(fQuery);
+   const matchAssignee = b.assignee.toLowerCase().includes(fQuery);
+   
+   // 💡 다양한 이슈 번호 검색 패턴(숫자, issue-N, issueN, #N 등) 완벽 대응
+   const matchIssueNum = (
+     fQuery === rawNum || 
+     fQuery === issueNumLower || 
+     fQuery === `issue${rawNum}` ||
+     (cleanQuery !== '' && cleanQuery === rawNum && (fQuery.includes('issue') || fQuery.includes('iss') || fQuery.includes('#') || fQuery.match(/^\d+$/)))
+   );
+   
+   if(!matchTitle && !matchDesc && !matchAssignee && !matchIssueNum) return false;
+  }
   return true;
  });
 
  filtered.sort((a,b) => {
   if(fOrder === "severity") return (severityWeight[b.severity] || 0) - (severityWeight[a.severity] || 0);
   if(fOrder === "priority") return (priorityWeight[b.priority] || 0) - (priorityWeight[a.priority] || 0);
-  return new Date(b.created) - new Date(a.created);
+  return new Date(b.created) - new Date(new Date(a.created));
  });
 
- document.getElementById("bugList").innerHTML = filtered.map((b, idx) => {  
-  const issueNumber = `ISSUE-${idx + 1}`;
+ document.getElementById("bugList").innerHTML = filtered.map((b) => {  
+  // 💡 필터링/정렬과 무관하게 프로젝트 내 고유 글로벌 순번을 항상 유지
+  const globalIdx = activeBugs.findIndex(item => item.id === b.id);
+  const issueNumber = `ISSUE-${globalIdx + 1}`;
+  
+  // ... (이하 카드 렌더링 코드 동일)
 
   if(editingBugId === b.id){
    return `
@@ -5596,12 +5788,13 @@ function renderBugs(){
 
  ${b.isSample ? '<span class="badge sample-badge">SAMPLE</span>' : ''}
  <div class="actions" style="margin-top:12px">
- <button class="secondary" style="padding:5px 10px;font-size:11px" onclick="editBug('${b.id}')">✏️ 편집</button>
+ <button class="secondary" onclick="editBug('${b.id}')">✏️ 편집</button>
  <select style="width:auto;margin:0" onchange="updateBug('${b.id}',this.value)">
  ${["Open","In Progress","Fixed","Closed"].map(s => `<option ${b.status === s ? "selected" : ""}>${s}</option>`).join("")}
  </select>
  <button class="danger" onclick="deleteBug('${b.id}')">삭제</button>
  </div>
+
  </div>
  `;
  }).join("") || '<div class="empty">조건에 일치하는 결함이 없습니다.</div>';
@@ -5884,7 +6077,6 @@ function exportMatrixCSV() {
  downloadBlob("QA_Traceability_Matrix.csv", new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }));
 }
  
-  
 function initDefaultSampleData(silent=true){
  const now=new Date().toISOString();
  let projects=db.projects.filter(p=>p.isSample);
@@ -5981,7 +6173,7 @@ function initDefaultSampleData(silent=true){
  ];
 
  const types=["기능 테스트","UI 테스트","전투 테스트","데이터 테스트","성능 테스트","회귀 테스트"];
- const testersList=["김테스터", "이QA", "박시니어", "최주니어"];
+ const testersList=["김테스터", "이QA", "박시니어", "최주니어", "정오토"];
 
  checklistLinkedCases.forEach((tc, idx)=>{
   if(!sampleTests.some(st=>st.name===tc.name)){
@@ -6085,8 +6277,17 @@ function initDefaultSampleData(silent=true){
   });
  }
 
- if(!db.devices.some(d=>d.isSample))db.devices.push({id:uid(),name:"Galaxy S23",os:"Android 13",type:"Mobile",isSample:true});
- if(!db.members.some(m=>m.isSample))db.members.push({id:uid(),name:"김테스터",role:"QA Lead",isSample:true});
+ if(!db.devices.some(d=>d.isSample)) db.devices.push({id:uid(),name:"Galaxy S23",os:"Android 13",type:"Mobile",isSample:true});
+
+ // 💡 샘플 QA 담당자 목록(db.members)을 여러 명으로 확충
+ db.members = db.members.filter(m => !m.isSample);
+ db.members.push(
+  {id:uid(), name:"김테스터", role:"QA Lead", isSample:true},
+  {id:uid(), name:"이QA", role:"Senior QA", isSample:true},
+  {id:uid(), name:"박시니어", role:"Test Engineer", isSample:true},
+  {id:uid(), name:"최주니어", role:"Junior QA", isSample:true},
+  {id:uid(), name:"정오토", role:"Automation Engineer", isSample:true}
+ );
 
  db.activeProject=sampleProject.id;
  editingBugId=null;
@@ -6135,14 +6336,14 @@ function renderDashboard(){
  const fail=targetTests.filter(t=>t.status==="Fail").length;
  const rate=total?Math.round((pass+fail)/total*100):0;
 
- // 💡 1. 전체 프로젝트 개수 표시
+ // 1. 전체 프로젝트 개수 표시
  document.getElementById("mProjects").textContent=db.projects.length;
 
- // 💡 2. 현재 선택된 프로젝트 명을 찾아 하단에 표시
+ // 2. 현재 선택된 프로젝트 명을 찾아 대시보드 카드 하단에 분리된 구조로 표시 (2번 이슈 반영)
  const activeProj = db.projects.find(p => p.id === db.activeProject);
  const activeProjEl = document.getElementById("mActiveProjectName");
  if(activeProjEl) {
-  activeProjEl.textContent = activeProj ? `선택됨: ${activeProj.name}` : "선택된 프로젝트 없음";
+  activeProjEl.textContent = activeProj ? activeProj.name : "없음";
  }
 
  document.getElementById("mTests").textContent=total;
@@ -6182,9 +6383,7 @@ function renderDashboard(){
   ? openIssues.map(b=>`<p>${esc(b.title)} <span class="badge">${esc(b.severity)}</span> <span class="badge" style="background:#252d3a;color:#70a5ff">${esc(b.status)}</span></p>`).join("")
   : '<div class="empty">열려있는 이슈가 없습니다.</div>';
 }
-
-
-
+  
 function renderDataHistory(){
  document.getElementById("dataHistory").innerHTML=db.dataRuns.map(r=>`
  <div class="card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -6486,7 +6685,7 @@ function downloadReportHTML(){
 </head>
 <body>
   <h1>📈 ${esc(name)} QA 통합 리포트</h1>
-  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.7.0</p>
+  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.7.1</p>
 
   ${certHTML}
 
@@ -6719,7 +6918,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 /**
  * 백업 데이터 스키마 자동 마이그레이션 핸들러
  */
-const CURRENT_SCHEMA_VERSION = "2.7.0";
+const CURRENT_SCHEMA_VERSION = "2.7.1";
 
 function restoreAndMigrateBackup(jsonString) {
     try {
