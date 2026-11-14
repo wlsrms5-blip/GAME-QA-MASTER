@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GAME QA MASTER v2.7.1</title>
+<title>GAME QA MASTER v2.7.3</title>
 <script>
 // 1. 우클릭 차단
 document.addEventListener('contextmenu', function(e) {
@@ -777,7 +777,12 @@ summary::-webkit-details-marker, summary::marker{
   vertical-align: middle !important;
   margin: 0 !important;
 }
-  
+ .calendar-cell {
+  transition: background 0.2s;
+}
+.calendar-cell:hover {
+  background: #252538 !important;
+} 
 
 </style>
 </head>
@@ -789,7 +794,7 @@ summary::-webkit-details-marker, summary::marker{
 <aside class="sidebar">
 <div class="logo">
 GAME QA MASTER
-<small>QUALITY ASSURANCE PLATFORM v2.7.1</small>
+<small>QUALITY ASSURANCE PLATFORM v2.7.3</small>
 </div>
 <div class="nav-group-container">
   <!-- 1. 매니지먼트 (요청 3: QA 리포트가 매니지먼트 하위로 이동) -->
@@ -856,7 +861,7 @@ GAME QA MASTER
   <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 12px;">
     <!-- 좌측 버전 표기 -->
     <div>
-      <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.7.1</span>
+      <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.7.3</span>
     </div>
     
     <!-- 우측 샘플 데이터 탭 이동 버튼 (2단 우측 고정) -->
@@ -1091,8 +1096,8 @@ GAME QA MASTER
 
 <section id="schedule" class="view">
 <div class="card">
-<h2>📅 테스트 일정 및 마일스톤 (Milestone) 간트 차트</h2>
-<p class="label">프로젝트 마일스톤(Alpha, Beta, RC, Live)과 테스터별 수행 기간/마감일(Due Date)을 시각적으로 관리합니다.</p>
+<h2>📅 테스트 일정 및 마일스톤 (Milestone) 매니지먼트</h2>
+<p class="label">프로젝트 마일스톤과 테스터별 마감일(Due Date)을 간트 차트와 월간 캘린더 뷰로 시각 관리하고 아웃룩/구글 캘린더 연동을 위한 .ics 파일을 다운로드합니다.</p>
 
 <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px">
  <div>
@@ -1121,16 +1126,45 @@ GAME QA MASTER
   <input type="date" id="schedDueDate">
  </div>
 </div>
-<button class="primary" onclick="addScheduleItem()">마일스톤 일정 등록</button>
+<div class="actions">
+ <button class="primary" onclick="addScheduleItem()">마일스톤 일정 등록</button>
+</div>
 </div>
 
+<!-- 🌟 [v2.7.3 신규] 간트 차트 뷰 / 캘린더 뷰 탭 전환 및 .ics 다운로드 액션 바 -->
 <div class="card">
-<div class="actions" style="justify-content:space-between;margin-bottom:12px">
- <h2 style="margin:0">📊 간트 차트 타임라인 (Gantt Chart Timeline)</h2>
+<div class="actions" style="justify-content:space-between;margin-bottom:15px;flex-wrap:wrap;gap:10px">
+ <div class="actions">
+  <button id="schedTabGanttBtn" class="primary" onclick="switchScheduleSubTab('gantt')">📊 간트 차트 뷰</button>
+  <button id="schedTabCalendarBtn" class="secondary" onclick="switchScheduleSubTab('calendar')">🗓️ 캘린더 뷰</button>
+ </div>
+ <div class="actions">
+  <button class="secondary" style="background:#10b981;color:white" onclick="exportSchedulesToIcs()">📥 .ics 캘린더 파일 다운로드</button>
+ </div>
 </div>
-<div id="ganttTimelineView" style="overflow-x:auto"></div>
+
+<!-- 간트 차트 뷰 컨테이너 -->
+<div id="schedPanelGantt">
+ <h2 style="margin:0 0 12px 0;font-size:1.1rem">📊 간트 차트 타임라인 (Gantt Chart Timeline)</h2>
+ <div id="ganttTimelineView" style="overflow-x:auto"></div>
+</div>
+
+<!-- 캘린더 뷰 컨테이너 (초기 숨김) -->
+<div id="schedPanelCalendar" style="display:none">
+ <div class="actions" style="justify-content:space-between;align-items:center;margin-bottom:12px">
+  <h2 id="calendarTitleMonth" style="margin:0;font-size:1.1rem">2026년 11월 캘린더</h2>
+  <div class="actions" style="display: flex; gap: 6px; align-items: center;">
+   <button class="secondary" onclick="moveCalendarMonth(-1)" style="padding: 5px 12px; box-sizing: border-box; border-radius: 4px; cursor: pointer;">◀ 이전 달</button>
+   <button onclick="goTodayCalendar()" style="background: #3b82f6; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; box-sizing: border-box;">오늘</button>
+   <button class="secondary" onclick="moveCalendarMonth(1)" style="padding: 5px 12px; box-sizing: border-box; border-radius: 4px; cursor: pointer;">다음 달 ▶</button>
+</div>
+
+ </div>
+ <div id="calendarMonthGridView"></div>
+</div>
 </div>
 </section>
+
 
 <section id="data" class="view">
 <div class="card">
@@ -1587,7 +1621,7 @@ GAME QA MASTER
 <div class="card">
 <h2>업데이트 내역</h2>
 <p class="update-intro">
- GAME QA MASTER의 v1.0.0부터 최신 v2.7.1까지 전체 버전별 변경사항 및 히스토리입니다.
+ GAME QA MASTER의 v1.0.0부터 최신 v2.7.3까지 전체 버전별 변경사항 및 히스토리입니다.
 </p>
 
 <div class="update-timeline">
@@ -1596,8 +1630,53 @@ GAME QA MASTER
 <div class="update-dot latest"></div>
 <details class="update-details" open>
 <summary class="update-head">
-<span class="update-version latest-ver">v2.7.1</span>
+<span class="update-version latest-ver">v2.7.3</span>
 <span class="update-pill latest-pill">LATEST</span>
+<span class="update-date">2026-11-14</span>
+<span class="update-pill feature-pill">🗓️ 캘린더 신설</span>
+</summary>
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel green-border">
+<strong class="green"> 캘린더 기능 추가</strong>
+<ul class="update-list-green">
+<li><strong> 캘린더 기능 추가:</strong>간트 차트와 연동되는 캘린더 추가</li>
+</ul>
+</div>
+</div>
+</details>
+</div>
+  
+<div class="update-entry">
+<div class="update-dot original"></div>
+<details class="update-details">
+<summary class="update-head">
+<span class="update-version latest-ver">v2.7.2</span>
+<span class="update-pill latest-pill">STABLE</span>
+<span class="update-date">2026-11-14</span>
+<span class="update-pill feature-pill">🛡️ 안정화 및 데이터 무결성 패치 (Stabilization)</span>
+</summary>
+
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel green-border">
+<strong class="green"> 핵심 안정화 및 엔진 고도화 패치 (DEV-001 ~ DEV-003)</strong>
+<ul class="update-list-green">
+<li><strong>1. API 테스트 엔진 (`DEV-003`):</strong> 실행 이력 저장 시 고정되던 상태 코드(200) 문제를 해결하고, 실제 응답 코드 및 케이스별 기대 코드가 동적으로 반영되도록 개선</li>
+<li><strong>2. Release Sign-off 통제 (`DEV-001`):</strong> Critical/Major 결함 외에 Minor/Trivial(경미/사소) 이슈가 존재하는 경우 1단계 검증 및 2단계 결재 시 '조건부 승인(Conditional)' 판정으로 유도 및 통제 강화</li>
+<li><strong>3. 스키마 마이그레이션 (`DEV-002`):</strong> 구버전 백업 파일 복원 시 누락되기 쉬운 히스토리 및 서명부 배열을 자동으로 정규화하고 최신 스키마로 무결성 있게 마이그레이션</li>
+<li><strong>4. 빌드 관리 아코디언 고도화:</strong> 빌드 카드 내에서 차단 대상 결함과 조건부 승인 대상 잔여 이슈를 분리하여 가독성 및 관리 편의성 제고</li>
+</ul>
+</div>
+</div>
+</details>
+</div>
+
+  
+<div class="update-entry">
+<div class="update-dot original"></div>
+<details class="update-details">
+<summary class="update-head">
+<span class="update-version latest-ver">v2.7.1</span>
+<span class="update-pill latest-pill">MINOR</span>
 <span class="update-date">2026-11-14</span>
 <span class="update-pill feature-pill">✨ 버그 수정 및 UI/UX 무결성 패치</span>
 </summary>
@@ -2530,7 +2609,7 @@ QUALITY ASSURANCE MANAGEMENT PLATFORM
 </div>
 
 <script>
-const APP_VERSION="2.7.1";
+const APP_VERSION="2.7.3";
 const KEY="GAME_QA_MASTER_V1";
 const VALIDATOR_KEY="GAME_QA_MASTER_VALIDATOR_V153";
 
@@ -2554,9 +2633,48 @@ function normalizeDB(source){
   if(k==="activeProject")return;
   if(!Array.isArray(result[k]))result[k]=[];
  });
+
+ // 하위 호환성 및 구버전 스키마 마이그레이션 안전장치 (v1.x ~ v2.6.x -> v2.7.2)
+ result.tests = result.tests.map(t => ({
+  ...t,
+  version: t.version || "1.0",
+  tester: t.tester || "",
+  status: t.status || "N/T",
+  history: Array.isArray(t.history) ? t.history : []
+ }));
+
+ result.bugs = result.bugs.map(b => ({
+  ...b,
+  severity: b.severity || "Major",
+  priority: b.priority || "P3 (Normal)",
+  category: b.category || "기타",
+  assignee: b.assignee || "미지정",
+  status: b.status || "Open",
+  history: Array.isArray(b.history) ? b.history : []
+ }));
+
+ result.builds = result.builds.map(b => ({
+  ...b,
+  phase: b.phase || "Alpha",
+  signOffStatus: b.signOffStatus || "Pending",
+  verificationStatus: b.verificationStatus || "None",
+  signOffHistory: Array.isArray(b.signOffHistory) ? b.signOffHistory : []
+ }));
+
+ result.schedules = result.schedules.map(s => ({
+  ...s,
+  phase: s.phase || "Alpha",
+  assignee: s.assignee || "미지정"
+ }));
+
  return result;
 }
 
+// 캘린더 월간 뷰 상태 관리 전역 변수
+let currentCalendarYear = new Date().getFullYear();
+let currentCalendarMonth = new Date().getMonth() + 1;
+
+  
 // 기존 db 로드 및 정규화 구간을 아래 코드로 교체해 주세요.
 let db;
 try{
@@ -2813,51 +2931,66 @@ async function restoreAll(event){
  try{
   const text=await file.text();
   const parsed=JSON.parse(text);
-  const restoredDB=parsed.application==="GAME_QA_MASTER"?parsed.database:parsed;
-  if(!restoredDB||!Array.isArray(restoredDB.projects)) throw Error("올바르지 않은 백업 형식입니다.");
-  if(!confirm("복원하시겠습니까? 현재 데이터는 복원 파일로 교체됩니다.")) return;
   
-  db=normalizeDB(restoredDB);
+  // 구버전(v1.x, v2.0~2.6) 및 최신 백업 구조 자동 판별
+  const backupVersion = parsed.version || "1.0.0";
+  const restoredDB = parsed.application === "GAME_QA_MASTER" ? parsed.database : parsed;
   
-  // 복원 직후 모든 프로젝트의 빌드 승인/무효화 상태 정합성 자동 재검증 수행
-  // [P0-001-01 반영] 프로그램 최초 실행 시 로드된 기존 데이터의 빌드 승인/무효화 상태 자동 재검증
-if (db.projects && db.projects.length > 0) {
- db.projects.forEach(p => {
-  if (typeof validateProjectBuildSignOffs === "function") {
-   validateProjectBuildSignOffs(p.id);
+  if(!restoredDB || !Array.isArray(restoredDB.projects)) {
+   throw Error("올바르지 않은 백업 형식입니다. (projects 배열 누락)");
   }
- });
- // 상태 일치 확인 후 자동 변경 사항 영속 저장
- try {
-  localStorage.setItem(KEY, JSON.stringify(db));
- } catch(e) {}
-}
+  if(!confirm(`[백업 버전: v${backupVersion}] 데이터를 복원하시겠습니까?\n현재 데이터는 복원 파일로 교체되며 최신 스키마(v${APP_VERSION})로 자동 마이그레이션됩니다.`)) return;
+  
+  // 스키마 정규화 및 구버전 필드 마이그레이션 실행
+  // 스키마 정규화 및 구버전 필드 마이그레이션 실행
+  db = normalizeDB(restoredDB);
+  
+  // 활성 프로젝트 ID 무결성 검증
+  if(db.activeProject && !db.projects.some(p => p.id === db.activeProject)){
+   db.activeProject = db.projects[0]?.id || null;
+  }
+  
+  // 💡 [핵심 수정] 복원 직후 모든 프로젝트의 빌드 승인/조건부 상태 및 무결성 강제 재검증
+  if (db.projects && db.projects.length > 0) {
+   db.projects.forEach(p => {
+    if (typeof validateProjectBuildSignOffs === "function") {
+     validateProjectBuildSignOffs(p.id);
+    }
+   });
+  }
 
-  store=parsed.validator?.store||{};
-  lastResult=parsed.validator?.lastResult||null;
-  validatorConfig=parsed.validator?.config||null;
-  if(parsed.validator?.configText) document.getElementById("cfg").value=parsed.validator.configText;
+  // 변경된 무결성 상태를 로컬 저장소에 즉시 반영
+  localStorage.setItem(KEY, JSON.stringify(db));
+
+
+  store = parsed.validator?.store || {};
+  lastResult = parsed.validator?.lastResult || null;
+  validatorConfig = parsed.validator?.config || null;
+  if(parsed.validator?.configText) document.getElementById("cfg").value = parsed.validator.configText;
   
-  localStorage.setItem(KEY,JSON.stringify(db));
-  await idbPut("validator",validatorState());
-  editingBugId=null;
+  localStorage.setItem(KEY, JSON.stringify(db));
+  await idbPut("validator", validatorState());
+  editingBugId = null;
+  editingTestId = null;
   
-  // 1. 전체 데이터 렌더링 강제 실행
+  // 전체 데이터 렌더링 강제 실행
   render(); 
   renderChips(); 
   renderValidationResult();
 
-  // 2. 현재 활성화되어 있는 뷰(탭)를 유지한 채 리렌더링 및 스크롤 고정
   const activeViewEl = document.querySelector(".view.active");
   if(activeViewEl){
    switchView(activeViewEl.id);
   }
 
-  statusText("● 데이터 복원 및 화면 갱신 완료");
-  alert("복원 및 빌드 승인 상태 재검증 완료!");
- }catch(e){ alert("복원 실패: "+e.message); }
- event.target.value="";
+  statusText(`● v${backupVersion} ➔ v${APP_VERSION} 마이그레이션 복원 완료`);
+  alert(`복원 및 최신 스키마(v${APP_VERSION}) 마이그레이션이 완료되었습니다!`);
+ }catch(e){ 
+  alert("복원 실패: " + e.message); 
+ }
+ event.target.value = "";
 }
+
 
 const titles={
  dashboard:"QA Dashboard",
@@ -2976,7 +3109,17 @@ function switchView(viewName){
  
  if(viewName==="reports") renderReports();
  if(viewName==="builds") renderBuilds();
- renderGanttChart();
+ 
+ // 🌟 [v2.7.3 수정] 일정(schedule) 뷰 진입 시 현재 선택된 서브 탭(간트 차트 또는 캘린더)에 맞춰 렌더링 분기
+ if(viewName==="schedule") {
+  const ganttPanel = document.getElementById("schedPanelGantt");
+  if (ganttPanel && ganttPanel.style.display !== "none") {
+   renderGanttChart();
+  } else {
+   renderCalendarMonthView();
+  }
+ }
+ 
  if(viewName==="tests") renderTests();
  
  // 🌟 [v2.7.0 신규] QA 추적성 매트릭스 뷰가 선택될 때 렌더링 실행
@@ -2984,6 +3127,7 @@ function switchView(viewName){
  
  window.scrollTo(0,0);
 }
+
 
 window.addEventListener("resize", () => {
  const currentActiveView = document.querySelector(".view.active")?.id || "dashboard";
@@ -3123,11 +3267,33 @@ function openSignOffModal(buildId){
  
  document.getElementById("signOffBuildVersionInfo").textContent = `대상 빌드: ${b.versionName} (${b.phase})`;
  
- // 2단계 결재창을 열 때 이전 무효화 사유나 코멘트가 남아있지 않도록 입력폼 초기화 (기존에 작성된 내용이 있다면 불러오되, 무효화 자동 코멘트는 배제)
+ // 해당 빌드에 미해결 Minor/Trivial 이슈가 있는지 확인
+ const projectBugs = db.bugs.filter(bug => bug.projectId === b.projectId);
+ const openMinorCount = projectBugs.filter(bug =>
+  (bug.buildVersion === b.versionName || !bug.buildVersion) &&
+  (bug.severity === "Minor" || bug.severity === "Trivial") &&
+  (bug.status === "Open" || bug.status === "In Progress")
+ ).length;
+
+ const typeSelect = document.getElementById("signOffTypeSelect");
+ if(openMinorCount > 0) {
+  // 마이너/트라이벌 이슈가 존재하면 '최정 승인(Approved)'을 비활성화하고 '조건부 승인(Conditional)'을 강제
+  typeSelect.innerHTML = `
+   <option value="Conditional" selected>⚠️ 조건부 승인 (Minor/Trivial 이슈 존재로 인해 필수)</option>
+   <option value="Rejected">🚨 반려 (Release Rejected)</option>
+  `;
+ } else {
+  // 이슈가 전혀 없으면 정상적으로 승인/반려 선택 가능
+  typeSelect.innerHTML = `
+   <option value="Approved">✅ 승인 (Release Approved)</option>
+   <option value="Conditional">⚠️ 조건부 승인 (Conditional Approval)</option>
+   <option value="Rejected">🚨 반려 (Release Rejected)</option>
+  `;
+ }
+
  const existingDetails = b.signOffDetails;
  const isInvalidComment = existingDetails?.comment?.includes("[자동 승인 무효화]");
  
- document.getElementById("signOffTypeSelect").value = "Approved";
  document.getElementById("signOffQaLeadInput").value = isInvalidComment ? "" : (existingDetails?.qaLead || "");
  document.getElementById("signOffPmInput").value = isInvalidComment ? "" : (existingDetails?.pm || "");
  document.getElementById("signOffCommentInput").value = isInvalidComment ? "" : (existingDetails?.comment || "");
@@ -3136,7 +3302,6 @@ function openSignOffModal(buildId){
  modal.style.display = "flex";
  document.body.style.overflow = "hidden";
 }
-
 
 function closeSignOffModal(){
  const modal = document.getElementById("signOffModal");
@@ -3233,7 +3398,7 @@ function validateProjectBuildSignOffs(projectId) {
  const now = new Date().toISOString();
 
  projectBuilds.forEach(b => {
-  // 미해결 Critical 또는 Major 결함 개수 산출
+  // 해당 빌드 버전 또는 빌드가 지정되지 않은 치명적/중대 결함 카운트
   const openCrit = projectBugs.filter(bug =>
    (bug.buildVersion === b.versionName || !bug.buildVersion) &&
    (bug.severity === "Critical" || bug.severity === "Major") &&
@@ -3241,13 +3406,13 @@ function validateProjectBuildSignOffs(projectId) {
   );
   
   if (openCrit.length > 0) {
-   // 미해결 중대 결함이 존재할 경우 승인 상태를 강제 반려/무효화
-   const isApprovedOrVerified = b.signOffStatus === "Approved" || b.signOffStatus === "Conditional" || b.verificationStatus === "Verified";
-   if (isApprovedOrVerified || b.signOffStatus !== "Rejected") {
+   // 조건부 승인(Conditional)의 경우 Minor/Trivial은 허용하되 Critical/Major가 남아있으면 강제 무효화 대상으로 판정
+   const isLockedState = b.signOffStatus === "Approved" || b.signOffStatus === "Conditional" || b.verificationStatus === "Verified";
+   if (isLockedState || b.signOffStatus !== "Rejected") {
     b.signOffStatus = "Rejected";
     b.verificationStatus = "None";
     
-    const invalidReason = `🚨 [자동 승인 무효화] 미해결 Critical/Major 결함이 발견되어 빌드 승인이 취소되었습니다.`;
+    const invalidReason = `🚨 [자동 승인 무효화] 미해결 Critical/Major 결함이 ${openCrit.length}건 존재하여 빌드 승인 및 검증이 취소되었습니다.`;
     
     b.signOffDetails = {
      type: "Rejected",
@@ -3259,7 +3424,7 @@ function validateProjectBuildSignOffs(projectId) {
 
     if(!Array.isArray(b.signOffHistory)) b.signOffHistory = [];
     const lastHistory = b.signOffHistory[b.signOffHistory.length - 1];
-    if (!lastHistory || lastHistory.comment !== invalidReason) {
+    if (!lastHistory || !lastHistory.comment?.includes("[자동 승인 무효화]")) {
      b.signOffHistory.push({
       actionType: "검증/승인 자동 무효화",
       status: "Rejected",
@@ -3271,8 +3436,8 @@ function validateProjectBuildSignOffs(projectId) {
     }
    }
   } else {
-   // 미해결 결함이 모두 해소된 경우 반려 상태였다면 검토 대기(Pending)로 복구
-   if (b.signOffStatus === "Rejected") {
+   // 미해결 Critical/Major 결함이 모두 해소되었고 기존에 반려 상태였다면 검토 대기(Pending)로 안전 복구
+   if (b.signOffStatus === "Rejected" && (!b.signOffDetails || b.signOffDetails.comment?.includes("[자동 승인 무효화]"))) {
     b.signOffStatus = "Pending";
     b.verificationStatus = "None";
     
@@ -3300,6 +3465,7 @@ function validateProjectBuildSignOffs(projectId) {
  });
 }
 
+
  
 // [P0-001-A, B] 우회 승인 방식 제거 및 결재 모달 강제 연동
 // [복원 및 보완] 1단계: 빌드 승인 검증 및 토글 절차
@@ -3311,15 +3477,21 @@ function toggleBuildSignOff(buildId){
  if(!b) return;
 
  const projectBugs = db.bugs.filter(bug => bug.projectId === b.projectId);
- const openCriticalBugs = projectBugs.filter(bug =>
+ const openCritCount = projectBugs.filter(bug =>
   (bug.buildVersion === b.versionName || !bug.buildVersion) &&
   (bug.severity === "Critical" || bug.severity === "Major") &&
   (bug.status === "Open" || bug.status === "In Progress")
- );
+ ).length;
+
+ const openMinorCount = projectBugs.filter(bug =>
+  (bug.buildVersion === b.versionName || !bug.buildVersion) &&
+  (bug.severity === "Minor" || bug.severity === "Trivial") &&
+  (bug.status === "Open" || bug.status === "In Progress")
+ ).length;
 
  if(!b.verificationStatus || b.verificationStatus === "None" || b.signOffStatus === "Rejected" || b.signOffStatus === "Pending"){
-  if(openCriticalBugs.length > 0){
-   alert(`⚠️ 빌드 1단계 검증 차단!\n\n해당 빌드[${b.versionName}]에 미해결된 Critical/Major 결함이 ${openCriticalBugs.length}건 존재합니다.\n\n빌드 카드 내 아코디언에서 결함을 확인 후 처리해 주세요.`);
+  if(openCritCount > 0){
+   alert(`⚠️ 빌드 1단계 검증 차단!\n\n해당 빌드[${b.versionName}]에 미해결된 Critical/Major 결함이 ${openCritCount}건 존재합니다.`);
    b.verificationStatus = "None";
    b.signOffStatus = "Rejected";
    save();
@@ -3328,14 +3500,18 @@ function toggleBuildSignOff(buildId){
    return;
   }
   
-  // 1단계 검증 통과 시: 최신 서명부(signOffDetails)만 초기화하여 카드 상단에서 숨김 (signOffHistory 아코디언 이력은 보존됨)
+  // Critical은 없지만 Minor/Trivial 이슈가 남아있는 경우: 1단계 검증은 통과시키되 조건부 검증 상태로 마킹
   b.verificationStatus = "Verified";
-  b.signOffStatus = "Pending";
+  b.signOffStatus = openMinorCount > 0 ? "Conditional" : "Pending"; // 마이너가 있으면 기본 판정을 Conditional로 유도
   delete b.signOffDetails;
   delete b.signedOffAt;
   
   save();
-  alert(`✅ 빌드 [${b.versionName}] 1단계 검증이 완료되었습니다!\n이제 'QA Release Sign-off 결재 작성' 버튼을 통해 새로운 결재를 진행할 수 있습니다.`);
+  if(openMinorCount > 0){
+    alert(`⚠️ 빌드 [${b.versionName}] 1단계 검증 완료 (조건부 대상)\n\n미해결 Minor/Trivial 결함이 ${openMinorCount}건 존재합니다. 최종 결재 시 '조건부 승인'만 선택 가능합니다.`);
+  } else {
+    alert(`✅ 빌드 [${b.versionName}] 1단계 검증이 완료되었습니다!`);
+  }
  } else {
   cancelBuildSignOff(buildId);
   return;
@@ -3344,6 +3520,7 @@ function toggleBuildSignOff(buildId){
  renderBuilds();
  renderGanttChart();
 }
+
 
 // 승인 취소 및 초기화 함수
 // 승인 수동 취소 시 이력 타임라인 기록 및 상태 초기화 함수
@@ -3512,6 +3689,276 @@ function renderGanttChart(){
  container.innerHTML = html;
 }
 
+// ==========================================
+// 📅 v2.7.3 일정 탭 및 캘린더 / .ics 엔진
+// ==========================================
+
+let currentCalendarDate = new Date(); // 현재 캘린더 포커스 날짜
+
+function switchScheduleSubTab(mode) {
+ const ganttBtn = document.getElementById("schedTabGanttBtn");
+ const calBtn = document.getElementById("schedTabCalendarBtn");
+ const ganttPanel = document.getElementById("schedPanelGantt");
+ const calPanel = document.getElementById("schedPanelCalendar");
+
+ if (!ganttBtn || !calBtn) return;
+
+ if (mode === 'gantt') {
+  ganttBtn.className = "primary";
+  calBtn.className = "secondary";
+  ganttPanel.style.display = "block";
+  calPanel.style.display = "none";
+  renderGanttChart();
+ } else {
+  ganttBtn.className = "secondary";
+  calBtn.className = "primary";
+  ganttPanel.style.display = "none";
+  calPanel.style.display = "block";
+  renderCalendarMonthView();
+ }
+}
+
+function moveCalendarMonth(offset) {
+ currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offset);
+ renderCalendarMonthView();
+}
+
+// 1. .ics 캘린더 파일 다운로드 기능
+// 1. .ics 캘린더 파일 다운로드 기능 (오타 및 날짜 범위 중복 깨짐 현상 완벽 수정)
+function exportSchedulesToIcs() {
+ const activeScheds = db.activeProject ? (db.schedules || []).filter(s => s.projectId === db.activeProject) : (db.schedules || []);
+ if (!activeScheds.length) return alert("내보낼 마일스톤 일정 데이터가 없습니다.");
+
+ let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//GAME QA MASTER//Gantt Calendar v2.7.3//KO\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n";
+
+ activeScheds.forEach(s => {
+  // YYYYMMDD 포맷 정규화
+  const dtStart = s.startDate ? s.startDate.replace(/-/g, "") : todayString();
+  
+  // ICS 규격에 맞춰 종료일(DTEND)을 하루 뒤로 안전하게 설정하여 중복 삽입 및 깨짐 방지
+  let endDateObj = new Date(s.dueDate || s.startDate);
+  endDateObj.setDate(endDateObj.getDate() + 1);
+  const dtEnd = endDateObj.toISOString().split("T")[0].replace(/-/g, "");
+
+  icsContent += "BEGIN:VEVENT\n";
+  icsContent += `UID:qa-sched-${s.id}@gameqamaster.local\n`;
+  icsContent += `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split(".")[0]}Z\n`;
+  icsContent += `DTSTART;VALUE=DATE:${dtStart}\n`;
+  icsContent += `DTEND;VALUE=DATE:${dtEnd}\n`;
+  icsContent += `SUMMARY:[QA 마일스톤] ${s.title} (${s.phase})\n`;
+  icsContent += `DESCRIPTION:담당자: ${s.assignee || '미지정'} | 단계: ${s.phase}\n`;
+  icsContent += "END:VEVENT\n";
+ });
+
+ icsContent += "END:VCALENDAR"; // 오타 수정 완료 (icssContent -> icsContent)
+ 
+ const projectNameStr = db.projects.find(p => p.id === db.activeProject)?.name || "QA_Schedule";
+ downloadBlob(safeFilename(projectNameStr) + "_milestones.ics", new Blob([icsContent], { type: "text/calendar;charset=utf-8" }));
+ alert("📥 표준 .ics 캘린더 파일이 생성되었습니다! 구글 캘린더나 아웃룩에 즉시 임포트할 수 있습니다.");
+}
+
+
+// 2. 캘린더 뷰 및 D-Day 자동 계산 엔진 렌더러
+// 수정: 주(Week) 단위 반복 안에서 해당 주의 시작일~마감일 구간에 걸치는 일정을 계산하여 바 형태로 출력
+// 3. 캘린더 뷰 메인 렌더링 함수 (v2.7.3 완성판)
+function renderCalendarMonthView() {
+  const container = document.getElementById('calendarMonthGridView');
+  if (!container) return;
+
+  const year = currentCalendarYear;
+  const month = currentCalendarMonth;
+  
+  const titleEl = document.getElementById("calendarTitleMonth");
+  if(titleEl) {
+    titleEl.textContent = `${year}년 ${month}월 캘린더`;
+  }
+
+  const firstDayObj = new Date(year, month - 1, 1);
+  const lastDayObj = new Date(year, month, 0);
+  const totalDays = lastDayObj.getDate();
+  const startDayOfWeek = firstDayObj.getDay(); // 0: 일요일 ~ 6: 토요일
+
+  let activeScheds = db.activeProject ? (db.schedules || []).filter(s => s.projectId === db.activeProject) : (db.schedules || []);
+  window.activeScheds = activeScheds;
+
+  // 시작일 순서로 정렬하여 세로 라인(슬롯) 순서 고정
+  activeScheds.sort((a, b) => (a.startDate > b.startDate ? 1 : -1));
+
+  const totalCells = Math.ceil((startDayOfWeek + totalDays) / 7) * 7;
+  const totalWeeks = totalCells / 7;
+
+  // 전체 달력 그리드 구조 (날짜 칸들이 배경으로 깔림)
+  let html = `<div style="position: relative; background: #2d2d3f; border-radius: 8px; overflow: hidden;">`;
+  
+  // 요일 헤더 (일요일: 붉은빛, 토요일: 푸른빛)
+  html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); background: #1e1e2d; border-bottom: 1px solid #2d2d3f;">`;
+  const weekdays = [
+    { name: '일', color: '#f87171' },
+    { name: '월', color: '#888' },
+    { name: '화', color: '#888' },
+    { name: '수', color: '#888' },
+    { name: '목', color: '#888' },
+    { name: '금', color: '#888' },
+    { name: '토', color: '#60a5fa' }
+  ];
+  weekdays.forEach(day => {
+    html += `<div style="text-align: center; font-weight: bold; font-size: 12px; color: ${day.color}; padding: 8px 0;">${day.name}</div>`;
+  });
+  html += `</div>`;
+
+  // 날짜 셀 그리드 본문
+  html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(${totalWeeks}, minmax(105px, auto)); gap: 1px; background: #2d2d3f;">`;
+
+  for (let cellIndex = 0; cellIndex < totalCells; cellIndex++) {
+    const currentDay = cellIndex - startDayOfWeek + 1;
+    const isCurrentMonth = (currentDay > 0 && currentDay <= totalDays);
+    const dayOfWeek = cellIndex % 7;
+
+    let cellBg = '#1e1e2d';
+    if (isCurrentMonth) {
+      if (dayOfWeek === 0) cellBg = '#221e28'; // 일요일 배경
+      else if (dayOfWeek === 6) cellBg = '#1c212b'; // 토요일 배경
+    }
+
+    html += `<div style="background: ${cellBg}; padding: 6px; position: relative;">`;
+    if (isCurrentMonth) {
+      let dayColor = '#bbb';
+      if (dayOfWeek === 0) dayColor = '#fca5a5';
+      if (dayOfWeek === 6) dayColor = '#93c5fd';
+      html += `<div style="font-size: 11px; color: ${dayColor}; font-weight: bold;">${currentDay}</div>`;
+    }
+    html += `</div>`;
+  }
+  html += `</div>`; // 날짜 그리드 닫기
+
+  // 오버레이 레이어 (일정 바 렌더링)
+  html += `<div style="position: absolute; top: 37px; left: 0; right: 0; bottom: 0; pointer-events: none; padding: 4px;">`;
+
+  activeScheds.forEach((s, slotIndex) => {
+    const monthStartStr = `${year}-${String(month).padStart(2, '0')}-01`;
+    const lastDayStr = `${year}-${String(month).padStart(2, '0')}-${String(totalDays).padStart(2, '0')}`;
+
+    if (s.dueDate < monthStartStr || s.startDate > lastDayStr) return;
+
+    const effectiveStartDate = s.startDate < monthStartStr ? monthStartStr : s.startDate;
+    const effectiveDueDate = s.dueDate > lastDayStr ? lastDayStr : s.dueDate;
+
+    const startDayNum = parseInt(effectiveStartDate.split('-')[2]);
+    const dueDayNum = parseInt(effectiveDueDate.split('-')[2]);
+
+    const startIndex = startDayOfWeek + (startDayNum - 1);
+    const endIndex = startDayOfWeek + (dueDayNum - 1);
+
+    const barColor = s.phase === 'Alpha' ? '#3b82f6' : s.phase === 'Beta' ? '#10b981' : '#f59e0b';
+    const baseTopOffset = startRow => startRow * 106 + 28 + (slotIndex * 22);
+
+    let segments = [];
+    let currentIdx = startIndex;
+
+    while (currentIdx <= endIndex) {
+      const currentWeekRow = Math.floor(currentIdx / 7);
+      const weekEndIdx = Math.min(endIndex, (currentWeekRow + 1) * 7 - 1);
+      
+      const startCol = currentIdx % 7;
+      const endCol = weekEndIdx % 7;
+      const spanCols = (endCol - startCol + 1);
+
+      segments.push({
+        currentIdx,
+        weekEndIdx,
+        currentWeekRow,
+        startCol,
+        endCol,
+        spanCols
+      });
+
+      currentIdx = weekEndIdx + 1;
+    }
+
+    // [개선된 핵심 로직] 여러 주차 중 칸 수가 가장 큰(넓은) 세그먼트를 찾아 텍스트를 배치합니다.
+    let textSegmentIndex = 0;
+    if (segments.length > 1) {
+      let maxSpan = segments[0].spanCols;
+      for (let i = 1; i < segments.length; i++) {
+        if (segments[i].spanCols > maxSpan) {
+          maxSpan = segments[i].spanCols;
+          textSegmentIndex = i;
+        }
+      }
+    }
+
+    segments.forEach((seg, idx) => {
+      const topOffset = baseTopOffset(seg.currentWeekRow);
+      const leftPercent = (seg.startCol / 7) * 100;
+      const widthPercent = (seg.spanCols / 7) * 100;
+
+      const isSingleSegment = (segments.length === 1);
+      
+      let borderRadius = '4px';
+      if (!isSingleSegment) {
+        if (idx === 0) {
+          borderRadius = '4px 0 0 4px';
+        } else if (idx === segments.length - 1) {
+          borderRadius = '0 4px 4px 0';
+        } else {
+          borderRadius = '0px';
+        }
+      }
+
+      const titleDisplay = `[${s.phase || ''}] ${s.title || ''}`;
+      // 가장 넓은 칸을 가진 세그먼트에만 텍스트를 출력하고 나머지는 빈 공간 처리
+      const showText = (idx === textSegmentIndex);
+
+      html += `<div onclick="openCalendarScheduleModal('${s.id}')" title="${esc(s.title)} (${s.startDate} ~ ${s.dueDate})" style="pointer-events: auto; position: absolute; top: ${topOffset}px; left: calc(${leftPercent}% + 2px); width: calc(${widthPercent}% - 4px); height: 20px; background-color: ${barColor}; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: ${borderRadius}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; box-sizing: border-box; line-height: 16px; font-weight: 500; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+        ${showText ? esc(titleDisplay) : '&nbsp;'}
+      </div>`;
+    });
+  });
+
+  html += `</div>`; // 오버레이 닫기
+  html += `</div>`; // 전체 컨테이너 닫기
+
+  container.innerHTML = html;
+}
+
+
+  
+
+// 1. 오늘 날짜로 이동하는 함수 ("오늘" 버튼용)
+function goTodayCalendar() {
+  const now = new Date();
+  currentCalendarYear = now.getFullYear();
+  currentCalendarMonth = now.getMonth() + 1;
+  renderCalendarMonthView();
+}
+ 
+// 2. 일정 바 클릭 시 상세 정보 모달 오픈 함수
+window.openCalendarScheduleModal = function(scheduleId) {
+  const targetSchedule = (db.schedules || []).find(s => s.id === scheduleId);
+  if (!targetSchedule) return;
+
+  if (typeof openScheduleEditModal === 'function') {
+    openScheduleEditModal(targetSchedule);
+  } else {
+    alert(`[일정 상세 정보]\n- 제목: ${targetSchedule.title}\n- 단계: ${targetSchedule.phase}\n- 기간: ${targetSchedule.startDate} ~ ${targetSchedule.dueDate}`);
+  }
+}; 
+
+// 월 이동 함수 연동 보완
+function moveCalendarMonth(offset) {
+  currentCalendarMonth += offset;
+  if (currentCalendarMonth > 12) {
+    currentCalendarMonth = 1;
+    currentCalendarYear++;
+  } else if (currentCalendarMonth < 1) {
+    currentCalendarMonth = 12;
+    currentCalendarYear--;
+  }
+  renderCalendarMonthView();
+}
+
+
+  
 // [P0-001-H 반영] 빌드 목록 렌더링 함수 수정 (동기화된 승인 배지 및 취소 버튼 출력)
 // [빌드 목록 렌더링] 1단계 승인 버튼 및 2단계 결재 작성 버튼 완전 분리
 // 승인 상태에 따라 1단계/2단계 버튼이 전환되는 빌드 목록 렌더링
@@ -3534,8 +3981,16 @@ function renderBuilds(){
 
  container.innerHTML = activeBuilds.map(b => {
   const projectBugs = db.bugs.filter(bug => bug.projectId === b.projectId);
-  const openCritCount = projectBugs.filter(bug => (bug.buildVersion === b.versionName || !bug.buildVersion) && (bug.severity === "Critical" || bug.severity === "Major") && (bug.status === "Open" || bug.status === "In Progress")).length;
   
+  // 1. 치명적/중대 결함 (빌드 차단 대상)
+  const openCritList = projectBugs.filter(bug => (bug.buildVersion === b.versionName || !bug.buildVersion) && (bug.severity === "Critical" || bug.severity === "Major") && (bug.status === "Open" || bug.status === "In Progress"));
+  const openCritCount = openCritList.length;
+
+  // 2. 경미/사소 결함 (조건부 승인 대상)
+  const openMinorList = projectBugs.filter(bug => (bug.buildVersion === b.versionName || !bug.buildVersion) && (bug.severity === "Minor" || bug.severity === "Trivial") && (bug.status === "Open" || bug.status === "In Progress"));
+  const openMinorCount = openMinorList.length;
+
+   
   const status = b.signOffStatus || "Pending";
   const isVerified = b.verificationStatus === "Verified";
   const isApproved = status === "Approved";
@@ -3543,26 +3998,53 @@ function renderBuilds(){
   const isRejected = status === "Rejected" || (openCritCount > 0 && status === "Pending") || (openCritCount > 0 && (isApproved || isConditional));
 
   let signOffBadge = "";
-  if (isRejected) {
+  if (isRejected || openCritCount > 0 || openMinorCount > 0) {
+   const hasBlocker = openCritCount > 0;
+   const badgeBg = hasBlocker ? "#512a32" : "#473a25";
+   const badgeColor = hasBlocker ? "#ff7373" : "#ffbd69";
+   const badgeTitle = hasBlocker 
+    ? `🚨 승인 반려/무효화 (미해결 중대: ${openCritCount}건, 경미: ${openMinorCount}건) ▼`
+    : `⚠️ 조건부 승인 상태 (미해결 경미/사소 이슈: ${openMinorCount}건) ▼`;
+
    signOffBadge = `
-    <details style="display:inline-block;background:#512a32;border-radius:5px;padding:2px 6px;">
-     <summary style="color:#ff7373;font-weight:bold;cursor:pointer;font-size:10px;">
-      🚨 승인 반려/무효화 (미해결 결함: ${openCritCount}건) ▼
+    <details style="display:inline-block;background:${badgeBg};border-radius:5px;padding:2px 6px;">
+     <summary style="color:${badgeColor};font-weight:bold;cursor:pointer;font-size:10px;">
+      ${badgeTitle}
      </summary>
-     <div style="margin-top:6px;padding:8px;background:#101319;border-radius:4px;border:1px solid #303644;font-size:11px;text-align:left;">
-      <div style="color:#9299aa;margin-bottom:4px;font-weight:bold;">[미해결 Critical/Major 결함 목록]</div>
-      ${openCritCount > 0 ? projectBugs.filter(bug => (bug.buildVersion === b.versionName || !bug.buildVersion) && (bug.severity === "Critical" || bug.severity === "Major") && (bug.status === "Open" || bug.status === "In Progress")).map(bug => {
-       const bugIdx = projectBugs.findIndex(item => item.id === bug.id);
-       const issueLabel = bugIdx !== -1 ? `ISSUE-${bugIdx + 1}` : 'ISSUE';
-       return `
-        <div style="margin:4px 0;padding:4px;background:#1a1f28;border-radius:3px;cursor:pointer;" onclick="scrollToTargetElement('bugs', 'bug-card-${bug.id}')">
-         <span class="badge" style="background:#303b4d;color:#70a5ff;font-weight:bold">[${issueLabel}]</span>
-         <strong style="color:#e5e7eb;">${esc(bug.title)}</strong>
-         <span class="badge" style="background:#263b31;color:#4bd69a">${esc(bug.severity)}</span>
-         <span class="badge" style="background:#252d3a;color:#70a5ff">${esc(bug.status)}</span>
-        </div>
-       `;
-      }).join("") : '<div style="color:#777f90">미해결 결함이 없습니다.</div>'}
+     <div style="margin-top:6px;padding:8px;background:#101319;border-radius:4px;border:1px solid #303644;font-size:11px;text-align:left;max-height:200px;overflow-y:auto;">
+      
+      ${openCritCount > 0 ? `
+       <div style="color:#ff7373;margin-bottom:4px;font-weight:bold;">[🔥 빌드 차단 Critical/Major 결함: ${openCritCount}건]</div>
+       ${openCritList.map(bug => {
+        const bugIdx = projectBugs.findIndex(item => item.id === bug.id);
+        const issueLabel = bugIdx !== -1 ? `ISSUE-${bugIdx + 1}` : 'ISSUE';
+        return `
+         <div style="margin:4px 0;padding:4px;background:#1a1f28;border-radius:3px;cursor:pointer;" onclick="scrollToTargetElement('bugs', 'bug-card-${bug.id}')">
+          <span class="badge" style="background:#303b4d;color:#70a5ff;font-weight:bold">[${issueLabel}]</span>
+          <strong style="color:#e5e7eb;">${esc(bug.title)}</strong>
+          <span class="badge" style="background:#512a32;color:#ff7373">${esc(bug.severity)}</span>
+          <span class="badge" style="background:#252d3a;color:#70a5ff">${esc(bug.status)}</span>
+         </div>
+        `;
+       }).join("")}
+      ` : ''}
+
+      ${openMinorCount > 0 ? `
+       <div style="color:#ffbd69;margin-top:${openCritCount > 0 ? '8px' : '0'};margin-bottom:4px;font-weight:bold;">[⚠️ 잔여 Minor/Trivial 이슈: ${openMinorCount}건]</div>
+       ${openMinorList.map(bug => {
+        const bugIdx = projectBugs.findIndex(item => item.id === bug.id);
+        const issueLabel = bugIdx !== -1 ? `ISSUE-${bugIdx + 1}` : 'ISSUE';
+        return `
+         <div style="margin:4px 0;padding:4px;background:#1a1f28;border-radius:3px;cursor:pointer;" onclick="scrollToTargetElement('bugs', 'bug-card-${bug.id}')">
+          <span class="badge" style="background:#303b4d;color:#70a5ff;font-weight:bold">[${issueLabel}]</span>
+          <strong style="color:#e5e7eb;">${esc(bug.title)}</strong>
+          <span class="badge" style="background:#473a25;color:#ffbd69">${esc(bug.severity)}</span>
+          <span class="badge" style="background:#252d3a;color:#70a5ff">${esc(bug.status)}</span>
+         </div>
+        `;
+       }).join("")}
+      ` : ''}
+
      </div>
     </details>
    `;
@@ -3575,6 +4057,7 @@ function renderBuilds(){
   } else {
    signOffBadge = '<span class="badge" style="background:#303746;color:#aab0bf;font-weight:bold">⏳ Sign-off 검토 대기</span>';
   }
+
 
   const details = b.signOffDetails;
   const historyList = b.signOffHistory || [];
@@ -5129,11 +5612,23 @@ async function runAdvancedApiSuite(){
 
   const dummyProjId=db.activeProject||null;
   lastApiResults.forEach(r=>{
+   // 기대 상태 코드가 테스트 케이스에 지정된 경우 해당 값을 이력에 반영, 없으면 실제 응답 상태 코드 활용
+   const expectedCode = r.expected_status_code || r.status || 200;
    db.apiRuns.unshift({
-    id:uid(), projectId:dummyProjId, name:r.name, url:redactApiUrl(r.url), method:r.method,
-    status:r.status, expected:200, passed:r.ok, elapsed:r.duration, date:new Date().toISOString(), isSample:false
+    id: uid(), 
+    projectId: dummyProjId, 
+    name: r.name, 
+    url: redactApiUrl(r.url), 
+    method: r.method,
+    status: r.status, 
+    expected: expectedCode, // 200 고정값 대신 실제 판정 기준이 된 기대 코드 동적 바인딩
+    passed: r.ok, 
+    elapsed: r.duration, 
+    date: new Date().toISOString(), 
+    isSample: false
    });
   });
+
   save();
 
   renderApiResultsUI();
@@ -5238,6 +5733,7 @@ function validateJsonSchema(body, schema) {
  }
  return errors;
 }
+  
 // 🌟 3. 개별 API 테스트 실행 함수 (오류 해결의 핵심)
 async function runSingleApiTest(test, baseUrl, globalHeaders, env, file){
  const name=test.name||'API Test Case';
@@ -5289,6 +5785,7 @@ async function runSingleApiTest(test, baseUrl, globalHeaders, env, file){
  }
  return result;
 }
+
 
 
   
@@ -6146,13 +6643,13 @@ function initDefaultSampleData(silent=true){
    versionName: "v1.1.0-RC1",
    phase: "RC",
    note: "릴리즈 후보 빌드: 회귀 테스트 및 성능 최적화 검증",
-   signOffStatus: "Approved",
+   signOffStatus: "Conditional",
    signedOffAt: now,
    signOffDetails: {
-    type: "Approved",
+    type: "Conditional",
     qaLead: "김테스터 (QA Lead)",
     pm: "이PM",
-    comment: "모든 회귀 검증 패스 및 Critical/Major 결함 0건 확인 완료. 라이브 배포를 승인합니다.",
+    comment: "잔여 Minor/Trivial 이슈가 존재하여 조건부로 릴리즈 승인합니다.",
     updatedAt: now
    },
    created: now,
@@ -6472,8 +6969,12 @@ function getSignOffCertHTML(activeProjectBuilds){
  return "";
 }
 
-
 function renderReports(){
+ // 💡 [수정] 리포트 진입 시 현재 활성 프로젝트의 빌드 및 결함 상태 무결성 강제 재검증 수행
+ if(db.activeProject){
+  validateProjectBuildSignOffs(db.activeProject);
+ }
+
  const activeTests=db.activeProject?db.tests.filter(t=>t.projectId===db.activeProject):[];
  const activeBuilds=db.activeProject?db.builds.filter(b=>b.projectId===db.activeProject):[];
  const total=activeTests.length;
@@ -6501,6 +7002,8 @@ function renderReports(){
 
  renderReportCharts();
 }
+
+
 
 function getChartCanvas(id){
  const canvas=document.getElementById(id);
@@ -6685,7 +7188,7 @@ function downloadReportHTML(){
 </head>
 <body>
   <h1>📈 ${esc(name)} QA 통합 리포트</h1>
-  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.7.1</p>
+  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.7.3</p>
 
   ${certHTML}
 
@@ -6918,47 +7421,9 @@ window.addEventListener("DOMContentLoaded", async () => {
 /**
  * 백업 데이터 스키마 자동 마이그레이션 핸들러
  */
-const CURRENT_SCHEMA_VERSION = "2.7.1";
+// normalizeDB() 및 restoreAll()에 실제 스키마 마이그레이션 파이프라인이 통합되었으므로
+// 하단의 미사용 더미 함수(restoreAndMigrateBackup 등)는 제거하여 코드 유지보수성을 개선합니다.
 
-function restoreAndMigrateBackup(jsonString) {
-    try {
-        const backupData = JSON.parse(jsonString);
-        
-        // 1. 스키마 버전 확인 (기존 구버전 백업은 v1.0으로 간주)
-        let dataVersion = backupData.version || "1.0.0";
-        let payload = backupData.payload || backupData; // 순수 데이터 형태 호환
-
-        console.log(`[Migration] Detected backup schema version: ${dataVersion}`);
-
-        // 2. 버전별 순차 마이그레이션 파이프라인 실행
-        if (isVersionOlder(dataVersion, "2.0.0")) {
-            payload = migrateV1toV2(payload);
-        }
-        if (isVersionOlder(dataVersion, "2.5.0")) {
-            payload = migrateV2toV2_5(payload);
-        }
-        if (isVersionOlder(dataVersion, CURRENT_SCHEMA_VERSION)) {
-            payload = migrateV2_5toLatest(payload);
-        }
-
-        // 3. 최종 데이터 구조 무결성 검증 (필수 필드 체크)
-        validateSchemaIntegrity(payload);
-
-        return {
-            success: true,
-            version: CURRENT_SCHEMA_VERSION,
-            data: payload,
-            message: `성공적으로 v${CURRENT_SCHEMA_VERSION} 스키마로 마이그레이션 및 복원되었습니다.`
-        };
-
-    } catch (error) {
-        console.error("[Migration Error]", error);
-        return {
-            success: false,
-            message: `백업 복원 실패: 스키마 구조가 손상되었거나 호환되지 않습니다. (${error.message})`
-        };
-    }
-}
 
 // 버전 비교 유틸리티
 function isVersionOlder(v1, v2) {
