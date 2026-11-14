@@ -1639,7 +1639,7 @@ GAME QA MASTER
 <div class="update-panel green-border">
 <strong class="green"> 캘린더 기능 추가</strong>
 <ul class="update-list-green">
-<li><strong> 캘린더 기능 추가:</strong>간트 차트와 연동되는 캘린더 추가</li>
+<li><strong> 캘린더 기능 추가:</strong>간트 차트와 연동되는 캘린더 신설</li>
 </ul>
 </div>
 </div>
@@ -3112,13 +3112,21 @@ function switchView(viewName){
  
  // 🌟 [v2.7.3 수정] 일정(schedule) 뷰 진입 시 현재 선택된 서브 탭(간트 차트 또는 캘린더)에 맞춰 렌더링 분기
  if(viewName==="schedule") {
-  const ganttPanel = document.getElementById("schedPanelGantt");
-  if (ganttPanel && ganttPanel.style.display !== "none") {
-   renderGanttChart();
-  } else {
-   renderCalendarMonthView();
-  }
+ // 수정 부분: 일정 및 마일스톤 탭 진입 시 간트차트 뷰가 디폴트로 활성화되도록 강제 설정
+ const ganttBtn = document.getElementById("schedTabGanttBtn");
+ const calBtn = document.getElementById("schedTabCalendarBtn");
+ const ganttPanel = document.getElementById("schedPanelGantt");
+ const calPanel = document.getElementById("schedPanelCalendar");
+
+ if (ganttBtn && calBtn && ganttPanel && calPanel) {
+  ganttBtn.className = "primary";
+  calBtn.className = "secondary";
+  ganttPanel.style.display = "block";
+  calPanel.style.display = "none";
  }
+ renderGanttChart();
+}
+
  
  if(viewName==="tests") renderTests();
  
@@ -3557,54 +3565,6 @@ function cancelBuildSignOff(buildId){
  renderGanttChart();
  alert(`빌드 [${b.versionName}] 승인이 취소되었습니다.`);
 }
-// 마일스톤 일정 등록 함수
-function addScheduleItem() {
-  if (!db.activeProject) {
-    return alert("프로젝트를 먼저 선택하세요.");
-  }
-  
-  const title = document.getElementById("schedTitle").value.trim();
-  const phase = document.getElementById("schedPhase").value;
-  const assignee = document.getElementById("schedAssignee").value.trim();
-  const startDate = document.getElementById("schedStartDate").value;
-  const dueDate = document.getElementById("schedDueDate").value;
-
-  if (!title) {
-    return alert("마일스톤 / 패키지명을 입력해주세요.");
-  }
-  if (!startDate || !dueDate) {
-    return alert("시작일과 마감일을 모두 선택해주세요.");
-  }
-  if (startDate > dueDate) {
-    return alert("⚠️ 마감일은 시작일보다 빠를 수 없습니다. 날짜를 다시 확인해주세요.");
-  }
-
-  if (!Array.isArray(db.schedules)) {
-    db.schedules = [];
-  }
-
-  db.schedules.push({
-    id: uid(),
-    projectId: db.activeProject,
-    title,
-    phase,
-    assignee: assignee || "미지정",
-    startDate,
-    dueDate,
-    created: new Date().toISOString(),
-    isSample: false
-  });
-
-  // 입력폼 초기화
-  document.getElementById("schedTitle").value = "";
-  document.getElementById("schedAssignee").value = "";
-  document.getElementById("schedStartDate").value = "";
-  document.getElementById("schedDueDate").value = "";
-
-  save();
-  renderGanttChart();
-  alert(`마일스톤 일정 [${title}]이 성공적으로 등록되었습니다!`);
-}
 
 
 function deleteScheduleItem(id){
@@ -3778,27 +3738,28 @@ function renderCalendarMonthView() {
   const totalDays = lastDayObj.getDate();
   const startDayOfWeek = firstDayObj.getDay(); // 0: 일요일 ~ 6: 토요일
 
-  let activeScheds = db.activeProject ? (db.schedules || []).filter(s => s.projectId === db.activeProject) : (db.schedules || []);
+  let activeScheds = db.activeProject ? (db.schedules || []).filter(s => s.projectId === db.activeProject) : [];
   window.activeScheds = activeScheds;
 
-  // 시작일 순서로 정렬하여 세로 라인(슬롯) 순서 고정
+  // 💡 [핵심 보완] 간트 차트/일정에 데이터가 없는 경우 캘린더 오버레이 일정도 즉시 비워지도록 정렬
+  if (!activeScheds.length) {
+    // 데이터가 없을 때 빈 상태를 안내하거나 오버레이를 완전히 초기화
+  }
+
+  // 시작일 순서로 정렬하여 슬롯 고정
   activeScheds.sort((a, b) => (a.startDate > b.startDate ? 1 : -1));
 
   const totalCells = Math.ceil((startDayOfWeek + totalDays) / 7) * 7;
   const totalWeeks = totalCells / 7;
 
-  // 전체 달력 그리드 구조 (날짜 칸들이 배경으로 깔림)
   let html = `<div style="position: relative; background: #2d2d3f; border-radius: 8px; overflow: hidden;">`;
   
-  // 요일 헤더 (일요일: 붉은빛, 토요일: 푸른빛)
+  // 요일 헤더
   html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); background: #1e1e2d; border-bottom: 1px solid #2d2d3f;">`;
   const weekdays = [
-    { name: '일', color: '#f87171' },
-    { name: '월', color: '#888' },
-    { name: '화', color: '#888' },
-    { name: '수', color: '#888' },
-    { name: '목', color: '#888' },
-    { name: '금', color: '#888' },
+    { name: '일', color: '#f87171' }, { name: '월', color: '#888' },
+    { name: '화', color: '#888' }, { name: '수', color: '#888' },
+    { name: '목', color: '#888' }, { name: '금', color: '#888' },
     { name: '토', color: '#60a5fa' }
   ];
   weekdays.forEach(day => {
@@ -3816,8 +3777,8 @@ function renderCalendarMonthView() {
 
     let cellBg = '#1e1e2d';
     if (isCurrentMonth) {
-      if (dayOfWeek === 0) cellBg = '#221e28'; // 일요일 배경
-      else if (dayOfWeek === 6) cellBg = '#1c212b'; // 토요일 배경
+      if (dayOfWeek === 0) cellBg = '#221e28';
+      else if (dayOfWeek === 6) cellBg = '#1c212b';
     }
 
     html += `<div style="background: ${cellBg}; padding: 6px; position: relative;">`;
@@ -3829,9 +3790,9 @@ function renderCalendarMonthView() {
     }
     html += `</div>`;
   }
-  html += `</div>`; // 날짜 그리드 닫기
+  html += `</div>`;
 
-  // 오버레이 레이어 (일정 바 렌더링)
+  // 오버레이 레이어 (일정이 없으면 activeScheds.forEach 내부가 실행되지 않아 캘린더에서 완벽히 삭제됨)
   html += `<div style="position: absolute; top: 37px; left: 0; right: 0; bottom: 0; pointer-events: none; padding: 4px;">`;
 
   activeScheds.forEach((s, slotIndex) => {
@@ -3863,19 +3824,10 @@ function renderCalendarMonthView() {
       const endCol = weekEndIdx % 7;
       const spanCols = (endCol - startCol + 1);
 
-      segments.push({
-        currentIdx,
-        weekEndIdx,
-        currentWeekRow,
-        startCol,
-        endCol,
-        spanCols
-      });
-
+      segments.push({ currentIdx, weekEndIdx, currentWeekRow, startCol, endCol, spanCols });
       currentIdx = weekEndIdx + 1;
     }
 
-    // [개선된 핵심 로직] 여러 주차 중 칸 수가 가장 큰(넓은) 세그먼트를 찾아 텍스트를 배치합니다.
     let textSegmentIndex = 0;
     if (segments.length > 1) {
       let maxSpan = segments[0].spanCols;
@@ -3893,20 +3845,14 @@ function renderCalendarMonthView() {
       const widthPercent = (seg.spanCols / 7) * 100;
 
       const isSingleSegment = (segments.length === 1);
-      
       let borderRadius = '4px';
       if (!isSingleSegment) {
-        if (idx === 0) {
-          borderRadius = '4px 0 0 4px';
-        } else if (idx === segments.length - 1) {
-          borderRadius = '0 4px 4px 0';
-        } else {
-          borderRadius = '0px';
-        }
+        if (idx === 0) borderRadius = '4px 0 0 4px';
+        else if (idx === segments.length - 1) borderRadius = '0 4px 4px 0';
+        else borderRadius = '0px';
       }
 
       const titleDisplay = `[${s.phase || ''}] ${s.title || ''}`;
-      // 가장 넓은 칸을 가진 세그먼트에만 텍스트를 출력하고 나머지는 빈 공간 처리
       const showText = (idx === textSegmentIndex);
 
       html += `<div onclick="openCalendarScheduleModal('${s.id}')" title="${esc(s.title)} (${s.startDate} ~ ${s.dueDate})" style="pointer-events: auto; position: absolute; top: ${topOffset}px; left: calc(${leftPercent}% + 2px); width: calc(${widthPercent}% - 4px); height: 20px; background-color: ${barColor}; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: ${borderRadius}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; box-sizing: border-box; line-height: 16px; font-weight: 500; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
@@ -3915,12 +3861,13 @@ function renderCalendarMonthView() {
     });
   });
 
-  html += `</div>`; // 오버레이 닫기
-  html += `</div>`; // 전체 컨테이너 닫기
+  html += `</div>`;
+  html += `</div>`;
 
   container.innerHTML = html;
 }
 
+   
 
   
 
@@ -7391,12 +7338,69 @@ function render(){
  renderApiHistory();
  renderBuilds();
  renderGanttChart();
+ renderCalendarMonthView(); // 💡 캘린더 뷰 동기화 렌더링 추가
 
- // 🌟 [v2.7.0 신규] 전체 렌더링 시 추적성 매트릭스 갱신 호출 추가
  renderTraceabilityMatrix(); 
 
  updateTableFilterOptions();
  loadAiSamplesToDropdown();
+}
+
+function deleteScheduleItem(id){
+ if(!confirm("해당 일정을 삭제하시겠습니까?")) return;
+ db.schedules=(db.schedules||[]).filter(s=>s.id!==id);
+ save();
+ renderGanttChart();
+ renderCalendarMonthView(); // 💡 일정 삭제 시 캘린더에서도 즉시 삭제되도록 동기화 추가
+}
+
+function addScheduleItem() {
+  if (!db.activeProject) {
+    return alert("프로젝트를 먼저 선택하세요.");
+  }
+  
+  const title = document.getElementById("schedTitle").value.trim();
+  const phase = document.getElementById("schedPhase").value;
+  const assignee = document.getElementById("schedAssignee").value.trim();
+  const startDate = document.getElementById("schedStartDate").value;
+  const dueDate = document.getElementById("schedDueDate").value;
+
+  if (!title) {
+    return alert("마일스톤 / 패키지명을 입력해주세요.");
+  }
+  if (!startDate || !dueDate) {
+    return alert("시작일과 마감일을 모두 선택해주세요.");
+  }
+  if (startDate > dueDate) {
+    return alert("⚠️ 마감일은 시작일보다 빠를 수 없습니다. 날짜를 다시 확인해주세요.");
+  }
+
+  if (!Array.isArray(db.schedules)) {
+    db.schedules = [];
+  }
+
+  db.schedules.push({
+    id: uid(),
+    projectId: db.activeProject,
+    title,
+    phase,
+    assignee: assignee || "미지정",
+    startDate,
+    dueDate,
+    created: new Date().toISOString(),
+    isSample: false
+  });
+
+  // 입력폼 초기화
+  document.getElementById("schedTitle").value = "";
+  document.getElementById("schedAssignee").value = "";
+  document.getElementById("schedStartDate").value = "";
+  document.getElementById("schedDueDate").value = "";
+
+  save();
+  renderGanttChart();
+  renderCalendarMonthView(); // 캘린더 뷰 즉시 동기화
+  alert(`마일스톤 일정 [${title}]이 성공적으로 등록되었습니다!`);
 }
 
 
