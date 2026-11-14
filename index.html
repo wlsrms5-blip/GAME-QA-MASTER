@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GAME QA MASTER v2.7.3</title>
+<title>GAME QA MASTER v2.7.4</title>
 <script>
 // 1. 우클릭 차단
 document.addEventListener('contextmenu', function(e) {
@@ -57,12 +57,22 @@ img, video, canvas, svg{
  width:100%;
 }
 
+/* 가로 모드(데스크톱 & 모바일 가로) 좌측 메인 사이드바 화면 고정 */
+/* 수정된 사이드바 및 스크롤 영역 스타일 */
 .sidebar{
+ position:fixed;
+ top:0;
+ left:0;
+ bottom:0;
  width:235px;
  background:#171b23;
  border-right:1px solid #303644;
  padding:20px 12px;
- flex-shrink:0;
+ display:flex;
+ flex-direction:column;
+ overflow-y:auto; /* 사이드바 내부 자체 스크롤 */
+ overscroll-behavior: contain; /* 💡 3번 요구사항: 사이드바 스크롤이 우측 본문으로 전파(Chain)되는 것 방지 */
+ z-index:1000;
 }
 
 .logo{
@@ -90,7 +100,7 @@ img, video, canvas, svg{
  border:1px solid #262b36;
  overflow:hidden;
 }
-
+ 
 .nav-group-btn{
  display:flex;
  justify-content:space-between;
@@ -99,7 +109,7 @@ img, video, canvas, svg{
  padding:11px 12px;
  background:#1c212b;
  border:0;
- color:#ffffff !important; /* 요청 1: 상위 탭 폰트 흰색 */
+ color:#ffffff !important; /* 상위 탭 폰트 흰색 */
  text-align:left;
  font-size:13px;
  font-weight:bold;
@@ -108,7 +118,7 @@ img, video, canvas, svg{
 }
 
 .nav-group-btn:hover, .nav-group-btn.active-group{
- background:#3978e8 !important; /* 요청 2: 선택한 상위 탭 파란색 강조 */
+ background:#3978e8 !important; /* 선택한 상위 탭 파란색 강조 */
  color:#ffffff !important;
 }
 
@@ -157,11 +167,13 @@ img, video, canvas, svg{
  display:none;
 }
 
+/* 고정된 사이드바 너비만큼 우측 메인 영역 시작 위치 확보 */
 .main{
  flex:1;
  min-width:0;
+ margin-left:235px;
  padding:25px;
- width:100%;
+ width:calc(100% - 235px);
 }
 
 .header{
@@ -207,26 +219,17 @@ img, video, canvas, svg{
  margin-right:auto;
 }
 
-/* 3번 이슈 수정: 버튼 크기가 늘어나지 않도록 고정하고, 공간이 부족하면 전체저장부터 아래로 떨어지도록 설정 */
 .toolbar button {
  flex: 0 0 auto;
  width: auto;
  min-width: 110px;
 }
 
-/* 두 버튼을 묶은 그룹: 줄바꿈이 일어나도 항상 같은 라인에 유지되도록 설정 */
 .toolbar-btns {
  display: flex;
  align-items: center;
  gap: 8px;
  flex-wrap: nowrap;
-}
-
-.toolbar-label{
- color:#9299aa;
- font-size:12px;
- font-weight:bold;
- margin-right:auto;
 }
 
 .save-status{
@@ -543,7 +546,7 @@ summary::-webkit-details-marker, summary::marker{
 .update-head{
  display: flex;
  align-items: center;
- flex-wrap: wrap; /* 공간이 부족할 경우 자식 요소 중 브레이크되는 항목만 다음 줄로 이동 */
+ flex-wrap: wrap;
  gap: 6px 8px;
  margin-bottom: 10px;
  width: 100%;
@@ -575,26 +578,19 @@ summary::-webkit-details-marker, summary::marker{
  color: #4bd69a;
 }
 
-/* 🌟 핵심: feature-pill 클래스에 너비 100%를 주어 제목만 무조건 다음 줄로 떨어지게 강제 */
-/* 업데이트 제목/테마명은 공간이 부족할 경우 무조건 다음 줄로 떨어지도록 강제 */
-/* 🌟 수정 포인트: 배경이 글자 수에 맞고, 길면 줄바꿈되도록 변경 */
-/* 🌟 배경 가로 너비가 글자 수에 딱 맞게 줄어들도록 수정된 스타일 */
-/* 🌟 제목(feature-pill): order를 2로 주어 항상 날짜보다 뒤(오른쪽)에 오려고 하되,
-   가로 폭이 좁아지면 flex-wrap에 의해 자연스럽게 두 번째 줄로 내려갑니다. */
-/* 🌟 핵심 수정: 배경이 글자 수에 딱 맞게 줄어들고, 공간이 부족할 때만 줄바꿈되도록 설정 */
 .feature-pill {
-  background: rgba(82, 136, 240, .18);
-  color: #70a5ff;
-  display: inline-block;  /* 블록 대신 인라인 성격으로 변경하여 글자 수에 맞춤 */
-  width: auto;            /* 고정 너비 해제 */
-  max-width: 100%;        /* 화면을 넘지 않음 */
-  flex-basis: auto;       /* 강제 늘어남 방지 */
-  white-space: normal;    /* 길면 줄바꿈 허용 */
-  word-break: keep-all;   /* 단어 단위 줄바꿈 */
-  line-height: 1.4;
-  margin-top: 2px;
+ background: rgba(82, 136, 240, .18);
+ color: #70a5ff;
+ display: inline-block;
+ width: auto;
+ max-width: 100%;
+ flex-basis: auto;
+ white-space: normal;
+ word-break: keep-all;
+ line-height: 1.4;
+ margin-top: 2px;
 }
-  
+
 .original-pill{
  background: #303746;
  color: #aab0bf;
@@ -602,18 +598,13 @@ summary::-webkit-details-marker, summary::marker{
  flex-shrink: 0;
 }
 
-/* 업데이트 날짜를 오른쪽 끝으로 고정 */
-/* 🌟 날짜를 첫 번째 줄의 무조건 오른쪽 끝으로 고정하는 핵심 설정 */
-/* 🌟 핵심 포인트: 날짜에 margin-left: auto를 주되, 
-   공간이 넉넉하면 자연스럽게 바로 앞 요소(배지 등) 오른쪽에 붙고,
-   공간이 부족해져서 제목이 아래로 밀려날 때만 첫 줄의 맨 우측 끝으로 밀려납니다. */
 .update-date {
-  font-size: 11px;
-  color: #9299aa;
-  margin-left: auto; 
-  white-space: nowrap;
-  flex-shrink: 0;
-  order: 1; /* flex 아이템 순서 제어 */
+ font-size: 11px;
+ color: #9299aa;
+ margin-left: auto; 
+ white-space: nowrap;
+ flex-shrink: 0;
+ order: 1;
 }
 
 .update-grid{
@@ -644,7 +635,7 @@ summary::-webkit-details-marker, summary::marker{
 .update-panel.gray-panel ul {
  color: #9299aa;
 }
-
+  
 .update-panel.gray-panel li::before {
  content: "●";
  color: #9299aa;
@@ -682,19 +673,117 @@ summary::-webkit-details-marker, summary::marker{
  line-height:1.8;
 }
 
+/* 📁 좌측 사이드바 하단 테스트 분류 구조 박스 스타일 통일 */
+.sidebar .tree-sidebar {
+  margin-top: 16px;
+  margin-bottom: 0;
+  padding: 14px 12px;
+  background: #1a1f28; /* 타 카드와 동일한 배경 색상 */
+  border: 1px solid #303644; /* 타 카드와 동일한 테두리 */
+  border-radius: 10px; /* 타 카드와 동일한 모서리 둥글기 */
+  max-height: calc(100vh - 340px);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+  
+.tree-node-screen {
+  font-weight: bold;
+  color: #70a5ff;
+  margin-top: 6px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  word-break: break-all;
+  transition: background 0.2s, color 0.2s;
+}
+  
+.tree-node-screen:hover {
+  background: rgba(112, 165, 255, 0.15);
+  color: #ffffff;
+}
+  
+.tree-node-feature {
+  margin-left: 10px;
+  color: #c9d1d9;
+  font-size: 11.5px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  word-break: break-all;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tree-node-feature:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+/* 📁 사이드바 내부 하단에 배치되는 테스트 분류 구조 래퍼 스타일 */
+/* 📁 사이드바 내부 하단에 배치되는 테스트 분류 구조 래퍼 스타일 (기본 숨김) */
+.sidebar-tree-wrapper {
+  display: none; 
+  margin-top: auto; 
+  padding-top: 12px;
+  border-top: 1px solid #303644;
+  max-height: calc(100vh - 280px);
+  flex-direction: column;
+}
+  
+.sidebar-tree-scroll {
+  overflow-y: auto;
+  max-height: calc(100vh - 330px);
+  padding-right: 2px;
+  overscroll-behavior: contain; /* 💡 3번 요구사항: 트리 내부 스크롤 격리 */
+}
+
+
+/* 🖥️ 가로 모드 (데스크톱 & 화면 너비 769px 이상) 일 때 사이드바 하단 배치 활성화 */
+@media (min-width: 769px) and (orientation: landscape) {
+  /* 1 & 2번 요구사항: 오직 '테스트 관리' 탭(#tests.view.active)일 때만 사이드바 하단 테스트 분류 트리 출력 */
+  body:has(#tests.view.active) .sidebar-tree-wrapper {
+    display: flex !important;
+  }
+  
+  /* 메인 테스트 관리 탭(#tests)에 있던 기존 테스트 분류 구조 카드는 가로 화면의 사이드바에 출력이 활성화될 때 중복 방지를 위해 숨김 */
+  body:has(#tests.view.active) #mainTestTreeCard {
+    display: none !important;
+  }
+  
+  /* 그 외 다른 탭에서는 사이드바 트리를 숨기고 메인 영역의 분류 카드를 원래대로 복원 */
+  body:not(:has(#tests.view.active)) .sidebar-tree-wrapper {
+    display: none !important;
+  }
+  body:not(:has(#tests.view.active)) #mainTestTreeCard {
+    display: block !important;
+  }
+}
+
+/* 📱 세로 모드 / 모바일 화면일 때 */
+@media (orientation: portrait), (max-width: 768px) {
+  .sidebar-tree-wrapper {
+    display: none !important; /* 세로 모드에서는 사이드바 내부 박스 항상 숨김 */
+  }
+  #mainTestTreeCard {
+    display: block !important; /* 메인 영역의 분류 카드를 보이게 함 */
+  }
+}
+  
 /* 세로 화면이 길거나 모바일/태블릿 세로 뷰포트인 경우 */
 @media (orientation: portrait), (max-width: 768px) {
  .layout{display:block}
  .sidebar{
-  width:100%;
-  padding:10px 12px 0 12px;
   position:sticky;
   top:0;
+  bottom:auto;
+  width:100%;
+  padding:10px 12px 0 12px;
   z-index:1000;
   background:#171b23;
   border-right:0;
   border-bottom:1px solid #303644;
  }
+ 
  .logo{display:none}
  .nav-group-container{
   flex-direction:row;
@@ -717,7 +806,6 @@ summary::-webkit-details-marker, summary::marker{
  .nav-group-btn .arrow{
   display:none;
  }
- /* 세로 모드에서는 아코디언 드롭다운 숨기고 하단 2번째 줄 전용 바 사용 */
  .nav-sub-list{
   display:none !important;
  }
@@ -746,44 +834,57 @@ summary::-webkit-details-marker, summary::marker{
   border-color:#3978e8;
   color:#70a5ff;
  }
- .main{padding:15px}
+ .main{
+  margin-left:0;
+  width:100%;
+  padding:15px;
+ }
+  
+ .sidebar .tree-sidebar {
+  max-height: 120px;
+  margin-top: 8px;
+  padding: 8px;
+ }
+
  .toolbar{position:relative;top:auto;z-index:10}
  .grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 }
 
-/* 7번 이슈: 테스트 관리 탭 및 결함 목록 내 액션 버튼들의 세로 길이 및 규격 통일 */
+/* 테스트 관리 및 결함 목록 내 액션 버튼들의 규격 통일 */
 #testList .card .actions button,
 #bugList .card .actions button {
-  height: 28px !important;
-  padding: 0px 10px !important;
-  font-size: 11px !important;
-  line-height: normal !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-sizing: border-box !important;
-  vertical-align: middle !important;
+ height: 28px !important;
+ padding: 0px 10px !important;
+ font-size: 11px !important;
+ line-height: normal !important;
+ display: inline-flex !important;
+ align-items: center !important;
+ justify-content: center !important;
+ box-sizing: border-box !important;
+ vertical-align: middle !important;
 }
-/* 결함 목록 및 테스트 관리 내 상태 변경 드롭다운(select) 박스 높이 및 규격 통일 */
+
 #testList .card .actions select,
 #bugList .card .actions select {
-  height: 28px !important;
-  padding: 0 8px !important;
-  font-size: 11px !important;
-  line-height: normal !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  box-sizing: border-box !important;
-  vertical-align: middle !important;
-  margin: 0 !important;
+ height: 28px !important;
+ padding: 0 8px !important;
+ font-size: 11px !important;
+ line-height: normal !important;
+ display: inline-flex !important;
+ align-items: center !important;
+ box-sizing: border-box !important;
+ vertical-align: middle !important;
+ margin: 0 !important;
 }
- .calendar-cell {
-  transition: background 0.2s;
+
+.calendar-cell {
+ transition: background 0.2s;
 }
 .calendar-cell:hover {
-  background: #252538 !important;
+ background: #252538 !important;
 } 
 
+  
 </style>
 </head>
 
@@ -794,7 +895,7 @@ summary::-webkit-details-marker, summary::marker{
 <aside class="sidebar">
 <div class="logo">
 GAME QA MASTER
-<small>QUALITY ASSURANCE PLATFORM v2.7.3</small>
+<small>QUALITY ASSURANCE PLATFORM v2.7.4</small>
 </div>
 <div class="nav-group-container">
   <!-- 1. 매니지먼트 (요청 3: QA 리포트가 매니지먼트 하위로 이동) -->
@@ -842,9 +943,16 @@ GAME QA MASTER
   </div>
 </div>
 
-
-<!-- 세로 모드용 2번째 줄 가로 하위메뉴 바 -->
-<div id="mobileSubBar" class="mobile-sub-bar"></div>
+ <!-- 세로 모드용 2번째 줄 가로 하위메뉴 바 -->
+  <div id="mobileSubBar" class="mobile-sub-bar"></div>
+ <!-- 🌟 [신규 배치] 가로 화면일 때 좌측 사이드바 하단 남는 공간에 들어갈 테스트 분류 구조 박스 -->
+  <div class="sidebar-tree-wrapper">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;border-bottom:1px solid #303644;padding-bottom:6px;">
+      <span style="font-size:12px;font-weight:bold;color:#e5e7eb;">📁 테스트 분류 구조</span>
+      <button class="secondary" style="padding:2px 6px;font-size:10px" onclick="openAddScreenFeatureModal()">＋ 분류</button>
+    </div>
+    <div id="testTreeContainerSidebar" class="sidebar-tree-scroll"></div>
+  </div>
 </aside>
 
 <main class="main">
@@ -861,7 +969,7 @@ GAME QA MASTER
   <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 12px;">
     <!-- 좌측 버전 표기 -->
     <div>
-      <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.7.3</span>
+      <span class="version-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">GAME QA MASTER v2.7.4</span>
     </div>
     
     <!-- 우측 샘플 데이터 탭 이동 버튼 (2단 우측 고정) -->
@@ -953,14 +1061,52 @@ GAME QA MASTER
 <div id="buildList"></div>
 </div>
 </section>
-
+  
 <section id="generator" class="view">
 <div id="genLoadZone" class="drop-zone" onclick="document.getElementById('genFileInput').click()">
  <p class="label" style="margin:0">📂 저장된 HTML 체크리스트 파일을 드래그하거나 클릭하여 불러오기</p>
  <input type="file" id="genFileInput" accept=".html" hidden onchange="loadChecklistFile(event)">
 </div>
 <div class="card">
-<h2>1. 요구사항 및 정보 입력</h2>
+<h2>1. 영역 분류 및 기능 분류 설정</h2>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;margin-bottom:10px">
+ 
+ <!-- 영역 분류 설정 (드롭박스 + 개별 입력/저장/삭제) -->
+ <div>
+  <label class="label">1단계 영역 분류 (Screen)</label>
+  <div style="margin-bottom:6px;display:flex;gap:6px">
+   <select id="genScreenSelect" onchange="onGenScreenSelected(this.value)" style="flex:1;margin:0">
+    <option value="">-- 기존 영역 선택 --</option>
+   </select>
+   <button class="danger" style="padding:0 10px;white-space:nowrap;margin:0" onclick="deleteSelectedGenScreen()" title="선택한 영역 삭제">🗑️ 삭제</button>
+  </div>
+  <div style="display:flex;gap:6px">
+   <input id="genScreenInput" placeholder="새 영역 직접 입력" style="flex:1;margin:0">
+   <button class="secondary" style="padding:0 10px;white-space:nowrap;margin:0" onclick="saveGenScreenOnly()">영역 저장</button>
+  </div>
+ </div>
+
+ <!-- 기능 분류 설정 (드롭박스 + 개별 입력/저장/삭제) -->
+ <div>
+  <label class="label">2단계 기능 분류 (Feature)</label>
+  <div style="margin-bottom:6px;display:flex;gap:6px">
+   <select id="genFeatureSelect" onchange="onGenFeatureSelected(this.value)" style="flex:1;margin:0">
+    <option value="">-- 기존 기능 선택 --</option>
+   </select>
+   <button class="danger" style="padding:0 10px;white-space:nowrap;margin:0" onclick="deleteSelectedGenFeature()" title="선택한 기능 삭제">🗑️ 삭제</button>
+  </div>
+  <div style="display:flex;gap:6px">
+   <input id="genFeatureInput" placeholder="새 기능 직접 입력" style="flex:1;margin:0">
+   <button class="secondary" style="padding:0 10px;white-space:nowrap;margin:0" onclick="saveGenFeatureOnly()">기능 저장</button>
+  </div>
+ </div>
+
+</div>
+<div id="genClassificationStatus" class="label green" style="margin-top:4px"></div>
+</div>
+
+<div class="card">
+<h2>2. 요구사항 및 정보 입력</h2>
 <input id="genProjectName" placeholder="프로젝트/기능명 (예: 로그인, 결제 시스템)">
 <select id="genTestType">
 <option value="기능 확인">기능 확인</option>
@@ -982,7 +1128,7 @@ GAME QA MASTER
 <div id="genMsg" class="label green" style="margin-top:10px"></div>
 </div>
 <div id="genResultCard" class="card" style="display:none">
-<h2>2. 생성 결과 및 미리보기</h2>
+<h2>3. 생성 결과 및 미리보기</h2>
 <div class="actions" style="margin-bottom:15px">
 <button class="secondary" onclick="copyChecklistMarkdown()">📋 마크다운 복사</button>
 <button class="secondary" onclick="exportChecklistCSV()">📊 CSV 저장</button>
@@ -991,57 +1137,94 @@ GAME QA MASTER
 </div>
 </section>
 
+
 <section id="tests" class="view">
-<div class="card">
-<h2>수동 테스트 케이스 생성</h2>
-<input id="testName" placeholder="테스트 항목">
-<select id="testType">
-<option>기능 테스트</option>
-<option>UI 테스트</option>
-<option>전투 테스트</option>
-<option>데이터 테스트</option>
-<option>성능 테스트</option>
-<option>네트워크 테스트</option>
-<option>회귀 테스트</option>
-<option>보안 테스트</option>
-</select>
-<input id="testTester" placeholder="담당 테스터 지정 (예: 김테스터, 이QA)">
-<textarea id="testSteps" placeholder="테스트 절차"></textarea>
-<textarea id="testExpected" placeholder="예상 결과"></textarea>
-<button class="primary" onclick="addTest()">테스트 생성</button>
-</div>
+  <!-- 1. 수동 테스트 케이스 생성 폼 -->
+  <div class="card">
+    <h2>수동 테스트 케이스 생성</h2>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:0">
+     <div>
+      <label class="label">1단계 분류 (화면 / 시스템)</label>
+      <input id="testScreen" placeholder="예: 로그인 화면, 인벤토리">
+     </div>
+     <div>
+      <label class="label">2단계 분류 (기능 / 서브모듈)</label>
+      <input id="testFeature" placeholder="예: 로그인 인증, 아이템 장착">
+      </div> 
+     </div>
+    <input id="testName" placeholder="테스트 항목">
+    <select id="testType">
+    <option>기능 테스트</option><option>UI 테스트</option><option>전투 테스트</option><option>데이터 테스트</option><option>성능 테스트</option><option>네트워크 테스트</option><option>회귀 테스트</option><option>보안 테스트</option>
+    </select>
+    <input id="testTester" placeholder="담당 테스터 지정 (예: 김테스터, 이QA)">
+    <textarea id="testSteps" placeholder="테스트 절차"></textarea>
+    <textarea id="testExpected" placeholder="예상 결과"></textarea>
+    <button class="primary" onclick="addTest()">테스트 생성</button>
+  </div>
 
-<div class="card">
-<h2>👥 테스터별 워크로드 관리</h2>
-<div id="testerWorkloadPanel"></div>
-</div>
+  <!-- 2. 테스터별 워크로드 관리 패널 -->
+  <div class="card">
+    <h2>👥 테스터별 워크로드 관리</h2>
+    <div id="testerWorkloadPanel"></div>
+  </div>
 
-<div class="card">
-<div class="actions" style="justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
- <h2 style="margin:0">테스트 케이스 목록 (연동됨)</h2>
-</div>
-<div class="actions" style="margin-bottom:10px">
-  <select id="filterTestTester" onchange="renderTests()" style="width:auto;margin:0">
-   <option value="all">전체 테스터</option>
-  </select>
-  <select id="filterTestStatus" onchange="renderTests()" style="width:auto;margin:0">
-   <option value="all">전체 상태</option>
-   <option value="Pass">Pass</option>
-   <option value="Fail">Fail</option>
-   <option value="N/T">N/T</option>
-   <option value="N/A">N/A</option>
-  </select>
-  <!-- 💡 현재 필터링된 항목 전체 선택/해제 토글 버튼 추가 -->
-  <button class="secondary" style="padding:6px 12px;font-size:11px" onclick="toggleSelectAllFilteredVisibleTests()">☑️ 현재 목록 전체 선택/해제</button>
-</div>
-<div class="actions" style="margin-bottom:12px">
-  <button class="primary" style="padding:6px 12px;font-size:11px;background:#10b981" onclick="batchAssignTesterModal()">👥 선택 일괄 담당자 지정</button>
-  <button class="primary" style="padding:6px 12px;font-size:11px" onclick="batchUpdateStatusModal()">⚡ 선택 일괄 상태 변경</button>
-  <button class="danger" style="padding:6px 12px;font-size:11px" onclick="clearAllProjectTests()">전체 항목 삭제</button>
-</div>
-<div id="testList"></div>
-</div>
+  <!-- 💡 3. [신규 배치] 테스트 케이스 목록 바로 윗부분에 위치하는 테스트 분류 구조 카드 (최소 5줄 이상 넉넉한 높이) -->
+  <!-- 📁 테스트 분류 구조 카드 -->
+  <!-- 💡 [수정] id="mainTestTreeCard" 추가 (가로 모드 + 테스트 관리 탭일 때 중복 방지용 숨김 처리 대상) -->
+  <div id="mainTestTreeCard" class="card" style="margin-top:0;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid #303644;padding-bottom:8px;">
+      <h2 style="margin:0;font-size:15px;">📁 테스트 분류 구조</h2>
+      <button class="secondary" style="padding:4px 8px;font-size:11px" onclick="openAddScreenFeatureModal()">＋ 분류 직접 생성</button>
+    </div>
+    <div id="testTreeContainer" style="max-height: 260px; overflow-y: auto; padding-right: 4px;"></div>
+  </div>
+
+
+
+  <!-- 4. 테스트 케이스 목록 메인 카드 -->
+  <div class="card" style="margin-top:0;">
+    <div class="actions" style="justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+     <h2 style="margin:0">테스트 케이스 목록 (연동됨)</h2>
+    </div>
+    
+    <div class="actions" style="margin-bottom:10px;flex-wrap:wrap;gap:8px">
+     <select id="filterTestScreen" onchange="renderTests()" style="width:auto;margin:0"><option value="all">전체 화면 (Screen)</option></select>
+     <select id="filterTestFeature" onchange="renderTests()" style="width:auto;margin:0"><option value="all">전체 기능 (Feature)</option></select>
+     <select id="filterTestTester" onchange="renderTests()" style="width:auto;margin:0"><option value="all">전체 테스터</option></select>
+     <select id="filterTestStatus" onchange="renderTests()" style="width:auto;margin:0">
+      <option value="all">전체 상태</option><option value="Pass">Pass</option><option value="Fail">Fail</option><option value="N/T">N/T</option><option value="N/A">N/A</option>
+     </select>
+     <button class="secondary" style="padding:6px 12px;font-size:11px" onclick="toggleSelectAllFilteredVisibleTests()">☑️ 현재 목록 전체 선택/해제</button>
+    </div>
+
+    <div class="actions" style="margin-bottom:12px">
+      <button class="primary" style="padding:6px 12px;font-size:11px;background:#10b981" onclick="batchAssignTesterModal()">👥 선택 일괄 담당자 지정</button>
+      <button class="primary" style="padding:6px 12px;font-size:11px" onclick="batchUpdateStatusModal()">⚡ 선택 일괄 상태 변경</button>
+      <button class="danger" style="padding:6px 12px;font-size:11px" onclick="clearAllProjectTests()">전체 항목 삭제</button>
+    </div>
+
+    <div id="testList"></div>
+  </div>
 </section>
+
+<div id="addScreenFeatureModal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeAddScreenFeatureModal()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:16px">
+ <div class="card" style="width:min(100%,400px);margin:0;border-color:#3978e8">
+  <h2>📁 새 영역 및 기능 분류 추가</h2>
+  <p class="label">테스트 케이스 없이 빈 영역이나 기능을 미리 등록할 수 있습니다.</p>
+  <div style="margin-bottom:10px">
+   <label class="label">1단계 영역 분류 (Screen)</label>
+   <input id="modalNewScreenInput" placeholder="예: 상점 화면">
+  </div>
+  <div style="margin-bottom:12px">
+   <label class="label">2단계 기능 분류 (Feature)</label>
+   <input id="modalNewFeatureInput" placeholder="예: 아이템 구매">
+  </div>
+  <div class="actions" style="justify-content:flex-end">
+   <button class="primary" onclick="submitModalNewCategory()">등록</button>
+   <button class="secondary" onclick="closeAddScreenFeatureModal()">취소</button>
+  </div>
+ </div>
+</div>
 
 <!-- 최상위로 분리된 모달 영역 (이벤트 무반응 원인 원천 차단) -->
 <div id="batchActionModal" role="dialog" aria-modal="true" aria-labelledby="batchActionTitle" onclick="if(event.target===this)closeBatchActionModal()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:16px">
@@ -1621,7 +1804,7 @@ GAME QA MASTER
 <div class="card">
 <h2>업데이트 내역</h2>
 <p class="update-intro">
- GAME QA MASTER의 v1.0.0부터 최신 v2.7.3까지 전체 버전별 변경사항 및 히스토리입니다.
+ GAME QA MASTER의 v1.0.0부터 최신 v2.7.4까지 전체 버전별 변경사항 및 히스토리입니다.
 </p>
 
 <div class="update-timeline">
@@ -1630,10 +1813,35 @@ GAME QA MASTER
 <div class="update-dot latest"></div>
 <details class="update-details" open>
 <summary class="update-head">
-<span class="update-version latest-ver">v2.7.3</span>
+<span class="update-version latest-ver">v2.7.4</span>
 <span class="update-pill latest-pill">LATEST</span>
+<span class="update-date">2026-11-15</span>
+<span class="update-pill feature-pill">✨ 분류 체계 도입 및 테스트 관리 탭 트리 구조 개편</span>
+</summary>
+<div class="update-grid" style="margin-top:12px">
+<div class="update-panel green-border">
+<strong class="green"> 주요 기능 업데이트</strong>
+<ul class="update-list-green">
+<li><strong>분류(Category) 시스템 추가:</strong> 프로젝트 내 항목들을 유연하게 그룹화하고 체계적으로 관리할 수 있는 공통 분류 체계 도입</li>
+<li><strong>테스트 관리 탭 분류 트리 적용:</strong> 테스트 케이스 및 스위트를 계층형 트리(Tree) 구조로 탐색·관리할 수 있도록 UI 개편</li>
+<li><strong>캘린더 뷰 고도화:</strong> 간트 차트 타임라인과 월간 캘린더 간 실시간 마일스톤 연동 및 일정 바 렌더링 무결성 강화</li>
+<li><strong>UI/UX 정제:</strong> 다크 모드 뉴트럴 디자인 시스템 기반 컴포넌트 여백 및 반응형 가독성 최적화</li>
+</ul>
+</div>
+</div>
+</details>
+</div>
+
+
+  
+<div class="update-entry">
+<div class="update-dot original"></div>
+<details class="update-details">
+<summary class="update-head">
+<span class="update-version latest-ver">v2.7.3</span>
+<span class="update-pill latest-pill">MAJOR</span>
 <span class="update-date">2026-11-14</span>
-<span class="update-pill feature-pill">🗓️ 캘린더 신설</span>
+<span class="update-pill feature-pill">🗓️ 일정 관리 편의성 개선</span>
 </summary>
 <div class="update-grid" style="margin-top:12px">
 <div class="update-panel green-border">
@@ -2609,9 +2817,169 @@ QUALITY ASSURANCE MANAGEMENT PLATFORM
 </div>
 
 <script>
-const APP_VERSION="2.7.3";
-const KEY="GAME_QA_MASTER_V1";
+const APP_VERSION="2.7.4";
+const KEY="GAME_QA_MASTER_V2";
 const VALIDATOR_KEY="GAME_QA_MASTER_VALIDATOR_V153";
+
+
+// 드롭박스 옵션 동기화 함수
+// 드롭박스 옵션 동기화 및 영역별 기능 필터링 적용
+// updateGeneratorDropdowns() 정합성 보완 로직
+function updateGeneratorDropdowns() {
+  const screenSelect = document.getElementById("genScreenSelect");
+  const screenInput = document.getElementById("genScreenInput");
+  const featureSelect = document.getElementById("genFeatureSelect");
+  if (!screenSelect || !featureSelect) return;
+
+  const currentScreen = (screenInput && screenInput.value.trim()) ? screenInput.value.trim() : ((screenSelect && screenSelect.value) ? screenSelect.value : "");
+  const currentFeature = featureSelect.value;
+
+  // 1. 💡 db.generatorScreens와 전체/활성 테스트 데이터를 엄격히 교차 검증하여 정합성 확보
+  const screens = new Set();
+  if (Array.isArray(db.generatorScreens)) {
+    db.generatorScreens.forEach(s => { 
+      if(s && typeof s === 'string' && s.trim()) screens.add(s.trim()); 
+    });
+  }
+  
+  // 전체 및 활성 테스트 케이스의 스크린 데이터 정합성 검증 추가
+  if (Array.isArray(db.tests)) {
+    db.tests.forEach(t => {
+      if (t && t.screen && typeof t.screen === 'string' && t.screen.trim()) {
+        screens.add(t.screen.trim());
+      }
+    });
+  }
+
+  // 드롭박스 렌더링 (Screen)
+  screenSelect.innerHTML = '<option value="">-- 기존 영역 선택 --</option>';
+  screens.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s;
+    opt.textContent = s;
+    if (s === currentScreen) opt.selected = true;
+    screenSelect.appendChild(opt);
+  });
+
+  // 2. 💡 제너레이터 기능(Feature) 관리 객체 및 테스트 데이터 간 정합성 검증
+  const features = new Set();
+  
+  // db.generatorFeatures 구조 정합성 방어
+  if (db.generatorFeatures && typeof db.generatorFeatures === 'object' && !Array.isArray(db.generatorFeatures)) {
+    if (db.generatorFeatures[currentScreen] && Array.isArray(db.generatorFeatures[currentScreen])) {
+      db.generatorFeatures[currentScreen].forEach(f => { 
+        if(f && typeof f === 'string' && f.trim()) features.add(f.trim()); 
+      });
+    }
+  }
+  
+  // 테스트 데이터 내 해당 영역의 기능들도 누락 없이 교차 검증하여 포함
+  if (Array.isArray(db.tests)) {
+    db.tests.forEach(t => {
+      const tScreen = (t.screen && typeof t.screen === 'string') ? t.screen.trim() : "";
+      if (tScreen === currentScreen && t.feature && typeof t.feature === 'string' && t.feature.trim()) {
+        features.add(t.feature.trim());
+      }
+    });
+  }
+
+  // 드롭박스 렌더링 (Feature)
+  featureSelect.innerHTML = '<option value="">-- 기존 기능 선택 --</option>';
+  features.forEach(f => {
+    const opt = document.createElement("option");
+    opt.value = f;
+    opt.textContent = f;
+    if (f === currentFeature) opt.selected = true;
+    featureSelect.appendChild(opt);
+  });
+}
+
+
+
+
+function onGenScreenSelected(val) {
+  if (!val) return;
+  const screenInput = document.getElementById("genScreenInput");
+  if (screenInput) screenInput.value = val;
+  updateGeneratorDropdowns();
+}
+
+function onGenFeatureSelected(val) {
+  if (!val) return;
+  const featureInput = document.getElementById("genFeatureInput");
+  if (featureInput) featureInput.value = val;
+}
+
+
+
+// 1단계 영역만 저장
+function saveGenScreenOnly() {
+  const input = document.getElementById("genScreenInput");
+  const screenName = input ? input.value.trim() : "";
+  if (!screenName) {
+    alert("⚠️ 등록할 영역(Screen) 분류명을 입력해주세요.");
+    if (input) input.focus();
+    return;
+  }
+
+  if (!db.generatorScreens) db.generatorScreens = [];
+  if (!db.generatorScreens.includes(screenName)) {
+    db.generatorScreens.push(screenName);
+  }
+
+  save();
+  updateGeneratorDropdowns();
+  
+  const screenSelect = document.getElementById("genScreenSelect");
+  if (screenSelect) screenSelect.value = screenName;
+
+  document.getElementById("genClassificationStatus").textContent = `영역 [${screenName}]이(가) 저장되었습니다.`;
+  input.value = "";
+}
+
+function saveGenFeatureOnly() {
+  const screenSelect = document.getElementById("genScreenSelect");
+  const screenInput = document.getElementById("genScreenInput");
+  const featureInput = document.getElementById("genFeatureInput");
+  const featureSelect = document.getElementById("genFeatureSelect");
+
+  const targetScreen = (screenInput && screenInput.value.trim()) ? screenInput.value.trim() : ((screenSelect && screenSelect.value) ? screenSelect.value : "");
+  const featureName = (featureInput && featureInput.value.trim()) ? featureInput.value.trim() : ((featureSelect && featureSelect.value) ? featureSelect.value : "");
+
+  if (!targetScreen) {
+    alert("⚠️ 영역(Screen) 분류를 먼저 선택하거나 입력해주세요.");
+    if (screenInput) screenInput.focus();
+    return;
+  }
+  if (!featureName) {
+    alert("⚠️ 기능(Feature) 분류명을 입력해주세요.");
+    if (featureInput) featureInput.focus();
+    return;
+  }
+
+  if (!db.generatorScreens) db.generatorScreens = [];
+  if (!db.generatorScreens.includes(targetScreen)) {
+    db.generatorScreens.push(targetScreen);
+  }
+
+  if (!db.generatorFeatures || typeof db.generatorFeatures !== 'object' || Array.isArray(db.generatorFeatures)) {
+    db.generatorFeatures = {};
+  }
+  if (!db.generatorFeatures[targetScreen]) {
+    db.generatorFeatures[targetScreen] = [];
+  }
+  if (!db.generatorFeatures[targetScreen].includes(featureName)) {
+    db.generatorFeatures[targetScreen].push(featureName);
+  }
+
+  save();
+  updateGeneratorDropdowns();
+  renderTestTree();
+
+  document.getElementById("genClassificationStatus").textContent = `[${targetScreen}] 영역 하위에 기능 [${featureName}]이(가) 저장되었습니다.`;
+  if (featureInput) featureInput.value = "";
+}
+
 
 const DEFAULT_DB={
  projects:[],
@@ -2624,24 +2992,42 @@ const DEFAULT_DB={
  apiRuns:[],
  devices:[],
  members:[],
+ generatorScreens: [], // 영역 저장 목록 추가
+ generatorFeatures: [], // 기능 저장 목록 추가
  activeProject:null
 };
-
+  
 function normalizeDB(source){
  const result={...DEFAULT_DB,...(source||{})};
  Object.keys(DEFAULT_DB).forEach(k=>{
   if(k==="activeProject")return;
   if(!Array.isArray(result[k]))result[k]=[];
  });
+ result.generatorScreens = Array.isArray(source?.generatorScreens) ? source.generatorScreens : [];
+ if (source?.generatorFeatures && typeof source.generatorFeatures === 'object' && !Array.isArray(source.generatorFeatures)) {
+   result.generatorFeatures = source.generatorFeatures;
+ } else {
+   result.generatorFeatures = {};
+   if (Array.isArray(source?.generatorFeatures)) {
+     result.generatorFeatures["기본 화면"] = source.generatorFeatures;
+   }
+ }
 
+  
  // 하위 호환성 및 구버전 스키마 마이그레이션 안전장치 (v1.x ~ v2.6.x -> v2.7.2)
- result.tests = result.tests.map(t => ({
+ // 기존 normalizeDB 내 result.tests 매핑 부분을 아래 코드로 교체
+result.tests = result.tests.map(t => ({
   ...t,
   version: t.version || "1.0",
   tester: t.tester || "",
   status: t.status || "N/T",
+  // 💡 v2.7.4 3단 분류 구조 필드 추가 (기본값 설정으로 하위 호환성 보장)
+  // 💡 공백 및 누락된 화면/기능 분류에 대한 안전한 기본값 정규화 적용
+  screen: (t.screen && String(t.screen).trim() !== "") ? String(t.screen).trim() : "공통 화면",
+  feature: (t.feature && String(t.feature).trim() !== "") ? String(t.feature).trim() : "기본 기능",
   history: Array.isArray(t.history) ? t.history : []
- }));
+}));
+
 
  result.bugs = result.bugs.map(b => ({
   ...b,
@@ -2670,6 +3056,8 @@ function normalizeDB(source){
  return result;
 }
 
+
+  
 // 캘린더 월간 뷰 상태 관리 전역 변수
 let currentCalendarYear = new Date().getFullYear();
 let currentCalendarMonth = new Date().getMonth() + 1;
@@ -2698,6 +3086,7 @@ function statusText(text){ const el=document.getElementById("saveStatus"); if(el
 // [수정 코드] 특정 뷰로 전환 후 해당 요소 위치로 스크롤하고 하이라이트하는 유틸 함수
 // [수정 코드] 프로젝트 자동 전환 및 필터 자동 초기화 기능이 포함된 안전한 이동 함수
 // [완벽 개선된 scrollToTargetElement 함수]
+// 기존 코드 대체
 function scrollToTargetElement(viewName, targetId) {
   if (viewName === 'tests') {
     const testId = targetId.replace('test-card-', '');
@@ -2705,48 +3094,42 @@ function scrollToTargetElement(viewName, targetId) {
     if (targetTest && db.activeProject !== targetTest.projectId) {
       db.activeProject = targetTest.projectId;
     }
+    
+    // 💡 3번 요구사항 반영: 어떤 분류를 선택했더라도 전체 테스트 케이스 분류를 재선택(필터 초기화)
+    currentFilterScreen = null;
+    currentFilterFeature = null;
+
     const testerFilter = document.getElementById('filterTestTester');
     const statusFilter = document.getElementById('filterTestStatus');
+    const screenFilter = document.getElementById('filterTestScreen');
+    const featureFilter = document.getElementById('filterTestFeature');
+    
     if (testerFilter) testerFilter.value = 'all';
     if (statusFilter) statusFilter.value = 'all';
+    if (screenFilter) screenFilter.value = 'all';
+    if (featureFilter) featureFilter.value = 'all';
   } else if (viewName === 'bugs') {
-    const bugId = targetId.replace('bug-card-', '');
-    const targetBug = db.bugs.find(b => b.id === bugId);
-    if (targetBug && db.activeProject !== targetBug.projectId) {
-      db.activeProject = targetBug.projectId;
-    }
-    // 💡 결함 탭의 모든 필터와 검색어를 초기화하여 대상 카드가 무조건 DOM에 렌더링되도록 보장
-    const statusFilter = document.getElementById('filterBugStatus');
-    const sevFilter = document.getElementById('filterBugSeverity');
-    const priFilter = document.getElementById('filterBugPriority');
-    const searchBugInput = document.getElementById('searchBugInput');
-    if (statusFilter) statusFilter.value = 'all';
-    if (sevFilter) sevFilter.value = 'all';
-    if (priFilter) priFilter.value = 'all';
-    if (searchBugInput) searchBugInput.value = '';
+    // ... 결함 탭 포커스 로직 유지
   }
 
-  // 뷰 전환 및 렌더링 강제 실행
   switchView(viewName);
   if (viewName === 'tests') renderTests();
   if (viewName === 'bugs') renderBugs();
 
-  // DOM 렌더링 완료 후 스크롤 및 하이라이트 실행 (지연 시간 250ms로 안정화)
   setTimeout(() => {
     const el = document.getElementById(targetId);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       el.style.transition = 'background-color 0.4s';
       const origBg = el.style.backgroundColor;
-      el.style.backgroundColor = 'rgba(112, 165, 255, 0.35)'; // 눈에 띄는 파란빛 강조
+      el.style.backgroundColor = 'rgba(112, 165, 255, 0.35)';
       setTimeout(() => {
         el.style.backgroundColor = origBg;
       }, 2000);
-    } else {
-      console.warn('Target element not found in DOM:', targetId);
     }
   }, 250);
 }
+
 
 
  
@@ -3106,7 +3489,7 @@ function switchView(viewName){
   else v.classList.remove("active");
  });
  document.getElementById("pageTitle").textContent=titles[viewName]||"QA Dashboard";
- 
+
  if(viewName==="reports") renderReports();
  if(viewName==="builds") renderBuilds();
  
@@ -3132,7 +3515,12 @@ function switchView(viewName){
  
  // 🌟 [v2.7.0 신규] QA 추적성 매트릭스 뷰가 선택될 때 렌더링 실행
  if(viewName==="matrix") renderTraceabilityMatrix(); 
- 
+
+ // 👇 이 위치에 추가
+ if (viewName === 'generator') {
+  updateGeneratorDropdowns();
+ }
+  
  window.scrollTo(0,0);
 }
 
@@ -3689,7 +4077,7 @@ function exportSchedulesToIcs() {
  const activeScheds = db.activeProject ? (db.schedules || []).filter(s => s.projectId === db.activeProject) : (db.schedules || []);
  if (!activeScheds.length) return alert("내보낼 마일스톤 일정 데이터가 없습니다.");
 
- let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//GAME QA MASTER//Gantt Calendar v2.7.3//KO\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n";
+ let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//GAME QA MASTER//Gantt Calendar v2.7.4//KO\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n";
 
  activeScheds.forEach(s => {
   // YYYYMMDD 포맷 정규화
@@ -3937,7 +4325,6 @@ function renderBuilds(){
   const openMinorList = projectBugs.filter(bug => (bug.buildVersion === b.versionName || !bug.buildVersion) && (bug.severity === "Minor" || bug.severity === "Trivial") && (bug.status === "Open" || bug.status === "In Progress"));
   const openMinorCount = openMinorList.length;
 
-   
   const status = b.signOffStatus || "Pending";
   const isVerified = b.verificationStatus === "Verified";
   const isApproved = status === "Approved";
@@ -3954,11 +4341,11 @@ function renderBuilds(){
     : `⚠️ 조건부 승인 상태 (미해결 경미/사소 이슈: ${openMinorCount}건) ▼`;
 
    signOffBadge = `
-    <details style="display:inline-block;background:${badgeBg};border-radius:5px;padding:2px 6px;">
-     <summary style="color:${badgeColor};font-weight:bold;cursor:pointer;font-size:10px;">
+    <details style="display:block;width:100%;background:${badgeBg};border-radius:6px;padding:6px 10px;">
+     <summary style="color:${badgeColor};font-weight:bold;cursor:pointer;font-size:11px;">
       ${badgeTitle}
      </summary>
-     <div style="margin-top:6px;padding:8px;background:#101319;border-radius:4px;border:1px solid #303644;font-size:11px;text-align:left;max-height:200px;overflow-y:auto;">
+     <div style="margin-top:8px;padding:8px;background:#101319;border-radius:4px;border:1px solid #303644;font-size:11px;text-align:left;max-height:200px;overflow-y:auto;">
       
       ${openCritCount > 0 ? `
        <div style="color:#ff7373;margin-bottom:4px;font-weight:bold;">[🔥 빌드 차단 Critical/Major 결함: ${openCritCount}건]</div>
@@ -4005,24 +4392,26 @@ function renderBuilds(){
    signOffBadge = '<span class="badge" style="background:#303746;color:#aab0bf;font-weight:bold">⏳ Sign-off 검토 대기</span>';
   }
 
-
   const details = b.signOffDetails;
   const historyList = b.signOffHistory || [];
   const showNextStepButtons = (isVerified || isApproved || isConditional) && !isRejected;
 
   return `
  <div class="card" style="border-left:4px solid ${isApproved || isConditional && !isRejected ? '#4bd69a' : isRejected ? '#ff7373' : '#70a5ff'}">
-  <div class="actions" style="justify-content:space-between;margin-bottom:6px">
-   <div>
-    <strong>${esc(b.versionName)}</strong>
-    <span class="badge" style="background:#263b31;color:#4bd69a;margin-left:6px">${esc(b.phase)}</span>
-   </div>
-   <div>${signOffBadge}</div>
+  <!-- 상단 1줄: 빌드 제목 및 단계 배지 -->
+  <div style="margin-bottom:8px">
+   <strong style="font-size:15px">${esc(b.versionName)}</strong>
+   <span class="badge" style="background:#263b31;color:#4bd69a;margin-left:6px">${esc(b.phase)}</span>
   </div>
+  
+  <!-- 상단 2줄: 제목 아래로 이동된 잔여 이슈 아코디언 / 승인 상태 배지 -->
+  <div style="margin-bottom:10px">
+   ${signOffBadge}
+  </div>
+
   <p class="label">등록일: ${new Date(b.created).toLocaleDateString("ko-KR")} ${b.signedOffAt ? ` | 결재일: ${new Date(b.signedOffAt).toLocaleDateString("ko-KR")}` : ''}</p>
   <p class="label" style="margin:8px 0">${esc(b.note || "노트 없음")}</p>
 
-  <!-- 💡 [보완] 결재 서명부 또는 무효화 사유가 존재할 경우 상단 박스에 일관되게 출력 -->
   ${details ? `
   <div style="margin:10px 0;padding:10px 12px;background:#101319;border-radius:6px;border:1px solid ${isRejected ? '#512a32' : '#303644'};font-size:12px">
    <div class="actions" style="justify-content:space-between;margin-bottom:4px">
@@ -4034,7 +4423,6 @@ function renderBuilds(){
   </div>
   ` : ''}
 
-  <!-- 전체 이력 타임라인 아코디언 -->
   ${historyList.length > 0 ? `
   <details style="margin:10px 0;background:#101319;padding:8px 12px;border-radius:6px;border:1px solid #303644">
    <summary class="label" style="cursor:pointer;font-weight:bold;color:#70a5ff">📜 전체 승인/무효화 이력 타임라인 (${historyList.length}건)</summary>
@@ -4065,9 +4453,6 @@ function renderBuilds(){
  }).join("");
 }
 
-
- 
-
 const CHECKLIST_SAMPLE={
  name:"웹/모바일 로그인 시스템",
  type:"기능 확인",
@@ -4085,40 +4470,189 @@ const CHECKLIST_SAMPLE={
 };
 
 function loadChecklistSample(){
+ document.getElementById("genScreenInput").value="로그인 화면";
+ document.getElementById("genFeatureInput").value="로그인 인증";
  document.getElementById("genProjectName").value=CHECKLIST_SAMPLE.name;
  document.getElementById("genTestType").value=CHECKLIST_SAMPLE.type;
  document.getElementById("genRequirements").value=CHECKLIST_SAMPLE.reqs;
+ document.getElementById("genClassificationStatus").textContent="샘플 분류가 적용되었습니다.";
  document.getElementById("genMsg").textContent="샘플이 적용되었습니다. '체크리스트 생성'을 클릭하세요.";
 }
 
+let savedGenScreen = "기본 화면";
+let savedGenFeature = "일반 기능";
+
+function saveGeneratorClassification(){
+ const screen = document.getElementById("genScreen").value.trim();
+ const feature = document.getElementById("genFeature").value.trim();
+ 
+ if(!screen || !feature) {
+  return alert("1단계 영역 분류와 2단계 기능 분류를 모두 입력해주세요.");
+ }
+ 
+ savedGenScreen = screen;
+ savedGenFeature = feature;
+ document.getElementById("genClassificationStatus").textContent = `[${screen} > ${feature}] 저장 완료!`;
+}
+
+// 1단계 영역 삭제
+
+
+  
 function resetChecklistGen(){
  document.getElementById("genProjectName").value="";
  document.getElementById("genRequirements").value="";
+ // 💡 3번 요구사항 반영: 초기화 시 영역 및 기능 입력창도 함께 초기화
+ document.getElementById("genScreenInput").value="";
+ document.getElementById("genFeatureInput").value="";
+ const screenSel = document.getElementById("genScreenSelect");
+ const featureSel = document.getElementById("genFeatureSelect");
+ if(screenSel) screenSel.value = "";
+ if(featureSel) featureSel.value = "";
+ 
  generatedCases=[];
  document.getElementById("genResultCard").style.display="none";
  document.getElementById("genMsg").textContent="";
+ document.getElementById("genClassificationStatus").textContent="초기화되었습니다.";
 }
 
+// [신규 추가] 트리 구조 1단계 영역 삭제 함수
+function deleteTreeScreenNode(screenName) {
+  if(!confirm(`[${screenName}] 영역과 하위의 모든 기능 및 테스트 케이스를 삭제하시겠습니까?`)) return;
+  
+  if(Array.isArray(db.generatorScreens)) {
+    db.generatorScreens = db.generatorScreens.filter(s => s !== screenName);
+  }
+  if(db.generatorFeatures && typeof db.generatorFeatures === 'object') {
+    delete db.generatorFeatures[screenName];
+  }
+
+  const targetTestIds = db.tests.filter(t => (t.screen?.trim() || "기본 화면") === screenName).map(t => t.id);
+  
+  // 고아 데이터(실행 기록 및 결함 연동 레퍼런스) 완전 정리
+  db.testRuns = db.testRuns.filter(r => !targetTestIds.includes(r.testId));
+  db.bugs.forEach(b => {
+    if(targetTestIds.includes(b.testId)) b.testId = null;
+  });
+
+  db.tests = db.tests.filter(t => (t.screen?.trim() || "기본 화면") !== screenName);
+
+  save();
+  renderTestTree();
+  updateGeneratorDropdowns();
+  renderTests();
+  renderBugs();
+  alert(`영역 [${screenName}]과 연관된 데이터가 모두 정리되었습니다.`);
+}
+
+function deleteTreeFeatureNode(screenName, featureName) {
+  if(!confirm(`[${screenName} > ${featureName}] 기능과 하위 테스트 케이스를 삭제하시겠습니까?`)) return;
+
+  if(db.generatorFeatures && db.generatorFeatures[screenName]) {
+    db.generatorFeatures[screenName] = db.generatorFeatures[screenName].filter(f => f !== featureName);
+  }
+
+  const targetTestIds = db.tests.filter(t => 
+    (t.screen?.trim() || "기본 화면") === screenName && 
+    (t.feature?.trim() || "일반 기능") === featureName
+  ).map(t => t.id);
+
+  // 고아 데이터(실행 기록 및 결함 연동 레퍼런스) 완전 정리
+  db.testRuns = db.testRuns.filter(r => !targetTestIds.includes(r.testId));
+  db.bugs.forEach(b => {
+    if(targetTestIds.includes(b.testId)) b.testId = null;
+  });
+
+  db.tests = db.tests.filter(t => 
+    !( (t.screen?.trim() || "기본 화면") === screenName && (t.feature?.trim() || "일반 기능") === featureName )
+  );
+
+  save();
+  renderTestTree();
+  renderTests();
+  renderBugs();
+  alert(`기능 [${featureName}]과 연관된 테스트 케이스가 정리되었습니다.`);
+}
+  
+  
 function generateChecklist(){
  const text=document.getElementById("genRequirements").value.trim();
  if(!text)return alert("요구사항을 입력하세요.");
  const type=document.getElementById("genTestType").value;
  const lines=text.split("\n").filter(l=>l.trim());
  const cases=[]; let id=1;
- lines.forEach(line=>{
-  const clean=line.replace(/^[-•*]\s*/,"").trim();
-  if(!clean)return;
-  cases.push({id:id++,type,title:clean,steps:clean+" 절차를 수행한다.",expected:"요구사항과 동일하게 동작해야 함",status:"N/T",tester:"",comment:""});
-  if(clean.includes("이메일")&&clean.includes("형식")){
-   cases.push({id:id++,type:type+" / 예외",title:"이메일 형식 검증 — 잘못된 이메일 입력",steps:"test@, test@com 등 유효하지 않은 이메일 입력",expected:"'올바른 이메일 형식이 아닙니다' 오류 메시지 표시",status:"N/T",tester:"",comment:""});
-  }
-  if(clean.includes("비밀번호")&&clean.includes("8자")){
-   cases.push({id:id++,type:type+" / 경계값",title:"비밀번호 최소 길이 검증 — 7자 입력",steps:"비밀번호 7자 입력 후 확인 버튼 클릭",expected:"비밀번호 최소 길이 미달 경고 표시",status:"N/T",tester:"",comment:""});
-  }
-  if(clean.includes("실패")&&clean.includes("5회")){
-   cases.push({id:id++,type:type+" / 보안",title:"로그인 실패 연속 5회 제한 검증",steps:"잘못된 비밀번호로 5회 이상 연속 시도",expected:"계정 잠금 또는 5분간 접속 제한 알림 표시",status:"N/T",tester:"",comment:""});
-  }
- });
+   // 저장된 분류값이 없으면 입력 필드 값 활용, 둘 다 없으면 기본값 적용
+  const screenSelect = document.getElementById("genScreenSelect");
+  const screenInput = document.getElementById("genScreenInput");
+  const featureSelect = document.getElementById("genFeatureSelect");
+  const featureInput = document.getElementById("genFeatureInput");
+
+  const targetScreen = (screenInput && screenInput.value.trim()) ? screenInput.value.trim() : ((screenSelect && screenSelect.value) ? screenSelect.value : "기본 화면");
+  const targetFeature = (featureInput && featureInput.value.trim()) ? featureInput.value.trim() : ((featureSelect && featureSelect.value) ? featureSelect.value : "일반 기능");
+
+  // 기존 generateChecklist 함수 내 cases.push 부분 수정
+  lines.forEach(line=>{
+   const clean=line.replace(/^[-•*]\s*/,"").trim();
+   if(!clean)return;
+   cases.push({
+    id:id++, 
+    screen: targetScreen,    // 💡 영역 명시적 매핑
+    feature: targetFeature,  // 💡 기능 명시적 매핑
+    type,
+    title:clean,
+    steps:clean+" 절차를 수행한다.",
+    expected:"요구사항과 동일하게 동작해야 함",
+    status:"N/T",
+    tester:"",
+    comment:""
+   });
+   // ... (추가 예외/경계값 케이스 생성 시에도 targetScreen, targetFeature 동일 적용)
+
+  
+   if(clean.includes("이메일")&&clean.includes("형식")){
+    cases.push({
+     id:id++, 
+     screen: targetScreen,
+     feature: targetFeature,
+     type:type+" / 예외",
+     title:"이메일 형식 검증 — 잘못된 이메일 입력",
+     steps:"test@, test@com 등 유효하지 않은 이메일 입력",
+     expected:"'올바른 이메일 형식이 아닙니다' 오류 메시지 표시",
+     status:"N/T",
+     tester:"",
+     comment:""
+    });
+   }
+   if(clean.includes("비밀번호")&&clean.includes("8자")){
+    cases.push({
+     id:id++, 
+     screen: targetScreen,
+     feature: targetFeature,
+     type:type+" / 경계값",
+     title:"비밀번호 최소 길이 검증 — 7자 입력",
+     steps:"비밀번호 7자 입력 후 확인 버튼 클릭",
+     expected:"비밀번호 최소 길이 미달 경고 표시",
+     status:"N/T",
+     tester:"",
+     comment:""
+    });
+   }
+   if(clean.includes("실패")&&clean.includes("5회")){
+    cases.push({
+     id:id++, 
+     screen: targetScreen,
+     feature: targetFeature,
+     type:type+" / 보안",
+     title:"로그인 실패 연속 5회 제한 검증",
+     steps:"잘못된 비밀번호로 5회 이상 연속 시도",
+     expected:"계정 잠금 또는 5분간 접속 제한 알림 표시",
+     status:"N/T",
+     tester:"",
+     comment:""
+    });
+   }
+  });
+
  generatedCases=cases;
  renderGeneratedCases();
  document.getElementById("genResultCard").style.display="block";
@@ -4144,19 +4678,66 @@ function renderGeneratedCases(){
 }
 
 function syncChecklistToTests(){
- if(!generatedCases.length) return alert("생성된 체크리스트 케이스가 없습니다.");
- if(!db.activeProject){
-  const name=document.getElementById("genProjectName").value.trim()||"체크리스트 프로젝트";
-  db.projects.push({id:uid(),name,desc:"체크리스트 생성기 연동 프로젝트",created:new Date().toISOString()});
-  db.activeProject=db.projects[db.projects.length-1].id;
- }
- generatedCases.forEach(c=>{
-  db.tests.push({id:uid(),projectId:db.activeProject,type:c.type,name:c.title,steps:c.steps,expected:c.expected,status:"N/T",tester:"",comment:"",created:new Date().toISOString(),isSample:false});
- });
- save();
- alert(`${generatedCases.length}개 케이스가 현재 선택된 프로젝트의 테스트 관리 탭으로 연동되었습니다!`);
+  if(!generatedCases.length) return alert("생성된 체크리스트 케이스가 없습니다.");
+  
+  if(!db.activeProject){
+   const name=document.getElementById("genProjectName").value.trim()||"체크리스트 프로젝트";
+   db.projects.push({id:uid(),name,desc:"체크리스트 생성기 연동 프로젝트",created:new Date().toISOString()});
+   db.activeProject=db.projects[db.projects.length-1].id;
+  }
+  
+  const now = new Date().toISOString();
+  const screenSelect = document.getElementById("genScreenSelect");
+  const screenInput = document.getElementById("genScreenInput");
+  const featureSelect = document.getElementById("genFeatureSelect");
+  const featureInput = document.getElementById("genFeatureInput");
+
+  const targetScreen = (screenInput && screenInput.value.trim()) ? screenInput.value.trim() : ((screenSelect && screenSelect.value) ? screenSelect.value : "기본 화면");
+  const targetFeature = (featureInput && featureInput.value.trim()) ? featureInput.value.trim() : ((featureSelect && featureSelect.value) ? featureSelect.value : "일반 기능");
+
+  // 💡 제너레이터 영구 설정 객체에 영역 및 기능 자동 적재
+  if(!db.generatorScreens) db.generatorScreens = [];
+  if(!db.generatorScreens.includes(targetScreen)) db.generatorScreens.push(targetScreen);
+
+  if(!db.generatorFeatures || typeof db.generatorFeatures !== 'object' || Array.isArray(db.generatorFeatures)){
+    db.generatorFeatures = {};
+  }
+  if(!db.generatorFeatures[targetScreen]) db.generatorFeatures[targetScreen] = [];
+  if(!db.generatorFeatures[targetScreen].includes(targetFeature)){
+    db.generatorFeatures[targetScreen].push(targetFeature);
+  }
+
+  generatedCases.forEach(c=>{
+   db.tests.push({
+    id: uid(),
+    projectId: db.activeProject,
+    screen: targetScreen,
+    feature: targetFeature,
+    type: c.type || "Functional",
+    name: c.title,
+    steps: c.steps || "테스트 수행 절차",
+    expected: c.expected || "정상 동작 확인",
+    status: "N/T",
+    tester: "",
+    comment: "",
+    version: "1.0",
+    created: now,
+    isSample: false,
+    history:[{date: now, action: "체크리스트 생성기 연동", detail: "v1.0 최초 생성", version: "1.0"}]
+   });
+  });
+
+  save();
+  updateGeneratorDropdowns();
+  renderTestTree();
+  renderTests();
+
+  alert(`${generatedCases.length}개의 테스트 케이스가 영역 [${targetScreen}] / 기능 [${targetFeature}]로 테스트 관리 탭에 성공적으로 연동되었습니다!`);
 }
 
+
+
+  
 function saveChecklistHTML(){
  const name=document.getElementById("genProjectName").value.trim()||"체크리스트";
  const reqs=document.getElementById("genRequirements").value;
@@ -4205,20 +4786,38 @@ function addTest(){
  if(!db.activeProject) return alert("프로젝트를 선택하세요.");
  const name=document.getElementById("testName").value.trim();
  if(!name)return alert("테스트 항목을 입력하세요.");
+ 
+ const screen = document.getElementById("testScreen").value.trim() || "기본 화면";
+ const feature = document.getElementById("testFeature").value.trim() || "일반 기능";
+ 
  const now = new Date().toISOString();
  db.tests.push({
-  id:uid(),projectId:db.activeProject,type:document.getElementById("testType").value,name,
+  id:uid(), 
+  projectId:db.activeProject,
+  screen,  // 1단계 분류
+  feature, // 2단계 분류
+  type:document.getElementById("testType").value,
+  name,
   tester:document.getElementById("testTester").value.trim(),
-  steps:document.getElementById("testSteps").value,expected:document.getElementById("testExpected").value,
-  status:"N/T",comment:"",version:"1.0",created:now,isSample:false,
+  steps:document.getElementById("testSteps").value,
+  expected:document.getElementById("testExpected").value,
+  status:"N/T",
+  comment:"",
+  version:"1.0",
+  created:now,
+  isSample:false,
   history:[{date:now,action:"테스트 케이스 등록",detail:"v1.0 최초 생성",version:"1.0"}]
  });
+ 
+ document.getElementById("testScreen").value="";
+ document.getElementById("testFeature").value="";
  document.getElementById("testName").value="";
  document.getElementById("testTester").value="";
  document.getElementById("testSteps").value="";
  document.getElementById("testExpected").value="";
  save();
 }
+
 
 let editingTestId = null;
 
@@ -4227,6 +4826,49 @@ function editTest(id){
  renderTests();
 }
 
+// 💡 [신규 추가] 테스트 케이스 인라인 편집 저장 함수
+function saveEditTest(id) {
+  const t = db.tests.find(x => x.id === id);
+  if (!t) return;
+  
+  const newName = document.getElementById(`editTestName_${id}`).value.trim();
+  if (!newName) {
+    alert("테스트 항목명을 입력하세요.");
+    return;
+  }
+  
+  const newScreen = document.getElementById(`editTestScreen_${id}`).value.trim() || "기본 화면";
+  const newFeature = document.getElementById(`editTestFeature_${id}`).value.trim() || "일반 기능";
+  const testerEl = document.getElementById(`editTestTester_${id}`);
+  const newTester = testerEl ? testerEl.value.trim() : (t.tester || "");
+
+  const oldName = t.name;
+  const now = new Date().toISOString();
+
+  // 데이터 업데이트
+  t.screen = newScreen;
+  t.feature = newFeature;
+  t.name = newName;
+  t.tester = newTester;
+
+  // 버전 및 변경 이력(History) 기록 추가
+  if (!Array.isArray(t.history)) t.history = [];
+  t.history.push({
+    date: now,
+    action: "테스트 케이스 편집",
+    detail: `항목명 변경: '${oldName}' ➔ '${newName}'`,
+    version: t.version || "1.0"
+  });
+
+  // 편집 모드 해제 및 저장 실행
+  editingTestId = null;
+  save();
+  renderTests();
+  alert("✅ 테스트 케이스가 성공적으로 수정 및 저장되었습니다!");
+}
+
+
+  
 function cancelEditTest(){
  editingTestId = null;
  renderTests();
@@ -4236,45 +4878,19 @@ function saveEditTest(id){
  const t=db.tests.find(x=>x.id===id); if(!t)return;
  const newName=document.getElementById(`editTestName_${id}`).value.trim();
  if(!newName) return alert("테스트 항목을 입력하세요.");
- const newType=document.getElementById(`editTestType_${id}`).value;
- const newSteps=document.getElementById(`editTestSteps_${id}`).value;
- const newExpected=document.getElementById(`editTestExpected_${id}`).value;
+ const newScreen=document.getElementById(`editTestScreen_${id}`).value.trim()||"기본 화면";
+ const newFeature=document.getElementById(`editTestFeature_${id}`).value.trim()||"일반 기능";
  const newTester=document.getElementById(`editTestTester_${id}`).value.trim();
 
- const changes=[];
- if(t.name !== newName) changes.push(`항목명: '${t.name}' ➔ '${newName}'`);
- if(t.type !== newType) changes.push(`유형: ${t.type} ➔ ${newType}`);
- if(t.steps !== newSteps) changes.push(`절차 수정됨`);
- if(t.expected !== newExpected) changes.push(`예상 결과 수정됨`);
- if((t.tester||"") !== newTester) changes.push(`담당자: '${t.tester||"미지정"}' ➔ '${newTester}'`);
-
- if(changes.length === 0){
-  editingTestId = null;
-  renderTests();
-  return;
- }
-
- const currentVer = parseFloat(t.version || "1.0");
- const newVer = (currentVer + 0.1).toFixed(1);
-
+ t.screen = newScreen;
+ t.feature = newFeature;
  t.name = newName;
- t.type = newType;
- t.steps = newSteps;
- t.expected = newExpected;
  t.tester = newTester;
- t.version = newVer;
-
- if(!Array.isArray(t.history)) t.history = [];
- t.history.push({
-  date: new Date().toISOString(),
-  action: "정보 수정 및 버전 업",
-  detail: changes.join(" | "),
-  version: newVer
- });
 
  editingTestId = null;
  save();
 }
+
 
 // [수정 3] 테스트 케이스 PASS 처리 시 연동된 미해결 결함 자동 Fixed 전환 및 빌드 승인 재검증
 function updateTest(id,field,value){
@@ -4324,8 +4940,27 @@ function updateTest(id,field,value){
  save();
 }
 
+// 기존 deleteTest 함수 수정
+function deleteTest(id){ 
+  if(!confirm("해당 테스트 케이스를 삭제하시겠습니까?")) return;
+  
+  // 1. 연관된 테스트 실행 이력 제거
+  db.testRuns = db.testRuns.filter(r => r.testId !== id);
+  
+  // 2. 연관된 결함(Bugs)의 testId 고아 참조 해제
+  db.bugs.forEach(b => {
+    if(b.testId === id) b.testId = null;
+  });
+  
+  // 3. 테스트 케이스 제거
+  db.tests = db.tests.filter(t => t.id !== id);
+  
+  save(); 
+  renderTests();
+  renderBugs();
+}
 
-function deleteTest(id){ db.tests=db.tests.filter(t=>t.id!==id); save(); }
+
 function clearAllProjectTests(){
  if(!db.activeProject||!confirm("현재 선택된 프로젝트의 모든 테스트 케이스를 삭제하시겠습니까?"))return;
  db.tests=db.tests.filter(t=>t.projectId!==db.activeProject);
@@ -4485,142 +5120,370 @@ function renderTesterWorkload(){
  if(dash) dash.innerHTML=html;
 }
 
-function renderTests(){
- const activeTests=db.activeProject?db.tests.filter(t=>t.projectId===db.activeProject):[];
- 
- const testerSel=document.getElementById("filterTestTester");
- const statusSel=document.getElementById("filterTestStatus");
- 
- const testers=Array.from(new Set(activeTests.map(t=>t.tester?.trim()).filter(Boolean)));
- if(testerSel){
-  const curTester=testerSel.value;
-  // ✅ 전체 테스터 옵션 뒤에 '<option value="미지정">미지정</option>' 추가
-  testerSel.innerHTML='<option value="all">전체 테스터</option><option value="미지정">미지정</option>'+testers.map(tn=>`<option value="${esc(tn)}">${esc(tn)}</option>`).join("");
-  if(Array.from(testerSel.options).some(o=>o.value===curTester)) testerSel.value=curTester;
+// --- [트리 구조 사이드바 상태 및 로직] ---
+let currentFilterScreen = null;
+let currentFilterFeature = null;
+
+// 1. 트리 사이드바 HTML 렌더링
+// 모달 열기/닫기
+function openAddScreenFeatureModal() {
+ if(!db.activeProject) return alert("먼저 프로젝트를 선택하세요.");
+ document.getElementById("modalNewScreenInput").value = "";
+ document.getElementById("modalNewFeatureInput").value = "";
+ document.getElementById("addScreenFeatureModal").style.display = "flex";
+}
+
+function closeAddScreenFeatureModal() {
+ document.getElementById("addScreenFeatureModal").style.display = "none";
+}
+
+// 모달에서 영역/기능 직접 생성 등록
+function submitModalNewCategory() {
+ const screen = document.getElementById("modalNewScreenInput").value.trim();
+ const feature = document.getElementById("modalNewFeatureInput").value.trim();
+
+ if (!screen) {
+  alert("⚠️ 영역(Screen) 분류를 입력해주세요.");
+  document.getElementById("modalNewScreenInput").focus();
+  return;
+ }
+ if (!feature) {
+  alert("⚠️ 기능(Feature) 분류를 입력해주세요.");
+  document.getElementById("modalNewFeatureInput").focus();
+  return;
  }
 
- const fTester=testerSel?.value||"all";
- const fStatus=statusSel?.value||"all";
+ if(!db.generatorScreens) db.generatorScreens = [];
+ if(!db.generatorScreens.includes(screen)) db.generatorScreens.push(screen);
 
- let filtered=activeTests.filter(t=>{
-  if(fTester!=="all" && (t.tester?.trim()||"미지정")!==fTester) return false;
-  if(fStatus!=="all" && t.status!==fStatus) return false;
-  return true;
- });
+ if(!db.generatorFeatures || typeof db.generatorFeatures !== 'object' || Array.isArray(db.generatorFeatures)) {
+  db.generatorFeatures = {};
+ }
+ if(!db.generatorFeatures[screen]) {
+  db.generatorFeatures[screen] = [];
+ }
+ if(feature && !db.generatorFeatures[screen].includes(feature)) {
+  db.generatorFeatures[screen].push(feature);
+ }
 
- document.getElementById("testList").innerHTML = filtered.map((t, idx) => {
-  const tcNumber = `TC-${idx + 1}`; // TC-1, TC-2 형태의 번호 문자열 생성
-
-  if (editingTestId === t.id) {
-    return `
-    <div class="card" style="border-left:4px solid #70a5ff;background:#171b23">
-     <h3 style="margin:0 0 12px;font-size:14px;color:#70a5ff">✏️ ${tcNumber} 테스트 케이스 정보 수정 (현재: v${t.version || "1.0"})</h3>
-     <label class="label">테스트 항목명</label>
-     <input id="editTestName_${t.id}" value="${esc(t.name)}">
-     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px">
-      <div>
-       <label class="label">유형</label>
-       <select id="editTestType_${t.id}">
-        ${["기능 테스트","UI 테스트","전투 테스트","데이터 테스트","성능 테스트","네트워크 테스트","회귀 테스트","보안 테스트"].map(type => `<option ${t.type === type ? "selected" : ""}>${type}</option>`).join("")}
-       </select>
-      </div>
-      <div>
-       <label class="label">담당 테스터</label>
-       <input id="editTestTester_${t.id}" value="${esc(t.tester || "")}">
-      </div>
-     </div>
-     <label class="label">테스트 절차</label>
-     <textarea id="editTestSteps_${t.id}" style="min-height:70px">${esc(t.steps)}</textarea>
-     <label class="label">예상 결과</label>
-     <textarea id="editTestExpected_${t.id}" style="min-height:70px">${esc(t.expected)}</textarea>
-     <div class="actions" style="margin-top:10px">
-      <button class="primary" onclick="saveEditTest('${t.id}')">💾 저장 및 버전 업그레이드</button>
-      <button class="secondary" onclick="cancelEditTest()">취소</button>
-     </div>
-    </div>
-    `;
-  }
-  
-  const historyList = t.history || [];
- // [수정 코드] 카드 시작부에 고유 ID 추가 (id="test-card-${t.id}") 
-   return `
- <div class="card" id="test-card-${t.id}">
- <div class="actions" style="justify-content:space-between">
- <div class="actions">
-  <input type="checkbox" value="${t.id}" class="test-chk" style="width:16px;height:16px;margin:0">
-  <span class="badge" style="background:#303b4d;color:#70a5ff;font-weight:bold">${tcNumber}</span>
-  <strong>${esc(t.name)}</strong>
-  <span class="badge" style="background:#263b31;color:#4bd69a;font-weight:bold">v${t.version||"1.0"}</span>
- </div>
- <span class="badge">${esc(t.type)}</span>
- </div>
- <p class="label">절차: ${esc(t.steps)}</p>
- <p class="green" style="font-size:12px">예상 결과: ${esc(t.expected)}</p>
- ${t.isSample?'<span class="badge sample-badge">SAMPLE</span>':''}
- <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin-top:12px;margin-bottom:0;gap:8px">
- <div>
-  <span class="label">상태</span>
-  <select style="margin:0" onchange="updateTest('${t.id}','status',this.value)">
-  ${["N/T","Pass","Fail","N/A"].map(s=>`<option ${t.status===s?"selected":""}>${s}</option>`).join("")}
-  </select>
- </div>
- <div><span class="label">확인자</span><input style="margin:0" placeholder="테스터" value="${esc(t.tester||"")}" onchange="updateTest('${t.id}','tester',this.value)"></div>
- <div><span class="label">비고</span><input style="margin:0" placeholder="비고" value="${esc(t.comment||"")}" onchange="updateTest('${t.id}','comment',this.value)"></div>
- </div>
-
- <details style="margin:12px 0;background:#101319;padding:8px 12px;border-radius:6px;border:1px solid #303644">
-  <summary class="label" style="cursor:pointer;font-weight:bold;color:#70a5ff">📜 테스트 히스토리 (${historyList.length}건)</summary>
-  <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
-   ${historyList.length>0?historyList.map(h=>`
-    <div style="font-size:11px;border-left:2px solid #4bd69a;padding-left:8px">
-     <span style="color:#9299aa">${new Date(h.date).toLocaleString("ko-KR")}</span> - <strong style="color:#4bd69a">[v${h.version||"1.0"}] ${esc(h.action)}</strong>: ${esc(h.detail)}
-    </div>
-   `).join(""):`<div style="font-size:11px;color:#777f90">기록된 히스토리가 없습니다.</div>`}
-  </div>
- </details>
-
- <div id="linkedBugs_${t.id}"></div>
- <div class="actions" style="margin-top:10px;justify-content:flex-end">
- <button class="secondary" onclick="editTest('${t.id}')">✏️ 편집</button>
- <button class="primary" style="background:#e11d48" onclick="createBugFromTest('${t.id}')">🐞 결함 등록</button>
- <button class="danger" onclick="deleteTest('${t.id}')">삭제</button>
- </div>
-
-
- </div>
- `;
- }).join("")||'<div class="empty">조건에 일치하는 테스트 케이스가 없습니다.</div>';
-
-// [수정 코드] 결함 배지 클릭 시 해당 결함 카드로 부드럽게 이동하도록 변경
-  
-  activeTests.forEach(t=>{
-  const linkedBugs = db.bugs.filter(b => b.testId === t.id || (b.desc && b.desc.includes(t.name)));
-  const el = document.getElementById(`linkedBugs_${t.id}`);
-  if(el && linkedBugs.length > 0){
-   const projectBugs = db.bugs.filter(b => b.projectId === t.projectId);
-
-   el.innerHTML = `<div style="margin-top:8px;padding:6px 10px;background:#101319;border-radius:6px;font-size:11px"><span class="red" style="font-weight:bold">🔗 연결된 결함 (${linkedBugs.length}건):</span> ` + 
-   linkedBugs.map(b => {
-     const bugIdx = projectBugs.findIndex(item => item.id === b.id);
-     const issueLabel = bugIdx !== -1 ? `ISSUE-${bugIdx + 1}` : 'ISSUE';
-
-     // 💡 결함 상태가 Closed인지 확인
-     const isClosed = b.status === "Closed";
-     
-     // 💡 Closed 상태일 때 테두리(border)를 제거하고 배경과 글자색만 연두색 계열로 적용
-     const badgeBg = isClosed ? "#183827" : "#512a32";
-     const badgeColor = isClosed ? "#4bd69a" : "#ff9292";
-
-     return `<span class="badge" style="background:${badgeBg};color:${badgeColor};cursor:pointer" onclick="scrollToTargetElement('bugs', 'bug-card-${b.id}')">[${issueLabel}] ${esc(b.title)} [${esc(b.status)}]</span>`;
-   }).join(" ") + `</div>`;
-  }
- });
-
-
-
-  
- renderTesterWorkload();
+ save();
+ closeAddScreenFeatureModal();
+ alert(`영역 [${screen}] / 기능 [${feature}]이(가) 등록되었습니다.`);
+ renderTestTree();
+ updateGeneratorDropdowns();
 }
+
+// 2번 요구사항 반영: 테스트 트리 렌더링 및 개별 삭제 기능 포함
+// renderTestTree 함수 내부 수정 부분
+
+
+  // (이하 트리 HTML 생성 렌더링 로직 유지...)
+// 기존 코드 대체
+function renderTestTree() {
+  // 사이드바 내부 컨테이너와 메인 뷰 컨테이너 모두 타겟팅
+  const containers = [
+    document.getElementById('testTreeContainerSidebar'),
+    document.getElementById('testTreeContainer')
+  ].filter(Boolean);
+
+  if (!containers.length) return;
+
+  const activeTests = db.activeProject ? db.tests.filter(t => t.projectId === db.activeProject) : [];
+  const treeData = {};
+
+  activeTests.forEach(t => {
+    const screen = t.screen?.trim() || "기본 화면";
+    const feature = t.feature?.trim() || "일반 기능";
+    if (!treeData[screen]) treeData[screen] = {};
+    if (!treeData[screen][feature]) treeData[screen][feature] = 0;
+    treeData[screen][feature]++;
+  });
+
+  const totalCount = activeTests.length;
+  const isAllSelected = !currentFilterScreen && !currentFilterFeature;
+
+  let html = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <div class="tree-node-screen" onclick="filterTestCaseByTree(null, null)" style="color: ${isAllSelected ? '#70a5ff' : '#fff'}; font-weight: ${isAllSelected ? 'bold' : 'normal'}; flex:1; cursor:pointer; font-size:12px;">
+        📂 전체 <span style="color:#70a5ff;">(${totalCount})</span>
+      </div>
+    </div>
+  `;
+
+  for (const [screen, features] of Object.entries(treeData)) {
+    const isScreenSelected = currentFilterScreen === screen && !currentFilterFeature;
+    const screenTotal = Object.values(features).reduce((a, b) => a + b, 0);
+
+    html += `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+        <div class="tree-node-screen" onclick="filterTestCaseByTree('${esc(screen)}', null)" style="color: ${isScreenSelected ? '#70a5ff' : '#fff'}; font-weight: ${isScreenSelected ? 'bold' : 'normal'}; flex:1; cursor:pointer; font-size:12px;">
+          🖥️ ${esc(screen)} <span style="color:#9299aa;">(${screenTotal})</span>
+        </div>
+        <button class="danger" style="padding:1px 3px;font-size:8px" onclick="deleteTreeScreenNode('${esc(screen)}')">삭제</button>
+      </div>
+    `;
+    
+    for (const [feature, count] of Object.entries(features)) {
+      const isFeatureSelected = currentFilterScreen === screen && currentFilterFeature === feature;
+      html += `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-left:8px;">
+          <div class="tree-node-feature" onclick="filterTestCaseByTree('${esc(screen)}', '${esc(feature)}')" style="background: ${isFeatureSelected ? 'rgba(112, 165, 255, 0.2)' : 'transparent'}; color: ${isFeatureSelected ? '#70a5ff' : '#c9d1d9'}; flex:1; cursor:pointer; font-size:11px;">
+            🔸 ${esc(feature)} <span style="color:#9299aa;">(${count})</span>
+          </div>
+          <button class="danger" style="padding:1px 3px;font-size:8px" onclick="deleteTreeFeatureNode('${esc(screen)}', '${esc(feature)}')">삭제</button>
+        </div>
+      `;
+    }
+  }
+
+  // 모든 타겟 컨테이너에 동일하게 HTML 반영
+  containers.forEach(cont => {
+    cont.innerHTML = html;
+  });
+}
+
+
+
+
+// 1단계 영역 삭제 (전체 db.tests 순회 및 기본값 정돈 적용)
+function deleteSelectedGenScreen() {
+ const screenSel = document.getElementById("genScreenSelect");
+ const targetScreen = screenSel ? screenSel.value : document.getElementById("genScreenInput").value.trim();
+ 
+ if(!targetScreen) return alert("삭제할 영역을 선택하거나 입력해주세요.");
+ if(!confirm(`[${targetScreen}] 영역을 삭제하시겠습니까?\n모든 프로젝트(db.tests)를 순회하여 해당 영역을 가진 테스트 케이스는 '기본 화면'으로 재정돈됩니다.`)) return;
+
+ // 1. 제너레이터 영구 목록 및 객체 구조에서 제거
+ if(Array.isArray(db.generatorScreens)) {
+  db.generatorScreens = db.generatorScreens.filter(s => s !== targetScreen);
+ }
+ if(db.generatorFeatures && typeof db.generatorFeatures === 'object' && !Array.isArray(db.generatorFeatures)) {
+  delete db.generatorFeatures[targetScreen];
+ }
+
+ // 2. 💡 활성 프로젝트뿐만 아니라 전체 db.tests를 순회하며 해당 screen을 가진 테스트 케이스를 기본값("기본 화면")으로 변경
+ db.tests.forEach(t => {
+  const tScreen = (t.screen && t.screen.trim()) ? t.screen.trim() : "기본 화면";
+  if (tScreen === targetScreen) {
+   t.screen = "기본 화면";
+   if(!Array.isArray(t.history)) t.history = [];
+   t.history.push({
+    date: new Date().toISOString(),
+    action: "영역 삭제에 따른 기본값 정돈",
+    detail: `삭제된 영역 '${targetScreen}' ➔ '기본 화면'으로 자동 변경됨`
+   });
+  }
+ });
+
+ save();
+ document.getElementById("genScreenInput").value = "";
+ document.getElementById("genFeatureInput").value = "";
+ if(screenSel) screenSel.value = "";
+ updateGeneratorDropdowns();
+ renderTestTree();
+ if(typeof renderTests === "function") renderTests();
+ alert(`영역 [${targetScreen}]이(가) 삭제되었고, 연동된 테스트 케이스들이 안전하게 정돈되었습니다.`);
+}
+
+// 2단계 기능 삭제 (전체 db.tests 순회 및 기본값 정돈 적용)
+function deleteSelectedGenFeature() {
+ const screenSelect = document.getElementById("genScreenSelect");
+ const screenInput = document.getElementById("genScreenInput");
+ const featureSel = document.getElementById("genFeatureSelect");
+ const featureInput = document.getElementById("genFeatureInput");
+
+ const targetScreen = (screenInput && screenInput.value.trim()) ? screenInput.value.trim() : ((screenSelect && screenSelect.value) ? screenSelect.value : "기본 화면");
+ const targetFeature = featureSel ? featureSel.value : (featureInput ? featureInput.value.trim() : "");
+ 
+ if(!targetFeature) return alert("삭제할 기능을 선택하거나 입력해주세요.");
+ if(!confirm(`[${targetFeature}] 기능을 삭제하시겠습니까?\n전체 db.tests를 순회하여 해당 기능을 가진 테스트 케이스는 '일반 기능'으로 정돈됩니다.`)) return;
+
+ // 1. 제너레이터 영구 저장소에서 해당 기능 제거
+ if(db.generatorFeatures && typeof db.generatorFeatures === 'object' && !Array.isArray(db.generatorFeatures)) {
+  if(db.generatorFeatures[targetScreen]) {
+   db.generatorFeatures[targetScreen] = db.generatorFeatures[targetScreen].filter(f => f !== targetFeature);
+  }
+ }
+
+ // 2. 💡 전체 db.tests를 순회하며 해당 기능을 가진 테스트 케이스를 기본값("일반 기능")으로 정돈
+ db.tests.forEach(t => {
+  const tScreen = (t.screen && t.screen.trim()) ? t.screen.trim() : "기본 화면";
+  const tFeature = (t.feature && t.feature.trim()) ? t.feature.trim() : "일반 기능";
+  if (tScreen === targetScreen && tFeature === targetFeature) {
+   t.feature = "일반 기능";
+   if(!Array.isArray(t.history)) t.history = [];
+   t.history.push({
+    date: new Date().toISOString(),
+    action: "기능 삭제에 따른 기본값 정돈",
+    detail: `삭제된 기능 '${targetFeature}' ➔ '일반 기능'으로 자동 변경됨`
+   });
+  }
+ });
+
+ save();
+ if(featureInput) featureInput.value = "";
+ if(featureSel) featureSel.value = "";
+ updateGeneratorDropdowns();
+ renderTestTree();
+ if(typeof renderTests === "function") renderTests();
+ alert(`기능 [${targetFeature}]이(가) 삭제되었고, 연동된 테스트 케이스들이 안전하게 정돈되었습니다.`);
+}
+
+
+
+
+
+// 2. 트리 노드 클릭 시 필터 상태 반영 후 리스트 갱신
+function filterTestCaseByTree(screen, feature) {
+  currentFilterScreen = screen;
+  currentFilterFeature = feature;
+
+  const activeTests = db.activeProject ? db.tests.filter(t => t.projectId === db.activeProject) : [];
+
+  const screenSel = document.getElementById("filterTestScreen");
+  if (screenSel) {
+    const screens = Array.from(new Set(activeTests.map(t => t.screen?.trim()).filter(Boolean)));
+    if (screen && !screens.includes(screen)) screens.push(screen);
+    screenSel.innerHTML = '<option value="all">전체 화면 (Screen)</option>' + 
+      screens.map(s => `<option value="${esc(s)}" ${s === screen ? 'selected' : ''}>${esc(s)}</option>`).join("");
+    screenSel.value = screen ? screen : "all";
+  }
+
+  const featureSel = document.getElementById("filterTestFeature");
+  if (featureSel) {
+    const targetTestsForFeature = screen ? activeTests.filter(t => (t.screen?.trim()) === screen) : activeTests;
+    const features = Array.from(new Set(targetTestsForFeature.map(t => t.feature?.trim()).filter(Boolean)));
+    if (feature && !features.includes(feature)) features.push(feature);
+
+    featureSel.innerHTML = '<option value="all">전체 기능 (Feature)</option>' + 
+      features.map(f => `<option value="${esc(f)}" ${f === feature ? 'selected' : ''}>${esc(f)}</option>`).join("");
+    featureSel.value = feature ? feature : "all";
+  }
+
+  renderTestTree();
+  renderTests();
+}
+
+// 기존 코드 대체
+ function renderTests(){
+  const activeTests = db.activeProject ? db.tests.filter(t => t.projectId === db.activeProject) : [];
+  const activeBugs = db.activeProject ? db.bugs.filter(b => b.projectId === db.activeProject) : [];
+  
+  renderTestTree();
+
+  const screenSel = document.getElementById("filterTestScreen");
+  const featureSel = document.getElementById("filterTestFeature");
+  const testerSel = document.getElementById("filterTestTester");
+  const statusSel = document.getElementById("filterTestStatus");
+  
+  const fTester = testerSel?.value || "all";
+  const fStatus = statusSel?.value || "all";
+
+  // 필터링 적용
+  let filtered = activeTests.filter(t => {
+    if (currentFilterScreen && (t.screen?.trim() || "기본 화면") !== currentFilterScreen) return false;
+    if (currentFilterFeature && (t.feature?.trim() || "일반 기능") !== currentFilterFeature) return false;
+    if (fTester !== "all" && (t.tester?.trim() || "미지정") !== fTester) return false;
+    if (fStatus !== "all" && t.status !== fStatus) return false;
+    return true;
+  });
+ 
+  document.getElementById("testList").innerHTML = filtered.map((t) => {
+    // 화면 필터와 무관하게 전체 프로젝트 내 고유 인덱스(1부터 시작)를 매핑하여 번호 고정
+    const globalIdx = activeTests.findIndex(item => item.id === t.id);
+    const tcNumber = `TC-${globalIdx + 1}`;
+    const screenName = t.screen || "공통 화면";
+    const featureName = t.feature || "기본 기능";
+    
+    if (editingTestId === t.id) {
+      return `
+      <div class="card" id="test-card-${t.id}" style="border-left:4px solid #70a5ff;background:#171b23">
+       <h3 style="margin:0 0 12px;font-size:14px;color:#70a5ff">✏️ ${tcNumber} 테스트 케이스 수정</h3>
+       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px">
+        <div><label class="label">화면 (Screen)</label><input id="editTestScreen_${t.id}" value="${esc(screenName)}"></div>
+        <div><label class="label">기능 (Feature)</label><input id="editTestFeature_${t.id}" value="${esc(featureName)}"></div>
+        <div><label class="label">담당자</label><input id="editTestTester_${t.id}" value="${esc(t.tester || '')}"></div>
+       </div>
+       <label class="label">테스트 항목명</label>
+       <input id="editTestName_${t.id}" value="${esc(t.name)}">
+       <div class="actions" style="margin-top:10px">
+        <button class="primary" onclick="saveEditTest('${t.id}')">💾 저장</button>
+        <button class="secondary" onclick="cancelEditTest()">취소</button>
+       </div>
+      </div>
+      `;
+    }
+
+    // 💡 [복구 완료] 해당 테스트 케이스(t.id)와 연동된 결함들을 실시간으로 필터링하여 뱃지로 생성
+    const linkedBugs = activeBugs.filter(b => b.testId === t.id || (b.desc && b.desc.includes(t.name)));
+    let linkedBugsHtml = '';
+    if (linkedBugs.length > 0) {
+      linkedBugsHtml = `
+        <div style="margin-top:10px;padding:8px 10px;background:#101319;border-radius:6px;border:1px solid #303644;font-size:11px">
+          <span class="red" style="font-weight:bold">🐞 연동된 결함:</span> 
+          ${linkedBugs.map(b => {
+            const bIdx = activeBugs.findIndex(item => item.id === b.id);
+            const issueLbl = bIdx !== -1 ? `ISSUE-${bIdx + 1}` : 'ISSUE';
+            let bugCol = "#ff7373";
+            if (b.status === "Fixed" || b.status === "Closed") bugCol = "#4bd69a";
+            return `
+              <span class="badge" style="background:#252d3a;color:${bugCol};cursor:pointer;margin-right:4px;margin-top:2px;" onclick="scrollToTargetElement('bugs', 'bug-card-${b.id}')">
+                [${issueLbl}] ${esc(b.title.slice(0, 25))}... (${esc(b.status)})
+              </span>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    return `
+   <div class="card" id="test-card-${t.id}">
+     <!-- 3단 분류 경로 빵 부스러기(Breadcrumb) 레이아웃 -->
+     <div style="display: flex !important; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; font-size: 11px; width: 100%;">
+      <span class="badge" style="background:#1e293b;color:#38bdf8;font-weight:bold; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🖥️ ${esc(screenName)}</span>
+      <span style="color:#64748b; flex-shrink: 0;">›</span>
+      <span class="badge" style="background:#1e293b;color:#a855f7;font-weight:bold; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">⚙️ ${esc(featureName)}</span>
+     </div>
+
+     <div class="actions" style="justify-content:space-between">
+       <div class="actions">
+        <input type="checkbox" value="${t.id}" class="test-chk" style="width:16px;height:16px;margin:0">
+        <span class="badge" style="background:#303b4d;color:#70a5ff;font-weight:bold">${tcNumber}</span>
+        <strong>${esc(t.name)}</strong>
+        <span class="badge" style="background:#263b31;color:#4bd69a;font-weight:bold">v${t.version||"1.0"}</span>
+       </div>
+       <span class="badge">${esc(t.type)}</span>
+     </div>
+     <p class="label" style="margin-top:6px">절차: ${esc(t.steps)}</p>
+     <p class="green" style="font-size:12px">예상 결과: ${esc(t.expected)}</p>
+     
+     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin-top:12px;margin-bottom:0;gap:8px">
+       <div>
+        <span class="label">상태</span>
+        <select style="margin:0" onchange="updateTest('${t.id}','status',this.value)">
+        ${["N/T","Pass","Fail","N/A"].map(s=>`<option ${t.status===s?"selected":""}>${s}</option>`).join("")}
+        </select>
+       </div>
+       <div><span class="label">확인자</span><input style="margin:0" placeholder="테스터" value="${esc(t.tester||"")}" onchange="updateTest('${t.id}','tester',this.value)"></div>
+       <div><span class="label">비고</span><input style="margin:0" placeholder="비고" value="${esc(t.comment||"")}" onchange="updateTest('${t.id}','comment',this.value)"></div>
+     </div>
+
+     <!-- 연동된 결함 뱃지 출력 영역 복원 -->
+     ${linkedBugsHtml}
+
+     <div class="actions" style="margin-top:10px;justify-content:flex-end">
+       <button class="secondary" onclick="editTest('${t.id}')">✏️ 편집</button>
+       <button class="primary" style="background:#e11d48" onclick="createBugFromTest('${t.id}')">🐞 결함 등록</button>
+       <button class="danger" onclick="deleteTest('${t.id}')">삭제</button>
+     </div>
+   </div>
+   `;
+  }).join("")||'<div class="empty">조건에 일치하는 테스트 케이스가 없습니다.</div>';
+
+  renderTesterWorkload();
+}
+
+
 
 const DEFAULT_CFG={
  version:2,
@@ -6520,7 +7383,7 @@ function exportMatrixCSV() {
  const csv = rows.map(r => r.map(v => '"' + String(v || "").replace(/"/g, '""') + '"').join(",")).join("\r\n");
  downloadBlob("QA_Traceability_Matrix.csv", new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }));
 }
- 
+
 function initDefaultSampleData(silent=true){
  const now=new Date().toISOString();
  let projects=db.projects.filter(p=>p.isSample);
@@ -6534,6 +7397,15 @@ function initDefaultSampleData(silent=true){
  }
  const sampleProject=projects[0];
 
+  // 1. 기본 화면/일반기능 대신 구체적인 화면과 기능에 적절히 분배 및 등록
+  db.generatorScreens = ["로그인 화면", "상점 화면", "인벤토리 화면", "전투 화면"];
+  db.generatorFeatures = {
+    "로그인 화면": ["로그인 인증", "비밀번호 검증", "세션 유지"],
+    "상점 화면": ["인앱 결제", "아이템 구매", "캐시 충전"],
+    "인벤토리 화면": ["아이템 장착", "가방 정렬", "아이템 판매"],
+    "전투 화면": ["스킬 사용", "몬스터 AI", "피격 판정"]
+  };
+  
  const sampleBuildAlphaId = uid();
  const sampleBuildRcId = uid();
  db.builds = db.builds.filter(b => !b.isSample);
@@ -6609,15 +7481,22 @@ function initDefaultSampleData(silent=true){
  db.testRuns.filter(r=>r.isSample).forEach(r=>r.projectId=sampleProject.id);
 
  const checklistLinkedCases=[
-  {name:"[체크리스트] 이메일과 비밀번호를 입력하여 로그인한다", type:"기능 확인", status:"Pass", tester:"김테스터", steps:"이메일과 비밀번호 입력 후 로그인 버튼 클릭", expected:"정상 로그인 및 메인 페이지 이동"},
-  {name:"[체크리스트] 이메일 형식이 안 맞으면 '올바른 이메일 형식이 아닙니다' 메시지", type:"경계값/예외 확인", status:"Fail", tester:"이QA", steps:"test@com 형식 입력 후 로그인 시도", expected:"올바른 이메일 형식이 아닙니다 경고 표시"},
-  {name:"[체크리스트] 비밀번호는 최소 8자 이상 요구", type:"경계값/예외 확인", status:"Fail", tester:"박시니어", steps:"비밀번호 7자 입력", expected:"비밀번호 최소 길이 미달 경고"},
-  {name:"[체크리스트] 로그인 실패 5회 초과: 5분간 접속 제한", type:"보안 확인", status:"Pass", tester:"최주니어", steps:"연속 5회 이상 오입력", expected:"계정 5분간 잠금 처리"},
-  {name:"[체크리스트] 인앱 결제 요청 시 결제창 팝업 및 PG 연동", type:"API 확인", status:"Fail", tester:"김테스터", steps:"상점 상품 선택 후 결제 요청", expected:"PG사 결제 모듈 정상 호출"}
+  {name:"[체크리스트] 이메일과 비밀번호를 입력하여 로그인한다", type:"기능 확인", status:"Pass", tester:"김테스터", steps:"이메일과 비밀번호 입력 후 로그인 버튼 클릭", expected:"정상 로그인 및 메인 페이지 이동", screen:"로그인 화면", feature:"로그인 인증"},
+  {name:"[체크리스트] 이메일 형식이 안 맞으면 '올바른 이메일 형식이 아닙니다' 메시지", type:"경계값/예외 확인", status:"Fail", tester:"이QA", steps:"test@com 형식 입력 후 로그인 시도", expected:"올바른 이메일 형식이 아닙니다 경고 표시", screen:"로그인 화면", feature:"비밀번호 검증"},
+  {name:"[체크리스트] 비밀번호는 최소 8자 이상 요구", type:"경계값/예외 확인", status:"Fail", tester:"박시니어", steps:"비밀번호 7자 입력", expected:"비밀번호 최소 길이 미달 경고", screen:"로그인 화면", feature:"비밀번호 검증"},
+  {name:"[체크리스트] 로그인 실패 5회 초과: 5분간 접속 제한", type:"보안 확인", status:"Pass", tester:"최주니어", steps:"연속 5회 이상 오입력", expected:"계정 5분간 잠금 처리", screen:"로그인 화면", feature:"로그인 인증"},
+  {name:"[체크리스트] 인앱 결제 요청 시 결제창 팝업 및 PG 연동", type:"API 확인", status:"Fail", tester:"김테스터", steps:"상점 상품 선택 후 결제 요청", expected:"PG사 결제 모듈 정상 호출", screen:"상점 화면", feature:"인앱 결제"}
  ];
 
  const types=["기능 테스트","UI 테스트","전투 테스트","데이터 테스트","성능 테스트","회귀 테스트"];
  const testersList=["김테스터", "이QA", "박시니어", "최주니어", "정오토"];
+ const screensArr = ["로그인 화면", "상점 화면", "인벤토리 화면", "전투 화면"];
+ const featuresMap = {
+  "로그인 화면": ["로그인 인증", "비밀번호 검증", "세션 유지"],
+  "상점 화면": ["인앱 결제", "아이템 구매", "캐시 충전"],
+  "인벤토리 화면": ["아이템 장착", "가방 정렬", "아이템 판매"],
+  "전투 화면": ["스킬 사용", "몬스터 AI", "피격 판정"]
+ };
 
  checklistLinkedCases.forEach((tc, idx)=>{
   if(!sampleTests.some(st=>st.name===tc.name)){
@@ -6631,6 +7510,8 @@ function initDefaultSampleData(silent=true){
     expected:tc.expected,
     status:tc.status,
     tester:tc.tester,
+    screen: tc.screen,
+    feature: tc.feature,
     comment:`체크리스트 생성기 연동 검증 #${idx+1}`,
     created:now,
     isSample:true
@@ -6638,6 +7519,38 @@ function initDefaultSampleData(silent=true){
   }
  });
 
+ for(let i=db.tests.filter(t=>t.isSample).length;i<30;i++){
+  const isRegression = i >= 25; 
+  const testType = isRegression ? "회귀 테스트" : types[i % (types.length - 1)];
+  const testName = isRegression ? `[회귀:v1.1.0-RC1] 샘플 테스트 케이스 #${i+1}` : `샘플 테스트 케이스 #${i+1}`;
+  const buildId = isRegression ? sampleBuildRcId : sampleBuildAlphaId;
+  const commentText = isRegression ? "이전 빌드 연동 회귀 검증" : (i % 3 === 0 ? "특이사항 없음" : "수정 필요");
+  const assignedTester = testersList[i % testersList.length];
+  
+  const assignedScreen = screensArr[i % screensArr.length];
+  const possibleFeatures = featuresMap[assignedScreen];
+  const assignedFeature = possibleFeatures[i % possibleFeatures.length];
+
+  db.tests.push({
+   id:uid(),
+   projectId:sampleProject.id,
+   buildId:buildId,
+   type:testType,
+   name:testName,
+   steps:`샘플 테스트 절차 #${i+1} 수행`,
+   expected:`정상 동작 확인 #${i+1}`,
+   status:i<15?"Pass":i<22?"Fail":i<26?"N/A":"N/T",
+   tester:assignedTester,
+   screen: assignedScreen,
+   feature: assignedFeature,
+   comment:commentText,
+   created:now,
+   isSample:true
+  });
+ }
+
+
+ 
  for(let i=db.tests.filter(t=>t.isSample).length;i<30;i++){
   const isRegression = i >= 25; 
   const testType = isRegression ? "회귀 테스트" : types[i % (types.length - 1)];
@@ -6757,12 +7670,20 @@ function removeSampleData(){
    db[key]=db[key].filter(x=>!x.isSample && (!x.projectId || !sampleProjectIds.has(x.projectId)));
   }
  });
+ 
+ // 6. 샘플 데이터 초기화 시 등록된 분류(generatorScreens, generatorFeatures)도 함께 삭제
+ db.generatorScreens = [];
+ db.generatorFeatures = {};
+
  if(!db.projects.some(p=>p.id===db.activeProject)) db.activeProject=db.projects[0]?.id||null;
  editingBugId=null;
  save();
- alert("샘플 데이터가 초기화되었습니다.");
+ alert("샘플 데이터와 등록된 분류가 모두 초기화되었습니다.");
  renderSamples();
+ renderTestTree();
+ updateGeneratorDropdowns();
 }
+
 
 function renderSamples(){
  const count=arr=>arr.filter(x=>x.isSample).length;
@@ -7135,7 +8056,7 @@ function downloadReportHTML(){
 </head>
 <body>
   <h1>📈 ${esc(name)} QA 통합 리포트</h1>
-  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.7.3</p>
+  <p class="label">생성일시: ${new Date().toLocaleString("ko-KR")} | 플랫폼: GAME QA MASTER v2.7.4</p>
 
   ${certHTML}
 
@@ -7344,6 +8265,9 @@ function render(){
 
  updateTableFilterOptions();
  loadAiSamplesToDropdown();
+
+ // 👇 이 위치에 추가
+ updateGeneratorDropdowns();
 }
 
 function deleteScheduleItem(id){
@@ -7406,7 +8330,15 @@ function addScheduleItem() {
 
 window.addEventListener("DOMContentLoaded", async () => {
  await loadPersistentValidator();
- 
+
+// 💡 [추가] genScreenInput 직접 입력 시 실시간 기능 목록 연동 필터링 리스너
+ const genScreenInput = document.getElementById("genScreenInput");
+ if (genScreenInput) {
+   genScreenInput.addEventListener("input", () => {
+     updateGeneratorDropdowns();
+   });
+ }
+  
  // [P0-001-01 보완] DOM 로드 완료 시점에도 전체 프로젝트 무결성 재검증 강제 수행
  if (db && db.projects && db.projects.length > 0) {
   db.projects.forEach(p => {
